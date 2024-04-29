@@ -20,7 +20,7 @@ import { useRoute, useNavigation, useTheme } from '@react-navigation/native';
 import { Chain } from '../../models/bitcoinUnits';
 import { BlueListItem, SecondButton } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
-import { WatchOnlyWallet } from '../../class';
+import { MultisigHDWallet, WatchOnlyWallet } from '../../class';
 import ActionSheet from '../ActionSheet';
 import loc, { formatBalance } from '../../loc';
 import { FContainer, FButton } from '../../components/FloatButtons';
@@ -31,6 +31,7 @@ import TransactionsNavigationHeader from '../../components/TransactionsNavigatio
 import PropTypes from 'prop-types';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
 
 const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
@@ -41,20 +42,32 @@ const buttonFontSize =
     ? 22
     : PixelRatio.roundToNearestPixel(Dimensions.get('window').width / 26);
 
-const dummyLnWallet = { chain: Chain.OFFCHAIN, isDummy: true };
+const dummyLnWallet = { chain: Chain.OFFCHAIN, isDummy: true, isLdWallet: true };
+const dummyMultiSigWallet = { chain: Chain.ONCHAIN, isDummy: true, isMultisig: true };
 const dummyTaroWallets = [
   { chain: Chain.OFFCHAIN, isDummy: true, isTapRoot: true, asset: 'USD' },
   { chain: Chain.OFFCHAIN, isDummy: true, isTapRoot: true, asset: 'EUR' },
   { chain: Chain.OFFCHAIN, isDummy: true, isTapRoot: true, asset: 'CHF' },
 ];
+const getWalletSubtitle = wallet => {
+  if (wallet.type === LightningLdsWallet.type || wallet.isLdWallet) { return 'Lightning' }
+  if (wallet.type === MultisigHDWallet.type || wallet.isMultisig) { return 'Multisig Vault' }
+  if (wallet.isTapRoot) { return 'Taro Protocol' }
+  if (wallet.chain === Chain.ONCHAIN) { return 'On-Chain' }
+  return ''
+}
 
 const WalletHome = ({ navigation }) => {
   const { wallets, saveToDisk, setSelectedWallet, isElectrumDisabled } = useContext(BlueStorageContext);
 
   const displayWallets = useMemo(() => {
-    const tmpWallets = [...wallets];
-    tmpWallets.length === 1 && tmpWallets.push(dummyLnWallet);
-    tmpWallets.length === 2 && tmpWallets.push(...dummyTaroWallets);
+    const LnWallet = wallets.find(w => w.type === LightningLdsWallet.type) || dummyLnWallet;
+    const multisigWallet = wallets.find(w => w.type === MultisigHDWallet.type) || dummyMultiSigWallet;
+    const tmpWallets = [];
+    tmpWallets.push(wallets[0]);
+    tmpWallets.push(LnWallet);
+    tmpWallets.push(multisigWallet);
+    tmpWallets.push(...dummyTaroWallets);
     return tmpWallets;
   }, [wallets]);
 
@@ -164,6 +177,24 @@ const WalletHome = ({ navigation }) => {
     });
   };
 
+  const navigateToAddLightning = () => {
+    navigate('WalletsRoot', {
+      screen: 'AddLightning',
+      params: {
+        walletID: wallet.getID()
+      },
+    });
+  };
+
+  const navigateToAddMultisig = () => {
+    navigate('AddWalletRoot', {
+      screen: 'WalletsAddMultisig',
+      params: {
+        walletLabel: loc.multisig.default_label
+      },
+    });
+  };
+
   const onBarScanned = value => {
     if (!value) return;
 
@@ -201,7 +232,7 @@ const WalletHome = ({ navigation }) => {
             style: 'default',
           },
 
-          { text: loc._.cancel, onPress: () => {}, style: 'cancel' },
+          { text: loc._.cancel, onPress: () => { }, style: 'cancel' },
         ],
         { cancelable: false },
       );
@@ -240,7 +271,7 @@ const WalletHome = ({ navigation }) => {
       const buttons = [
         {
           text: loc._.cancel,
-          onPress: () => {},
+          onPress: () => { },
           style: 'cancel',
         },
         {
@@ -307,34 +338,34 @@ const WalletHome = ({ navigation }) => {
             disabled={w.isDummy}
             onPress={() => navigate('WalletsRoot', { screen: 'WalletAsset', params: { walletID: w.getID() } })}
           >
-            <BlueListItem
-              title={w.asset ?? 'Bitcoin'}
-              subtitleNumberOfLines={1}
-              subtitle={w.chain === Chain.ONCHAIN ? 'On-chain' : w.isTapRoot ? 'Taro Protocol' : 'Lightning'}
-              Component={View}
-              {...(!w.isDummy
-                ? w.hideBalance
-                  ? {
-                      chevron: true,
-                      rightElement: <Icon name="eye-slash" type="font-awesome" color="#FFFFFF" />,
-                    }
-                  : {
-                      chevron: true,
-                      rightTitle: formatBalance(w.getBalance(), w.getPreferredBalanceUnit(), true).toString(),
-                      rightTitleStyle: styles.walletBalance,
-                    }
-                : w.isTapRoot
-                ? { rightTitle: loc.wallets.coming_soon, rightTitleStyle: stylesHook.comingSoon }
-                : {
-                    rightElement: (
-                      <SecondButton
-                        title={loc._.add}
-                        icon={{ name: 'plus', type: 'font-awesome', color: 'white', size: 12 }}
-                        onPress={() => navigate('WalletsRoot', { screen: 'AddLightning', params: { walletID: wallet.getID() } })}
-                      />
-                    ),
-                  })}
-            />
+            {w.isDummy ? (
+              <BlueListItem
+                title={w.asset ?? 'Bitcoin'}
+                subtitleNumberOfLines={1}
+                subtitle={getWalletSubtitle(w)}
+                Component={View}
+                {...(w.isTapRoot ? {
+                  rightTitle: loc.wallets.coming_soon,
+                  rightTitleStyle: stylesHook.comingSoon
+                } : {
+                  rightElement: <SecondButton
+                    title={loc._.add}
+                    icon={{ name: 'plus', type: 'font-awesome', color: 'white', size: 12 }}
+                    onPress={w.isLdWallet ? navigateToAddLightning : navigateToAddMultisig}
+                  />
+                })}
+              />
+            ) : (
+              <BlueListItem
+                title={'Bitcoin'}
+                subtitleNumberOfLines={1}
+                subtitle={getWalletSubtitle(w)}
+                Component={View}
+                rightTitle={formatBalance(w.getBalance(), w.getPreferredBalanceUnit(), true).toString()}
+                rightTitleStyle={styles.walletBalance}
+                chevron
+              />
+            )}
           </TouchableOpacity>
         ))}
       </View>

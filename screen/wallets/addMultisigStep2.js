@@ -341,7 +341,7 @@ const WalletsAddMultisigStep2 = () => {
         retData = retData.pop();
         ret.data = JSON.stringify(retData);
       }
-    } catch (_) {}
+    } catch (_) { }
 
     if (ret.data.toUpperCase().startsWith('UR')) {
       alert('BC-UR not decoded. This should never happen');
@@ -480,20 +480,6 @@ const WalletsAddMultisigStep2 = () => {
         />
         {renderProvideKeyButtons && (
           <>
-            <MultipleStepsListItem
-              showActivityIndicator={vaultKeyData.keyIndex === el.index && vaultKeyData.isLoading}
-              button={{
-                buttonType: MultipleStepsListItemButtohType.full,
-                onPress: () => {
-                  setVaultKeyData({ keyIndex: el.index, xpub: '', seed: '', isLoading: true });
-                  generateNewKey();
-                },
-                text: loc.multisig.create_new_key,
-                disabled: vaultKeyData.isLoading,
-              }}
-              dashes={MultipleStepsListItemDashType.topAndBottom}
-              checked={isChecked}
-            />
             <MultipleStepsListItem
               button={{
                 onPress: iHaveMnemonics,

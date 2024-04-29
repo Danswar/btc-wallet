@@ -22,7 +22,7 @@ import { useRoute, useNavigation, useTheme, useFocusEffect } from '@react-naviga
 import { Chain } from '../../models/bitcoinUnits';
 import { BlueText } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
-import { WatchOnlyWallet } from '../../class';
+import { MultisigHDWallet, WatchOnlyWallet } from '../../class';
 import ActionSheet from '../ActionSheet';
 import loc from '../../loc';
 import { FContainer, FButton } from '../../components/FloatButtons';
@@ -192,7 +192,7 @@ const Asset = ({ navigation }) => {
         Alert.alert('Something went wrong', e.message?.toString(), [
           {
             text: loc._.ok,
-            onPress: () => {},
+            onPress: () => { },
             style: 'default',
           },
         ]),
@@ -215,6 +215,8 @@ const Asset = ({ navigation }) => {
 
     return false;
   };
+
+  const isMultiSig = () => wallet.type === MultisigHDWallet.type;
 
   /**
    * Forcefully fetches TXs and balance for wallet
@@ -350,7 +352,7 @@ const Asset = ({ navigation }) => {
             style: 'default',
           },
 
-          { text: loc._.cancel, onPress: () => {}, style: 'cancel' },
+          { text: loc._.cancel, onPress: () => { }, style: 'cancel' },
         ],
         { cancelable: false },
       );
@@ -389,7 +391,7 @@ const Asset = ({ navigation }) => {
       const buttons = [
         {
           text: loc._.cancel,
-          onPress: () => {},
+          onPress: () => { },
           style: 'cancel',
         },
         {
@@ -446,36 +448,46 @@ const Asset = ({ navigation }) => {
             saveToDisk();
           })
         }
+        onManageFundsPressed={() => navigate('ViewEditMultisigCosignersRoot', {
+          screen: 'ViewEditMultisigCosigners',
+          params: {
+            walletId: wallet.getID(),
+          },
+        })}
       />
-      <View style={stylesHook.dfxContainer}>
-        {isDfxAvailable && (
-          <>
-            <BlueText>{loc.wallets.external_services}</BlueText>
-            <View style={stylesHook.dfxButtonContainer}>
-              {isDfxProcessing ? (
-                <ActivityIndicator />
-              ) : (
-                <>
-                  <View>
-                    <ImageButton
-                      source={buttonImages[0]}
-                      onPress={() => handleOpenServices(DfxService.BUY)}
-                      disabled={isHandlingOpenServices}
-                    />
-                  </View>
-                  <View>
-                    <ImageButton
-                      source={buttonImages[1]}
-                      onPress={() => handleOpenServices(DfxService.SELL)}
-                      disabled={isHandlingOpenServices}
-                    />
-                  </View>
-                </>
-              )}
-            </View>
-          </>
-        )}
-      </View>
+      {
+        !isMultiSig() && (
+          <View style={stylesHook.dfxContainer}>
+            {isDfxAvailable && (
+              <>
+                <BlueText>{loc.wallets.external_services}</BlueText>
+                <View style={stylesHook.dfxButtonContainer}>
+                  {isDfxProcessing ? (
+                    <ActivityIndicator />
+                  ) : (
+                    <>
+                      <View>
+                        <ImageButton
+                          source={buttonImages[0]}
+                          onPress={() => handleOpenServices(DfxService.BUY)}
+                          disabled={isHandlingOpenServices}
+                        />
+                      </View>
+                      <View>
+                        <ImageButton
+                          source={buttonImages[1]}
+                          onPress={() => handleOpenServices(DfxService.SELL)}
+                          disabled={isHandlingOpenServices}
+                        />
+                      </View>
+                    </>
+                  )}
+                </View>
+              </>
+            )}
+          </View>
+        )
+      }
 
       <View style={[styles.list, stylesHook.list]}>
         <FlatList
