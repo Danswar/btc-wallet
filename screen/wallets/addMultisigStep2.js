@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState, useEffect } from 'react';
+import React, { useContext, useRef, useState, useEffect, useMemo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -49,12 +49,12 @@ const isDesktop = getSystemName() === 'Mac OS X';
 const staticCache = {};
 
 const WalletsAddMultisigStep2 = () => {
-  const { addWallet, saveToDisk, isElectrumDisabled, isAdvancedModeEnabled, sleep } = useContext(BlueStorageContext);
+  const { wallets, addWallet, saveToDisk, isElectrumDisabled, isAdvancedModeEnabled, sleep } = useContext(BlueStorageContext);
+  const mainWallet = useMemo(() => wallets[0], [wallets]);
   const { colors } = useTheme();
 
   const navigation = useNavigation();
   const { m, n, format, walletLabel } = useRoute().params;
-
   const [cosigners, setCosigners] = useState([]); // array of cosigners user provided. if format [cosigner, fp, path]
   const [isLoading, setIsLoading] = useState(false);
   const [isMnemonicsModalVisible, setIsMnemonicsModalVisible] = useState(false);
@@ -75,6 +75,14 @@ const WalletsAddMultisigStep2 = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (cosigners.length === 0) {
+      const cosignersCopy = [...cosigners];
+      cosignersCopy.push([mainWallet.getSecret(), false, false]);
+      setCosigners(cosignersCopy);
+    }
+  },[]);
+  
   const handleOnHelpPress = () => {
     navigation.navigate('WalletsAddMultisigHelp');
   };
@@ -158,27 +166,6 @@ const WalletsAddMultisigStep2 = () => {
     A(A.ENUM.CREATED_WALLET);
     ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
     navigation.dangerouslyGetParent().goBack();
-  };
-
-  const generateNewKey = () => {
-    const w = new HDSegwitBech32Wallet();
-    w.generate().then(() => {
-      const cosignersCopy = [...cosigners];
-      cosignersCopy.push([w.getSecret(), false, false]);
-      if (Platform.OS !== 'android') LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setCosigners(cosignersCopy);
-      setVaultKeyData({ keyIndex: cosignersCopy.length, seed: w.getSecret(), xpub: w.getXpub(), isLoading: false });
-      setIsLoading(true);
-      setIsMnemonicsModalVisible(true);
-
-      // filling cache
-      setTimeout(() => {
-        // filling cache
-        setXpubCacheForMnemonics(w.getSecret());
-        setFpCacheForMnemonics(w.getSecret());
-        setIsLoading(false);
-      }, 500);
-    });
   };
 
   const getPath = () => {
