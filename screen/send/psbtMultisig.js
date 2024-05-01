@@ -281,20 +281,6 @@ const PsbtMultisig = () => {
                 ListHeaderComponent={header}
                 ListFooterComponent={footer}
               />
-              {isConfirmEnabled() && (
-                <View style={styles.height80}>
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    testID="ExportSignedPsbt"
-                    style={[styles.provideSignatureButton, stylesHook.provideSignatureButton]}
-                    onPress={navigateToPSBTMultisigQRCode}
-                  >
-                    <Text style={[styles.provideSignatureButtonText, stylesHook.provideSignatureButtonText]}>
-                      {loc.multisig.export_signed_psbt}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
             </BlueCard>
           </View>
         </View>

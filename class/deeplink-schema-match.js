@@ -326,6 +326,14 @@ class DeeplinkSchemaMatch {
     );
   }
 
+  static isPossiblyPSBTString(text) {
+    try {
+      return Boolean(bitcoin.Psbt.fromBase64(text))
+    } catch (e) {
+      return false;
+    }
+  }
+
   static isBothBitcoinAndLightningOnWalletSelect(wallet, uri) {
     if (wallet.chain === Chain.ONCHAIN) {
       return [

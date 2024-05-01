@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useRoute, useNavigation, useTheme } from '@react-navigation/native';
+import * as bitcoin from 'bitcoinjs-lib';
 import { Chain } from '../../models/bitcoinUnits';
 import { BlueListItem, SecondButton } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
@@ -72,6 +73,7 @@ const WalletHome = ({ navigation }) => {
   }, [wallets]);
 
   const walletID = useMemo(() => wallets[0]?.getID(), [wallets]);
+  const multisigWallet = useMemo(() => wallets.find(w => w.type === MultisigHDWallet.type), [wallets]);
   const [isLoading, setIsLoading] = useState(false);
   const { name } = useRoute();
   const { setParams, navigate } = useNavigation();
@@ -195,8 +197,50 @@ const WalletHome = ({ navigation }) => {
     });
   };
 
+  const askCosignThisTransaction = async () => {
+    return new Promise(resolve => {
+      Alert.alert(
+        '',
+        loc.multisig.cosign_this_transaction,
+        [
+          {
+            text: loc._.no,
+            style: 'cancel',
+            onPress: () => resolve(false),
+          },
+          {
+            text: loc._.yes,
+            onPress: () => resolve(true),
+          },
+        ],
+        { cancelable: false },
+      );
+    });
+  };
+
+  const importPsbt = async (base64Psbt) => {
+    try {
+      const psbt = bitcoin.Psbt.fromBase64(base64Psbt); // if it doesnt throw - all good, its valid
+      if (multisigWallet.howManySignaturesCanWeMake() > 0 && (await askCosignThisTransaction())) {
+        multisigWallet.cosignPsbt(psbt)
+        navigation.navigate('SendDetailsRoot', {
+          screen: 'PsbtMultisig',
+          params: {
+            psbtBase64: psbt.toBase64(),
+            walletID: multisigWallet.getID(),
+          }
+        });
+      }
+    } catch (_) { }
+  }
+
   const onBarScanned = value => {
     if (!value) return;
+
+    if (DeeplinkSchemaMatch.isPossiblyPSBTString(value) && Boolean(multisigWallet)) {
+      importPsbt(value);
+      return;
+    }
 
     DeeplinkSchemaMatch.navigationRouteFor({ url: value }, completionValue => {
       ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });

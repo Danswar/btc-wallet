@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useRoute, useNavigation, useTheme, useFocusEffect } from '@react-navigation/native';
+import * as bitcoin from 'bitcoinjs-lib';
 import { Chain } from '../../models/bitcoinUnits';
 import { BlueText } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
@@ -64,6 +65,7 @@ const Asset = ({ navigation }) => {
   const { name, params } = useRoute();
   const walletID = params.walletID;
   const [isLoading, setIsLoading] = useState(false);
+  const multisigWallet = useMemo(() => wallets.find(w => w.type === MultisigHDWallet.type), [wallets]);
   const wallet = useMemo(() => wallets.find(w => w.getID() === walletID), [wallets, walletID]);
   const [itemPriceUnit, setItemPriceUnit] = useState(wallet.getPreferredBalanceUnit());
   const [dataSource, setDataSource] = useState(wallet.getTransactions(15));
@@ -311,11 +313,49 @@ const Asset = ({ navigation }) => {
     <TransactionListItem item={item.item} itemPriceUnit={itemPriceUnit} timeElapsed={timeElapsed} walletID={walletID} />
   );
 
+  const askCosignThisTransaction = async () => {
+    return new Promise(resolve => {
+      Alert.alert(
+        '',
+        loc.multisig.cosign_this_transaction,
+        [
+          {
+            text: loc._.no,
+            style: 'cancel',
+            onPress: () => resolve(false),
+          },
+          {
+            text: loc._.yes,
+            onPress: () => resolve(true),
+          },
+        ],
+        { cancelable: false },
+      );
+    });
+  };
+
+  const importPsbt = async (base64Psbt) => {
+    try {
+      const psbt = bitcoin.Psbt.fromBase64(base64Psbt); // if it doesnt throw - all good, its valid
+      if (multisigWallet.howManySignaturesCanWeMake() > 0 && (await askCosignThisTransaction())) {
+        multisigWallet.cosignPsbt(psbt)
+        navigation.navigate('SendDetailsRoot', {
+          screen: 'PsbtMultisig',
+          params: {
+            psbtBase64: psbt.toBase64(),
+            walletID: multisigWallet.getID(),
+          }
+        });
+      }
+    } catch (_) { }
+  }
   const onBarCodeRead = value => {
     if (!value || isLoading) return;
 
-    if (!isLoading) {
-      setIsLoading(true);
+    setIsLoading(true);
+    if (DeeplinkSchemaMatch.isPossiblyPSBTString(value) && Boolean(multisigWallet)) {
+      importPsbt(value);
+    } else {
       DeeplinkSchemaMatch.navigationRouteFor({ url: value }, completionValue => {
         ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
         navigate(...completionValue);
