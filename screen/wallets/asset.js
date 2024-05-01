@@ -488,12 +488,6 @@ const Asset = ({ navigation }) => {
             saveToDisk();
           })
         }
-        onManageFundsPressed={() => navigate('ViewEditMultisigCosignersRoot', {
-          screen: 'ViewEditMultisigCosigners',
-          params: {
-            walletId: wallet.getID(),
-          },
-        })}
       />
       {
         !isMultiSig() && (
