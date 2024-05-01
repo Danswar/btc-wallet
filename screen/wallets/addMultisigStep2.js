@@ -63,7 +63,7 @@ const WalletsAddMultisigStep2 = () => {
   const [cosignerXpub, setCosignerXpub] = useState(''); // string used in exportCosigner()
   const [cosignerXpubURv2, setCosignerXpubURv2] = useState(''); // string displayed in renderCosignersXpubModal()
   const [cosignerXpubFilename, setCosignerXpubFilename] = useState('bw-cosigner.json');
-  const [vaultKeyData, setVaultKeyData] = useState({ keyIndex: 1, xpub: '', seed: '', isLoading: false }); // string rendered in modal
+  const [vaultKeyData] = useState({ keyIndex: 1, xpub: '', seed: '', isLoading: false }); // string rendered in modal
   const [importText, setImportText] = useState('');
   const [askPassphrase, setAskPassphrase] = useState(false);
   const [isAdvancedModeEnabledRender, setIsAdvancedModeEnabledRender] = useState(false);
@@ -227,10 +227,6 @@ const WalletsAddMultisigStep2 = () => {
     return staticCache[seed + (passphrase ?? '')];
   };
 
-  const iHaveMnemonics = () => {
-    setIsProvideMnemonicsModalVisible(true);
-  };
-
   const tryUsingXpub = async xpub => {
     if (!MultisigHDWallet.isXpubForMultisig(xpub)) {
       setIsProvideMnemonicsModalVisible(false);
@@ -330,6 +326,10 @@ const WalletsAddMultisigStep2 = () => {
       }
     } catch (_) { }
 
+    if(!new MultisigCosigner(ret.data).isValid()){
+      return alert(loc.multisig.not_a_multisignature_xpub);
+    }
+
     if (ret.data.toUpperCase().startsWith('UR')) {
       alert('BC-UR not decoded. This should never happen');
     } else if (isValidMnemonicSeed(ret.data)) {
@@ -416,14 +416,13 @@ const WalletsAddMultisigStep2 = () => {
     if (isDesktop) {
       fs.showActionSheet({ anchor: findNodeHandle(openScannerButton.current) }).then(onBarScanned);
     } else {
-      setIsProvideMnemonicsModalVisible(false);
       setTimeout(
         () =>
           navigation.navigate('ScanQRCodeRoot', {
             screen: 'ScanQRCode',
             params: {
               onBarScanned,
-              showFileImportButton: true,
+              showFileImportButton: false,
             },
           }),
         650,
@@ -469,7 +468,7 @@ const WalletsAddMultisigStep2 = () => {
           <>
             <MultipleStepsListItem
               button={{
-                onPress: iHaveMnemonics,
+                onPress: scanOrOpenFile,
                 buttonType: MultipleStepsListItemButtohType.full,
                 text: loc.wallets.import_do_import,
                 disabled: vaultKeyData.isLoading,
