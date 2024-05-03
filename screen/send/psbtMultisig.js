@@ -244,21 +244,6 @@ const PsbtMultisig = () => {
       <View>{destinationAddress()}</View>
     </View>
   );
-  const footer = (
-    <>
-      <View style={styles.bottomWrapper}>
-        <View style={styles.bottomFeesWrapper}>
-          <BlueText style={[styles.feeFiatText, stylesHook.feeFiatText]}>
-            {loc.formatString(loc.multisig.fee, { number: currency.satoshiToLocalCurrency(getFee()) })} -{' '}
-          </BlueText>
-          <BlueText>{loc.formatString(loc.multisig.fee_btc, { number: currency.satoshiToBTC(getFee()) })}</BlueText>
-        </View>
-      </View>
-      <View style={styles.marginConfirmButton}>
-        <BlueButton disabled={!isConfirmEnabled()} title={loc.multisig.confirm} onPress={onConfirm} testID="PsbtMultisigConfirmButton" />
-      </View>
-    </>
-  );
 
   const onLayout = e => {
     setFlatListHeight(e.nativeEvent.layout.height);
@@ -279,11 +264,22 @@ const PsbtMultisig = () => {
                 renderItem={_renderItem}
                 keyExtractor={(_item, index) => `${index}`}
                 ListHeaderComponent={header}
-                ListFooterComponent={footer}
+                ListFooterComponent={<View style={styles.footerSpacing} />}
               />
             </BlueCard>
           </View>
         </View>
+      </View>
+      <View style={styles.bottomWrapper}>
+        <View style={styles.bottomFeesWrapper}>
+          <BlueText style={[styles.feeFiatText, stylesHook.feeFiatText]}>
+            {loc.formatString(loc.multisig.fee, { number: currency.satoshiToLocalCurrency(getFee()) })} -{' '}
+          </BlueText>
+          <BlueText>{loc.formatString(loc.multisig.fee_btc, { number: currency.satoshiToBTC(getFee()) })}</BlueText>
+        </View>
+      </View>
+      <View style={styles.marginConfirmButton}>
+        <BlueButton disabled={!isConfirmEnabled()} title={loc.multisig.confirm} onPress={onConfirm} testID="PsbtMultisigConfirmButton" />
       </View>
     </SafeBlueArea>
   );
@@ -383,6 +379,9 @@ const styles = StyleSheet.create({
   marginConfirmButton: { marginTop: 16, marginHorizontal: 32, marginBottom: 48 },
   height80: {
     height: 80,
+  },
+  footerSpacing: {
+    height: 100,
   },
 });
 
