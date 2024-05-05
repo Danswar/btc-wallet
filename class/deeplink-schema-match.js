@@ -124,6 +124,7 @@ class DeeplinkSchemaMatch {
           screen: 'SendDetails',
           params: {
             uri: event.url.replace('://', ':'),
+            walletID: context.walletID,
           },
         },
       ]);

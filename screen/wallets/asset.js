@@ -359,7 +359,7 @@ const Asset = ({ navigation }) => {
       DeeplinkSchemaMatch.navigationRouteFor({ url: value }, completionValue => {
         ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
         navigate(...completionValue);
-      });
+      }, { walletID });
     }
     setIsLoading(false);
   };
