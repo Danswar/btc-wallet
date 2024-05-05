@@ -548,6 +548,7 @@ const SendDetails = () => {
         psbtBase64: psbt.toBase64(),
         walletID: wallet.getID(),
         launchedBy: routeParams.launchedBy,
+        isTxSigned: true
       });
       setIsLoading(false);
       return;

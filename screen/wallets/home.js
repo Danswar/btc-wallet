@@ -197,32 +197,10 @@ const WalletHome = ({ navigation }) => {
     });
   };
 
-  const askCosignThisTransaction = async () => {
-    return new Promise(resolve => {
-      Alert.alert(
-        '',
-        loc.multisig.cosign_this_transaction,
-        [
-          {
-            text: loc._.no,
-            style: 'cancel',
-            onPress: () => resolve(false),
-          },
-          {
-            text: loc._.yes,
-            onPress: () => resolve(true),
-          },
-        ],
-        { cancelable: false },
-      );
-    });
-  };
-
-  const importPsbt = async (base64Psbt) => {
+  const importPsbt = (base64Psbt) => {
     try {
       const psbt = bitcoin.Psbt.fromBase64(base64Psbt); // if it doesnt throw - all good, its valid
-      if (multisigWallet.howManySignaturesCanWeMake() > 0 && (await askCosignThisTransaction())) {
-        multisigWallet.cosignPsbt(psbt)
+      if (Boolean(multisigWallet) && multisigWallet.howManySignaturesCanWeMake() > 0) {
         navigation.navigate('SendDetailsRoot', {
           screen: 'PsbtMultisig',
           params: {
@@ -237,7 +215,7 @@ const WalletHome = ({ navigation }) => {
   const onBarScanned = value => {
     if (!value) return;
 
-    if (DeeplinkSchemaMatch.isPossiblyPSBTString(value) && Boolean(multisigWallet)) {
+    if (DeeplinkSchemaMatch.isPossiblyPSBTString(value)) {
       importPsbt(value);
       return;
     }

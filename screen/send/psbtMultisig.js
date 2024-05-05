@@ -3,7 +3,7 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import { Icon } from 'react-native-elements';
 import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 
-import { BlueButton, BlueCard, BlueText, SafeBlueArea } from '../../BlueComponents';
+import { BlueButton, BlueCard, BlueSpacing10, BlueText, SafeBlueArea } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
 import loc from '../../loc';
 import { BitcoinUnit } from '../../models/bitcoinUnits';
@@ -22,7 +22,9 @@ const PsbtMultisig = () => {
   const { navigate, setParams } = useNavigation();
   const { colors } = useTheme();
   const [flatListHeight, setFlatListHeight] = useState(0);
-  const { walletID, psbtBase64, memo, receivedPSBTBase64, launchedBy } = useRoute().params;
+  const { walletID, psbtBase64, memo, receivedPSBTBase64, launchedBy, isTxSigned } = useRoute().params;
+  const [hasSigned, setHasSigned] = useState(isTxSigned);
+  const [isLoading, setIsLoading] = useState(false);
   /** @type MultisigHDWallet */
   const wallet = wallets.find(w => w.getID() === walletID);
   const [psbt, setPsbt] = useState(bitcoin.Psbt.fromBase64(psbtBase64));
@@ -159,6 +161,16 @@ const PsbtMultisig = () => {
     }
   };
 
+  const onSign = async () => {
+    try {
+      setIsLoading(true);
+      setHasSigned(true);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      wallet.cosignPsbt(psbt);
+    } catch (_) { }
+    setIsLoading(false);
+  }
+
   const onConfirm = () => {
     try {
       psbt.finalizeAllInputs();
@@ -279,6 +291,8 @@ const PsbtMultisig = () => {
         </View>
       </View>
       <View style={styles.marginConfirmButton}>
+        <BlueButton disabled={hasSigned || isConfirmEnabled()} title={"Sign"} isLoading={isLoading} onPress={onSign} testID="PsbtMultisigSignButton" />
+        <BlueSpacing10 />
         <BlueButton disabled={!isConfirmEnabled()} title={loc.multisig.confirm} onPress={onConfirm} testID="PsbtMultisigConfirmButton" />
       </View>
     </SafeBlueArea>

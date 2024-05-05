@@ -19,7 +19,6 @@ import {
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useRoute, useNavigation, useTheme, useFocusEffect } from '@react-navigation/native';
-import * as bitcoin from 'bitcoinjs-lib';
 import { Chain } from '../../models/bitcoinUnits';
 import { BlueText } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
@@ -313,36 +312,13 @@ const Asset = ({ navigation }) => {
     <TransactionListItem item={item.item} itemPriceUnit={itemPriceUnit} timeElapsed={timeElapsed} walletID={walletID} />
   );
 
-  const askCosignThisTransaction = async () => {
-    return new Promise(resolve => {
-      Alert.alert(
-        '',
-        loc.multisig.cosign_this_transaction,
-        [
-          {
-            text: loc._.no,
-            style: 'cancel',
-            onPress: () => resolve(false),
-          },
-          {
-            text: loc._.yes,
-            onPress: () => resolve(true),
-          },
-        ],
-        { cancelable: false },
-      );
-    });
-  };
-
-  const importPsbt = async (base64Psbt) => {
+  const importPsbt = (base64Psbt) => {
     try {
-      const psbt = bitcoin.Psbt.fromBase64(base64Psbt); // if it doesnt throw - all good, its valid
-      if (multisigWallet.howManySignaturesCanWeMake() > 0 && (await askCosignThisTransaction())) {
-        multisigWallet.cosignPsbt(psbt)
+      if (Boolean(multisigWallet) && multisigWallet.howManySignaturesCanWeMake()) {
         navigation.navigate('SendDetailsRoot', {
           screen: 'PsbtMultisig',
           params: {
-            psbtBase64: psbt.toBase64(),
+            psbtBase64: base64Psbt,
             walletID: multisigWallet.getID(),
           }
         });
@@ -353,7 +329,7 @@ const Asset = ({ navigation }) => {
     if (!value || isLoading) return;
 
     setIsLoading(true);
-    if (DeeplinkSchemaMatch.isPossiblyPSBTString(value) && Boolean(multisigWallet)) {
+    if (DeeplinkSchemaMatch.isPossiblyPSBTString(value)) {
       importPsbt(value);
     } else {
       DeeplinkSchemaMatch.navigationRouteFor({ url: value }, completionValue => {
