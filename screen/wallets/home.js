@@ -51,10 +51,10 @@ const dummyTaroWallets = [
   { chain: Chain.OFFCHAIN, isDummy: true, isTapRoot: true, asset: 'CHF' },
 ];
 const getWalletSubtitle = wallet => {
-  if (wallet.type === LightningLdsWallet.type || wallet.isLdWallet) { return 'Lightning' }
-  if (wallet.type === MultisigHDWallet.type || wallet.isMultisig) { return 'Multisig Vault' }
+  if (wallet.type === LightningLdsWallet.type || wallet.isLdWallet) { return 'Lightning wallet' }
+  if (wallet.type === MultisigHDWallet.type || wallet.isMultisig) { return 'Multi-Device wallet' }
   if (wallet.isTapRoot) { return 'Taro Protocol' }
-  if (wallet.chain === Chain.ONCHAIN) { return 'On-Chain' }
+  if (wallet.chain === Chain.ONCHAIN) { return 'On-Chain wallet' }
   return ''
 }
 
@@ -65,9 +65,9 @@ const WalletHome = ({ navigation }) => {
     const LnWallet = wallets.find(w => w.type === LightningLdsWallet.type) || dummyLnWallet;
     const multisigWallet = wallets.find(w => w.type === MultisigHDWallet.type) || dummyMultiSigWallet;
     const tmpWallets = [];
+    tmpWallets.push(multisigWallet);
     tmpWallets.push(wallets[0]);
     tmpWallets.push(LnWallet);
-    tmpWallets.push(multisigWallet);
     tmpWallets.push(...dummyTaroWallets);
     return tmpWallets;
   }, [wallets]);
