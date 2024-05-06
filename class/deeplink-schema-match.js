@@ -34,7 +34,12 @@ class DeeplinkSchemaMatch {
       return;
     }
 
-    if (event.url.toLowerCase().startsWith('bluewallet:bitcoin:') || event.url.toLowerCase().startsWith('bluewallet:lightning:')) {
+    if (
+      event.url.toLowerCase().startsWith('bluewallet:bitcoin:') ||
+      event.url.toLowerCase().startsWith('bluewallet:lightning:') ||
+      event.url.toLowerCase().startsWith('dfxtaro:bitcoin:') ||
+      event.url.toLowerCase().startsWith('dfxtaro:lightning:')
+    ) {
       event.url = event.url.substring(11);
     } else if (event.url.toLocaleLowerCase().startsWith('bluewallet://widget?action=')) {
       event.url = event.url.substring('bluewallet://'.length);
