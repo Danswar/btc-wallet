@@ -174,7 +174,9 @@ const SendDetails = () => {
       navigation.goBack();
       return;
     }
-    const newWallet = (routeParams.walletID && wallets.find(w => w.getID() === routeParams.walletID)) || suitable[0];
+    const walletFromParmas = routeParams.walletID && wallets.find(w => w.getID() === routeParams.walletID);
+    const isWalletFromParamsSuitable = walletFromParmas && walletFromParmas.chain === Chain.ONCHAIN && walletFromParmas.allowSend();
+    const newWallet = isWalletFromParamsSuitable ? walletFromParmas : suitable[0];
     setWallet(newWallet);
     setFeeUnit(newWallet.getPreferredBalanceUnit());
     setAmountUnit(newWallet.preferredBalanceUnit); // default for whole screen
@@ -546,6 +548,7 @@ const SendDetails = () => {
         psbtBase64: psbt.toBase64(),
         walletID: wallet.getID(),
         launchedBy: routeParams.launchedBy,
+        isTxSigned: true
       });
       setIsLoading(false);
       return;
