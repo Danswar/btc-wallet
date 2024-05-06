@@ -174,9 +174,9 @@ const SendDetails = () => {
       navigation.goBack();
       return;
     }
-    const walletFromParmas = routeParams.walletID && wallets.find(w => w.getID() === routeParams.walletID);
-    const isWalletFromParamsSuitable = walletFromParmas && walletFromParmas.chain === Chain.ONCHAIN && walletFromParmas.allowSend();
-    const newWallet = isWalletFromParamsSuitable ? walletFromParmas : suitable[0];
+    const walletFromParams = routeParams.walletID && wallets.find(w => w.getID() === routeParams.walletID);
+    const isWalletFromParamsSuitable = walletFromParams && walletFromParams.chain === Chain.ONCHAIN && walletFromParams.allowSend();
+    const newWallet = isWalletFromParamsSuitable ? walletFromParams : suitable[0];
     setWallet(newWallet);
     setFeeUnit(newWallet.getPreferredBalanceUnit());
     setAmountUnit(newWallet.preferredBalanceUnit); // default for whole screen
