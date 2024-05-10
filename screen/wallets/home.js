@@ -51,10 +51,10 @@ const dummyTaroWallets = [
   { chain: Chain.OFFCHAIN, isDummy: true, isTapRoot: true, asset: 'CHF' },
 ];
 const getWalletSubtitle = wallet => {
-  if (wallet.type === LightningLdsWallet.type || wallet.isLdWallet) { return 'Lightning wallet' }
-  if (wallet.type === MultisigHDWallet.type || wallet.isMultisig) { return 'Multi-Device wallet' }
+  if (wallet.type === LightningLdsWallet.type || wallet.isLdWallet) { return loc.wallets.lightning_wallet_label }
+  if (wallet.type === MultisigHDWallet.type || wallet.isMultisig) { return loc.wallets.multi_sig_wallet_label }
   if (wallet.isTapRoot) { return 'Taro Protocol' }
-  if (wallet.chain === Chain.ONCHAIN) { return 'On-Chain wallet' }
+  if (wallet.chain === Chain.ONCHAIN) { return loc.wallets.main_wallet_label }
   return ''
 }
 
