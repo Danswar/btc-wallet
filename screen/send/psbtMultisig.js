@@ -4,7 +4,7 @@ import { Icon } from 'react-native-elements';
 import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
-import { BlueButton, BlueCard, BlueSpacing10, BlueText, SafeBlueArea } from '../../BlueComponents';
+import { BlueButton, BlueCard, BlueSpacing10, BlueSpacing20, BlueText, SafeBlueArea } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
 import loc, { formatBalanceWithoutSuffix } from '../../loc';
 import { BitcoinUnit } from '../../models/bitcoinUnits';
@@ -116,7 +116,7 @@ const PsbtMultisig = () => {
           </View>
         </View>
 
-        {renderProvideSignature && (
+        {renderProvideSignature && isTxSigned && (
           <View>
             <TouchableOpacity
               accessibilityRole="button"
@@ -329,11 +329,27 @@ const PsbtMultisig = () => {
           <BlueText>{loc.formatString(loc.multisig.fee_btc, { number: currency.satoshiToBTC(getFee()) })}</BlueText>
         </View>
       </View>
-      <View style={styles.marginConfirmButton}>
-        <BlueButton disabled={hasSigned || isConfirmEnabled()} title={"Sign"} isLoading={isSignign} onPress={onSign} testID="PsbtMultisigSignButton" />
-        <BlueSpacing10 />
-        <BlueButton disabled={!isConfirmEnabled()} loading={isBroadcasting} title={loc.send.confirm_sendNow} onPress={onConfirm} testID="PsbtMultisigConfirmButton" />
-      </View>
+      {!isTxSigned ? (
+        <View style={styles.marginConfirmButton}>
+          <BlueButton
+            disabled={hasSigned || isConfirmEnabled()}
+            title={'Sign'}
+            isLoading={isSignign}
+            onPress={onSign}
+            testID="PsbtMultisigSignButton"
+          />
+          <BlueSpacing10 />
+          <BlueButton
+            disabled={!isConfirmEnabled()}
+            loading={isBroadcasting}
+            title={loc.send.confirm_sendNow}
+            onPress={onConfirm}
+            testID="PsbtMultisigConfirmButton"
+          />
+        </View>
+      ) : (
+        <BlueSpacing20 />
+      )}
     </SafeBlueArea>
   );
 };
