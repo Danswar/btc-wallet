@@ -608,32 +608,17 @@ const SendDetails = () => {
 
   const onUseAllPressed = () => {
     ReactNativeHapticFeedback.trigger('notificationWarning');
-    const message = frozenBalance > 0 ? loc.send.details_adv_full_sure_frozen : loc.send.details_adv_full_sure;
-    Alert.alert(
-      loc.send.details_adv_full,
-      message,
-      [
-        {
-          text: loc._.ok,
-          onPress: () => {
-            Keyboard.dismiss();
-            setAddresses(addrs => {
-              addrs[scrollIndex.current].amount = BitcoinUnit.MAX;
-              addrs[scrollIndex.current].amountSats = BitcoinUnit.MAX;
-              return [...addrs];
-            });
-            setUnits(u => {
-              u[scrollIndex.current] = BitcoinUnit.BTC;
-              return [...u];
-            });
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-          },
-          style: 'default',
-        },
-        { text: loc._.cancel, onPress: () => {}, style: 'cancel' },
-      ],
-      { cancelable: false },
-    );
+    Keyboard.dismiss();
+    setAddresses(addrs => {
+      addrs[scrollIndex.current].amount = BitcoinUnit.MAX;
+      addrs[scrollIndex.current].amountSats = BitcoinUnit.MAX;
+      return [...addrs];
+    });
+    setUnits(u => {
+      u[scrollIndex.current] = BitcoinUnit.BTC;
+      return [...u];
+    });
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   };
 
   const formatFee = fee => formatBalance(fee, feeUnit, true);
