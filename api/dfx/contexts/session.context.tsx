@@ -13,7 +13,7 @@ import Lnurl from '../../../class/lnurl';
 import loc from '../../../loc';
 import { useApi } from '../hooks/api.hook';
 import { User, UserUrl } from '../definitions/user';
-import { SignIn } from '../definitions/auth';
+import { Auth } from '../definitions/auth';
 import { useLanguageContext } from './language.context';
 import { MultisigHDWallet } from '../../../class';
 
@@ -40,7 +40,7 @@ export function useDfxSessionContext(): SessionInterface {
 export function DfxSessionContextProvider(props: PropsWithChildren<any>): JSX.Element {
   const { wallets } = useContext(BlueStorageContext);
   const { walletID: mainWalletId, address: mainAddress, signMessage } = useWalletContext();
-  const { getSignMessage, signIn, signUp } = useAuth();
+  const { getSignMessage, auth } = useAuth();
   const { call } = useApi();
   const { dfxSession } = useStore();
   const { languages } = useLanguageContext();
@@ -86,7 +86,7 @@ export function DfxSessionContextProvider(props: PropsWithChildren<any>): JSX.El
     return loc.getLanguage()?.split('_')[0]?.toUpperCase();
   }
 
-  async function updateLanguage(token: SignIn): Promise<SignIn> {
+  async function updateLanguage(token: Auth): Promise<Auth> {
     try {
       const language = languages?.find(l => l.symbol === getAppLanguage());
       if (language) {
@@ -101,12 +101,8 @@ export function DfxSessionContextProvider(props: PropsWithChildren<any>): JSX.El
   }
 
   async function createSession(address: string, signature: string): Promise<string> {
-    return await signIn(address, signature)
-      .catch((e: ApiError) => {
-        if (e.statusCode === 404) return signUp(address, signature).then(updateLanguage);
-
-        throw e;
-      })
+    return await auth(address, signature)
+      .then(updateLanguage)
       .then(r => r.accessToken);
   }
 
@@ -114,7 +110,7 @@ export function DfxSessionContextProvider(props: PropsWithChildren<any>): JSX.El
     if (walletId === mainWalletId) {
       if (!mainAddress) throw new Error('Address is not defined');
 
-      const message = await getSignMessage(mainAddress);
+      const message = getSignMessage(mainAddress);
       const signature = await signMessage(message, mainAddress);
 
       return await createSession(mainAddress, signature);
@@ -205,7 +201,7 @@ export function DfxSessionContextProvider(props: PropsWithChildren<any>): JSX.El
       reset,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainWalletId, mainAddress, signMessage, getSignMessage, signIn, signUp, dfxSession, sessions, isProcessing, isAvailable],
+    [mainWalletId, mainAddress, signMessage, getSignMessage, auth, dfxSession, sessions, isProcessing, isAvailable],
   );
 
   return <DfxSessionContext.Provider value={context}>{props.children}</DfxSessionContext.Provider>;
