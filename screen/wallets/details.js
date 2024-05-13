@@ -39,6 +39,8 @@ import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
 import { writeFileAndExport } from '../../blue_modules/fs';
 import { useDfxSessionContext } from '../../api/dfx/contexts/session.context';
 import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
+import Clipboard from '@react-native-clipboard/clipboard';
+import { useWalletContext } from '../../contexts/wallet.context';
 
 const prompt = require('../../helpers/prompt');
 
@@ -83,6 +85,9 @@ const styles = StyleSheet.create({
   marginRight16: {
     marginRight: 16,
   },
+  addressProofContainer:{
+    height: 52,
+  },
 });
 
 const WalletDetails = () => {
@@ -93,7 +98,6 @@ const WalletDetails = () => {
   const [backdoorPressed, setBackdoorPressed] = useState(0);
   const [backdoorBip47Pressed] = useState(0);
   const wallet = useRef(wallets.find(w => w.getID() === walletID)).current;
-  const isMainWallet = useMemo(() => wallets[0].getID() === walletID , [wallets]);
   const [useWithHardwareWallet, setUseWithHardwareWallet] = useState(wallet.useWithHardwareWalletEnabled());
   const { isAdvancedModeEnabled } = useContext(BlueStorageContext);
   const [isAdvancedModeEnabledRender, setIsAdvancedModeEnabledRender] = useState(false);
@@ -112,6 +116,10 @@ const WalletDetails = () => {
     }
   }, [wallet]);
   const [lightningWalletInfo, setLightningWalletInfo] = useState({});
+  const { walletID: mainWalletId, getOwnershipProof } = useWalletContext();
+  const [ownershipProof, setOwnershipProof] = useState(wallet.addressOwnershipProof);
+  const [isCopied, setIsCopied] = useState(false);
+  const isMainWallet = useMemo(() => mainWalletId === walletID , [wallets]);
 
   useEffect(() => {
     if (isAdvancedModeEnabledRender && wallet.allowMasterFingerprint()) {
@@ -147,6 +155,14 @@ const WalletDetails = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletID]);
+
+  useEffect(() => {
+    if (isMainWallet && !ownershipProof) {
+      setTimeout(() => {
+        getOwnershipProof().then(setOwnershipProof).catch(console.error);
+      }, 1);
+    }
+  }, []);
 
   const deleteAllWallets = () => {
     dispatch(StackActions.replace('AddWalletRoot'));
@@ -339,6 +355,12 @@ const WalletDetails = () => {
     );
   };
 
+  const onCopyToClipboard = () => {
+    setIsCopied(true)
+    Clipboard.setString(ownershipProof);
+    setTimeout(() => setIsCopied(false), 2000)
+  }
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -459,6 +481,22 @@ const WalletDetails = () => {
                   </View>
                 )}
               </View>
+              {wallet.type !== MultisigHDWallet.type && (
+                <>
+                  <Text style={[styles.textLabel2, stylesHook.textLabel2]}>{loc.wallets.ownership_proof}</Text>
+                  <View style={styles.addressProofContainer}>
+                    {isCopied ? (
+                      <View style={styles.address}>
+                        <BlueText style={stylesHook.textLabel2}>{loc.wallets.xpub_copiedToClipboard}</BlueText>
+                      </View>
+                    ) : ownershipProof ? (
+                      <BlueText onPress={onCopyToClipboard}>{ownershipProof}</BlueText>
+                    ) : (
+                      <ActivityIndicator />
+                    )}
+                  </View>
+                </>
+              )}
             </BlueCard>
             {(wallet instanceof AbstractHDElectrumWallet || (wallet.type === WatchOnlyWallet.type && wallet.isHd())) && (
               <BlueListItem onPress={navigateToAddresses} title={loc.wallets.details_show_addresses} chevron />

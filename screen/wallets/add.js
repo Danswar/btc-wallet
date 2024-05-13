@@ -24,6 +24,7 @@ import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import alert from '../../components/Alert';
 import Config from 'react-native-config';
+import { useAuth } from '../../api/dfx/hooks/auth.hook';
 const BlueApp = require('../../BlueApp');
 const AppStorage = BlueApp.AppStorage;
 const A = require('../../blue_modules/analytics');
@@ -42,6 +43,7 @@ const WalletsAdd = () => {
   const { navigate, goBack, dispatch } = useNavigation();
   const [entropy, setEntropy] = useState();
   const [entropyButtonText, setEntropyButtonText] = useState(loc.wallets.add_entropy_provide);
+  const { getOwnershipMessage } = useAuth();
   const stylesHook = {
     advancedText: {
       color: colors.feeText,
@@ -116,6 +118,9 @@ const WalletsAdd = () => {
     } else {
       await w.generate();
     }
+    const mainAddress = w._getExternalAddressByIndex(0);
+    const message = getOwnershipMessage(mainAddress);
+    w.addressOwnershipProof = await w.signMessage(message, mainAddress);
     addWallet(w);
     await saveToDisk();
     A(A.ENUM.CREATED_WALLET);
