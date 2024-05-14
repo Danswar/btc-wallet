@@ -119,7 +119,7 @@ const WalletsAdd = () => {
       await w.generate();
     }
     const mainAddress = w._getExternalAddressByIndex(0);
-    const message = await getSignMessage(mainAddress);
+    const message = getSignMessage(mainAddress);
     w.addressOwnershipProof = await w.signMessage(message, mainAddress);
     addWallet(w);
     await saveToDisk();

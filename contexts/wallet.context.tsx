@@ -35,7 +35,7 @@ export function WalletContextProvider(props: PropsWithChildren<any>): JSX.Elemen
 
     if (!wallet.addressOwnershipProof) {
       const mainAddress = getAddress();
-      const m = await getSignMessage(mainAddress as string);
+      const m = getSignMessage(mainAddress as string);
       const proof = await wallet.signMessage(m, mainAddress);
       wallet.addressOwnershipProof = proof;
       await saveToDisk();
