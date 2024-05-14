@@ -17,7 +17,7 @@ export function useWalletContext(): WalletInterface {
 
 export function WalletContextProvider(props: PropsWithChildren<any>): JSX.Element {
   const { wallets, walletsInitialized, saveToDisk } = useContext(BlueStorageContext);
-  const { getOwnershipMessage } = useAuth();
+  const { getSignMessage } = useAuth();
 
   function getAddress(): string | undefined {
     const wallet = wallets?.[0];
@@ -35,7 +35,7 @@ export function WalletContextProvider(props: PropsWithChildren<any>): JSX.Elemen
 
     if (!wallet.addressOwnershipProof) {
       const mainAddress = getAddress();
-      const m = getOwnershipMessage(mainAddress as string);
+      const m = await getSignMessage(mainAddress as string);
       const proof = await wallet.signMessage(m, mainAddress);
       wallet.addressOwnershipProof = proof;
       await saveToDisk();

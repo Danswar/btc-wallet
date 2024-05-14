@@ -43,7 +43,7 @@ const WalletsAdd = () => {
   const { navigate, goBack, dispatch } = useNavigation();
   const [entropy, setEntropy] = useState();
   const [entropyButtonText, setEntropyButtonText] = useState(loc.wallets.add_entropy_provide);
-  const { getOwnershipMessage } = useAuth();
+  const { getSignMessage } = useAuth();
   const stylesHook = {
     advancedText: {
       color: colors.feeText,
@@ -119,7 +119,7 @@ const WalletsAdd = () => {
       await w.generate();
     }
     const mainAddress = w._getExternalAddressByIndex(0);
-    const message = getOwnershipMessage(mainAddress);
+    const message = await getSignMessage(mainAddress);
     w.addressOwnershipProof = await w.signMessage(message, mainAddress);
     addWallet(w);
     await saveToDisk();
