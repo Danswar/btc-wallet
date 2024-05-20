@@ -163,11 +163,12 @@ const WalletHome = ({ navigation }) => {
   };
 
   const refreshBalance = async w => {
-    if (!w.getBalance) return false;
-
-    const oldBalance = w.getBalance();
-    await w.fetchBalance();
-    return oldBalance !== w.getBalance();
+    try {
+      if (!w.getBalance) return false;
+      const oldBalance = w.getBalance();
+      await w.fetchBalance();
+      return oldBalance !== w.getBalance();
+    } catch (_) { }
   };
 
   const navigateToSendScreen = () => {
