@@ -331,11 +331,20 @@ const Asset = ({ navigation }) => {
     setIsLoading(true);
     if (DeeplinkSchemaMatch.isPossiblyPSBTString(value)) {
       importPsbt(value);
+    } else if (DeeplinkSchemaMatch.isBothBitcoinAndLightning(value)) {
+      const uri = DeeplinkSchemaMatch.isBothBitcoinAndLightning(value);
+      const route = DeeplinkSchemaMatch.isBothBitcoinAndLightningOnWalletSelect(wallet, uri);
+      ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
+      navigate(...route);
     } else {
-      DeeplinkSchemaMatch.navigationRouteFor({ url: value }, completionValue => {
-        ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
-        navigate(...completionValue);
-      }, { walletID });
+      DeeplinkSchemaMatch.navigationRouteFor(
+        { url: value },
+        completionValue => {
+          ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
+          navigate(...completionValue);
+        },
+        { walletID, wallets },
+      );
     }
     setIsLoading(false);
   };

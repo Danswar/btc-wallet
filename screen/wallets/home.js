@@ -74,6 +74,7 @@ const WalletHome = ({ navigation }) => {
 
   const walletID = useMemo(() => wallets[0]?.getID(), [wallets]);
   const multisigWallet = useMemo(() => wallets.find(w => w.type === MultisigHDWallet.type), [wallets]);
+  const lnWallet = useMemo(() => wallets.find(w => w.type === LightningLdsWallet.type), [wallets]);
   const [isLoading, setIsLoading] = useState(false);
   const { name } = useRoute();
   const { setParams, navigate } = useNavigation();
@@ -218,6 +219,15 @@ const WalletHome = ({ navigation }) => {
 
     if (DeeplinkSchemaMatch.isPossiblyPSBTString(value)) {
       importPsbt(value);
+      return;
+    }
+
+    if (DeeplinkSchemaMatch.isBothBitcoinAndLightning(value)) {
+      const uri = DeeplinkSchemaMatch.isBothBitcoinAndLightning(value);
+      const walletSelected = lnWallet || wallet;
+      const route = DeeplinkSchemaMatch.isBothBitcoinAndLightningOnWalletSelect(walletSelected, uri);
+      ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
+      navigate(...route);
       return;
     }
 
