@@ -34,6 +34,8 @@ class AmountInput extends Component {
     unit: PropTypes.string,
     onBlur: PropTypes.func,
     onFocus: PropTypes.func,
+    inputStyle: PropTypes.object,
+    unitStyle: PropTypes.object,
   };
 
   /**
@@ -203,7 +205,7 @@ class AmountInput extends Component {
   };
 
   render() {
-    const { colors, disabled, unit } = this.props;
+    const { colors, disabled, unit, inputStyle, unitStyle } = this.props;
     const amount = this.props.amount || 0;
     let secondaryDisplayCurrency = formatBalanceWithoutSuffix(amount, BitcoinUnit.LOCAL_CURRENCY, false);
 
@@ -271,7 +273,7 @@ class AmountInput extends Component {
                     editable={!this.props.isLoading && !disabled}
                     value={amount === BitcoinUnit.MAX ? loc.units.MAX : parseFloat(amount) >= 0 ? String(amount) : undefined}
                     placeholderTextColor={disabled ? colors.buttonDisabledTextColor : colors.alternativeTextColor2}
-                    style={[styles.input, stylesHook.input]}
+                    style={[styles.input, stylesHook.input, inputStyle]}
                   />
                 ) : (
                   <Pressable onPress={this.resetAmount}>
@@ -279,7 +281,7 @@ class AmountInput extends Component {
                   </Pressable>
                 )}
                 {unit !== BitcoinUnit.LOCAL_CURRENCY && amount !== BitcoinUnit.MAX && (
-                  <Text style={[styles.cryptoCurrency, stylesHook.cryptoCurrency]}>{' ' + loc.units[unit]}</Text>
+                  <Text style={[styles.cryptoCurrency, stylesHook.cryptoCurrency, unitStyle]}>{' ' + loc.units[unit]}</Text>
                 )}
               </View>
               <View style={styles.secondaryRoot}>

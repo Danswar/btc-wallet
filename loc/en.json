@@ -82,7 +82,8 @@
     "title": "Manage Funds",
     "can_send": "Can Send",
     "can_receive": "Can Receive",
-    "view_logs": "View Logs"
+    "view_logs": "View Logs",
+    "next": "Next"
   },
   "lndViewInvoice": {
     "additional_info": "Additional Information",

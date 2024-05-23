@@ -25,7 +25,7 @@ import alert from '../../components/Alert';
 const currency = require('../../blue_modules/currency');
 
 const ScanLndInvoice = () => {
-  const { wallets, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
+  const { wallets } = useContext(BlueStorageContext);
   const { colors } = useTheme();
   const { walletID, uri, invoice } = useRoute().params;
   const name = useRoute().name;
@@ -40,6 +40,7 @@ const ScanLndInvoice = () => {
   const [decoded, setDecoded] = useState();
   const [amount, setAmount] = useState();
   const [isAmountInitiallyEmpty, setIsAmountInitiallyEmpty] = useState();
+  const [desc, setDesc] = useState();
   const [expiresIn, setExpiresIn] = useState();
   const stylesHook = StyleSheet.create({
     root: {
@@ -78,7 +79,7 @@ const ScanLndInvoice = () => {
   useEffect(() => {
     if (wallet && uri) {
       if (Lnurl.isLnurl(uri)) return processLnurlPay(uri);
-      if (Lnurl.isLightningAddress(uri)) return processLnurlPay(uri);
+      if (Lnurl.isLightningAddress(uri)) return setDestination(uri);
 
       let data = uri;
       // handling BIP21 w/BOLT11 support
@@ -109,6 +110,7 @@ const ScanLndInvoice = () => {
         setAmount(newDecoded.num_satoshis);
         setExpiresIn(newExpiresIn);
         setDecoded(newDecoded);
+        setDesc(newDecoded.description);
       } catch (Err) {
         ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
         Keyboard.dismiss();
@@ -123,23 +125,26 @@ const ScanLndInvoice = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uri]);
+
   const processInvoice = data => {
     if (Lnurl.isLnurl(data)) return processLnurlPay(data);
-    if (Lnurl.isLightningAddress(data)) return processLnurlPay(data);
+    if (Lnurl.isLightningAddress(data)) return setDestination(data);
     setParams({ uri: data });
   };
 
-  const processLnurlPay = data => {
+  const processLnurlPay = () => {
     navigate('SendDetailsRoot', {
       screen: 'LnurlPay',
       params: {
-        lnurl: data,
+        destination: destination,
+        amountSat: amount,
+        description: desc,
         walletID: walletID || wallet.getID(),
       },
     });
   };
 
-  const pay = async () => {
+  const processInvoicePay = async () => {
     if (!decoded) {
       return null;
     }
@@ -180,21 +185,28 @@ const ScanLndInvoice = () => {
       return alert(loc.lnd.sameWalletAsInvoiceError);
     }
 
-    try {
-      await wallet.payInvoice(invoice, amountSats);
-    } catch (Err) {
-      console.log(Err.message);
-      setIsLoading(false);
-      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-      return alert(Err.message);
+    setIsLoading(false);
+    return navigate('SendDetailsRoot', {
+      screen: 'LnurlPay',
+      params: {
+        invoice: invoice,
+        amountSat: amountSats,
+        amountUnit: BitcoinUnit.SATS,
+        description: decoded.description,
+        walletID: walletID || wallet.getID(),
+      },
+    });
+  };
+
+  const next = () => {
+    if (wallet.getBalance() < amount) {
+      return alert(loc.send.details_total_exceeds_balance);
     }
 
-    navigate('Success', {
-      amount: amountSats,
-      amountUnit: BitcoinUnit.SATS,
-      invoiceDescription: decoded.description,
-    });
-    fetchAndSaveWalletTransactions(wallet.getID());
+    if (invoice) {
+      return processInvoicePay();
+    }
+    processLnurlPay(destination);
   };
 
   const processTextForInvoice = text => {
@@ -213,7 +225,7 @@ const ScanLndInvoice = () => {
   };
 
   const shouldDisablePayButton = () => {
-    if (!decoded) {
+    if (invoice && !decoded) {
       return true;
     } else {
       if (!amount) {
@@ -221,12 +233,11 @@ const ScanLndInvoice = () => {
       }
     }
     return !(amount > 0);
-    // return decoded.num_satoshis <= 0 || isLoading || isNaN(decoded.num_satoshis);
   };
 
   const getFees = () => {
-    const min = Math.floor(decoded.num_satoshis * 0.003);
-    const max = Math.floor(decoded.num_satoshis * 0.01) + 1;
+    const min = Math.floor(amount * 0.003);
+    const max = Math.floor(amount * 0.01) + 1;
     return `${min} ${BitcoinUnit.SATS} - ${max} ${BitcoinUnit.SATS}`;
   };
 
@@ -243,6 +254,12 @@ const ScanLndInvoice = () => {
     }
 
     setParams({ walletID: id });
+  };
+
+  const getAreInputsDisabled = () => {
+    if (invoice) {
+      return !decoded || isLoading || decoded.num_satoshis > 0;
+    }
   };
 
   if (wallet === undefined || !wallet) {
@@ -270,7 +287,7 @@ const ScanLndInvoice = () => {
                 amount={amount}
                 onAmountUnitChange={setUnit}
                 onChangeText={setAmount}
-                disabled={!decoded || isLoading || decoded.num_satoshis > 0}
+                disabled={getAreInputsDisabled()}
                 unit={unit}
                 inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
               />
@@ -301,29 +318,28 @@ const ScanLndInvoice = () => {
               <BlueFormInput
                 placeholder={loc.send.details_note_placeholder}
                 placeholderTextColor={colors.feeText}
-                value={decoded?.description}
-                onChangeText={console.log}
-                editable={false}
+                value={desc}
+                onChangeText={setDesc}
+                editable={!getAreInputsDisabled()}
                 color={colors.feeText}
               />
             </View>
-
             <View style={styles.fee}>
               <BlueText style={stylesHook.fee}>{loc.send.create_fee}</BlueText>
-              <BlueText style={stylesHook.fee}>{decoded?.num_satoshis > 0 ? getFees() : '-'}</BlueText>
+              <BlueText style={stylesHook.fee}>{amount > 0 ? getFees() : '-'}</BlueText>
             </View>
-            <BlueCard>
-              {isLoading ? (
-                <View>
-                  <ActivityIndicator />
-                </View>
-              ) : (
-                <View>
-                  <BlueButton title={loc.lnd.payButton} onPress={pay} disabled={shouldDisablePayButton()} />
-                </View>
-              )}
-            </BlueCard>
           </KeyboardAvoidingView>
+          <BlueCard>
+            {isLoading ? (
+              <View>
+                <ActivityIndicator />
+              </View>
+            ) : (
+              <View>
+                <BlueButton title={loc.lnd.next} onPress={next} disabled={shouldDisablePayButton()} />
+              </View>
+            )}
+          </BlueCard>
         </ScrollView>
       </View>
       <BlueDismissKeyboardInputAccessory />

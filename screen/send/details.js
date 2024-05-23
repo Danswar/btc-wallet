@@ -548,7 +548,7 @@ const SendDetails = () => {
         psbtBase64: psbt.toBase64(),
         walletID: wallet.getID(),
         launchedBy: routeParams.launchedBy,
-        isTxSigned: true
+        isTxSigned: true,
       });
       setIsLoading(false);
       return;
@@ -948,10 +948,10 @@ const SendDetails = () => {
                 </View>
               )}
             </TouchableOpacity>
-            {renderCreateButton()}
             {renderFeeSelectionModal()}
           </KeyboardAvoidingView>
         </View>
+        {renderCreateButton()}
         <BlueDismissKeyboardInputAccessory />
         {Platform.select({
           ios: <InputAccessoryAllFunds canUseAll={balance > 0} onUseAllPressed={onUseAllPressed} balance={allBalance} />,
