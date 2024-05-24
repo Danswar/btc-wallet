@@ -198,8 +198,8 @@ const LnurlPay = () => {
   };
 
   const getFees = () => {
-    const min = Math.floor(amount * 0.003);
-    const max = Math.floor(amount * 0.01) + 1;
+    const min = 0;
+    const max = Math.floor(amount * 0.03);
     return `${min} ${BitcoinUnit.SATS} - ${max} ${BitcoinUnit.SATS}`;
   };
 
