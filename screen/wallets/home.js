@@ -349,6 +349,7 @@ const WalletHome = ({ navigation }) => {
         navigation={navigation}
         wallet={totalWallet}
         width={width}
+        showRBFWarning={!wallet.allowRBF()}
         onWalletChange={total =>
           InteractionManager.runAfterInteractions(async () => {
             wallets.forEach(w => {

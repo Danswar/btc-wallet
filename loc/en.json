@@ -510,7 +510,10 @@
     "backupSeed": "Backup your wallet",
     "backupSeedWarning": "Backup not verified",
     "external_services": "External services",
-    "coming_soon": "Coming soon"
+    "coming_soon": "Coming soon",
+    "warning": "Warning!",
+    "rbf_warning": "You are using an outdated wallet without RBF function.",
+    "more_info": "Click here for more information."
   },
   "multisig": {
     "multisig_vault": "Vault",
