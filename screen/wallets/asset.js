@@ -145,6 +145,15 @@ const Asset = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
+    const refresingInterval = setInterval(() => {
+      if (!isLoading) refreshTransactions();
+    }, 20 * 1000);
+    return () => {
+      clearInterval(refresingInterval);
+    };
+  }, []);
+
+  useEffect(() => {
     setOptions({ headerTitle: walletTransactionUpdateStatus === walletID ? loc.transactions.updating : '' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletTransactionUpdateStatus]);
@@ -532,7 +541,6 @@ const Asset = ({ navigation }) => {
               </Text>
             </ScrollView>
           }
-          {...(isElectrumDisabled ? {} : { refreshing: isLoading, onRefresh: refreshTransactions })}
           data={dataSource}
           extraData={[timeElapsed, dataSource, wallets]}
           keyExtractor={_keyExtractor}

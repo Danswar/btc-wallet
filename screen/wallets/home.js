@@ -129,6 +129,16 @@ const WalletHome = ({ navigation }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallets]);
 
+  useEffect(() => {
+    if (!wallets) return;
+    const interval = setInterval(() => {
+      console.log('##### refreshing balances #####');
+      if(isLoading) return;
+      refreshBalances().catch(console.error);
+    }, 20 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   /**
    * Forcefully fetches balance for wallets
    */
@@ -156,10 +166,8 @@ const WalletHome = ({ navigation }) => {
       console.log('saving to disk');
       await saveToDisk();
     }
-
-    wallet.balance = 0;
+    
     await saveToDisk();
-
     setIsLoading(false);
   };
 
