@@ -93,7 +93,12 @@
     "please_pay": "Please pay",
     "preimage": "Preimage",
     "sats": "sats.",
-    "wasnt_paid_and_expired": "This invoice was not paid and has expired."
+    "wasnt_paid_and_expired": "This invoice was not paid and has expired.",
+    "payment_hash": "Payment Hash",
+    "value": "Value",
+    "description": "Description",
+    "memo": "Memo",
+    "domain": "Domain"
   },
   "plausibledeniability": {
     "create_fake_storage": "Create Encrypted Storage",
