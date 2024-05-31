@@ -15,6 +15,7 @@ import { BitcoinUnit } from '../../models/bitcoinUnits';
 import loc, { formatBalanceWithoutSuffix } from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import * as BlueElectrum from '../../blue_modules/BlueElectrum';
+import NetworkTransactionFees from '../../models/networkTransactionFees';
 
 const buttonStatus = Object.freeze({
   possible: 1,
@@ -128,16 +129,16 @@ const TransactionsStatus = () => {
           console.log('txFromMempool=', txFromMempool);
 
           const satPerVbyte = Math.round(txFromMempool.fee / txFromElectrum.vsize);
-          const fees = await BlueElectrum.estimateFees();
+          const fees = await NetworkTransactionFees.recommendedFees();
           console.log('fees=', fees, 'satPerVbyte=', satPerVbyte);
-          if (satPerVbyte >= fees.fast) {
-            setEta(loc.formatString(loc.transactions.eta_10m));
-          }
-          if (satPerVbyte >= fees.medium && satPerVbyte < fees.fast) {
-            setEta(loc.formatString(loc.transactions.eta_3h));
-          }
-          if (satPerVbyte < fees.medium) {
-            setEta(loc.formatString(loc.transactions.eta_1d));
+          if (satPerVbyte >= fees.fastestFee) {
+            setEta(loc.formatString(loc.transactions.eta_fastest));
+          } else if (satPerVbyte >= fees.mediumFee) {
+            setEta(loc.formatString(loc.transactions.eta_fast));
+          } else if (satPerVbyte >= fees.slowFee) {
+            setEta(loc.formatString(loc.transactions.eta_medium));
+          } else {
+            setEta(loc.formatString(loc.transactions.eta_slow));
           }
         } else if (txFromElectrum.confirmations > 0) {
           // now, handling a case when tx became confirmed!
