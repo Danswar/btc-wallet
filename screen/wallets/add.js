@@ -141,89 +141,93 @@ const WalletsAdd = () => {
   };
 
   return (
-    <ScrollView style={stylesHook.root}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      <BlueSpacing20 />
-      <KeyboardAvoidingView enabled behavior={Platform.OS === 'ios' ? 'padding' : null} keyboardVerticalOffset={62}>
-        {!isLoading && (
-          <TouchableOpacity onPress={handleDisclaimerPress}>
-            <Text style={stylesHook.disclaimer}>{loc.wallets.add_disclaimer}</Text>
-          </TouchableOpacity>
-        )}
-        <View style={styles.advanced}>
-          {(() => {
-            if (selectedWalletType === ButtonSelected.ONCHAIN && isAdvancedOptionsEnabled) {
-              return (
-                <View>
-                  <BlueSpacing20 />
-                  <Text style={[styles.advancedText, stylesHook.advancedText]}>{loc.settings.advanced_options}</Text>
-                  <BlueListItem
-                    containerStyle={[styles.noPadding, stylesHook.noPadding]}
-                    bottomDivider={false}
-                    onPress={() => setSelectedIndex(0)}
-                    title={HDSegwitBech32Wallet.typeReadable}
-                    checkmark={selectedIndex === 0}
-                  />
-                  <BlueListItem
-                    containerStyle={[styles.noPadding, stylesHook.noPadding]}
-                    bottomDivider={false}
-                    onPress={() => setSelectedIndex(1)}
-                    title={SegwitP2SHWallet.typeReadable}
-                    checkmark={selectedIndex === 1}
-                  />
-                  <BlueListItem
-                    containerStyle={[styles.noPadding, stylesHook.noPadding]}
-                    bottomDivider={false}
-                    onPress={() => setSelectedIndex(2)}
-                    title={HDSegwitP2SHWallet.typeReadable}
-                    checkmark={selectedIndex === 2}
-                  />
-                </View>
-              );
-            } else if (selectedWalletType === ButtonSelected.OFFCHAIN) {
-              return (
-                <>
-                  <BlueSpacing20 />
-                  <Text style={[styles.advancedText, stylesHook.advancedText]}>{loc.settings.advanced_options}</Text>
-                  <BlueSpacing20 />
-                  <BlueText>{loc.wallets.add_lndhub}</BlueText>
-                  <View style={[styles.lndUri, stylesHook.lndUri]}>
-                    <TextInput
-                      value={walletBaseURI}
-                      onChangeText={setWalletBaseURI}
-                      onSubmitEditing={Keyboard.dismiss}
-                      placeholder={loc.wallets.add_lndhub_placeholder}
-                      clearButtonMode="while-editing"
-                      autoCapitalize="none"
-                      textContentType="URL"
-                      autoCorrect={false}
-                      placeholderTextColor="#81868e"
-                      style={styles.textInputCommon}
-                      editable={!isLoading}
-                      underlineColorAndroid="transparent"
+    <ScrollView contentContainerStyle={[styles.root, stylesHook.root]}>
+      <View>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+        <BlueSpacing20 />
+        <KeyboardAvoidingView enabled behavior={Platform.OS === 'ios' ? 'padding' : null} keyboardVerticalOffset={62}>
+          {!isLoading && (
+            <TouchableOpacity onPress={handleDisclaimerPress}>
+              <Text style={stylesHook.disclaimer}>{loc.wallets.add_disclaimer}</Text>
+            </TouchableOpacity>
+          )}
+          <View style={styles.advanced}>
+            {(() => {
+              if (selectedWalletType === ButtonSelected.ONCHAIN && isAdvancedOptionsEnabled) {
+                return (
+                  <View>
+                    <BlueSpacing20 />
+                    <Text style={[styles.advancedText, stylesHook.advancedText]}>{loc.settings.advanced_options}</Text>
+                    <BlueListItem
+                      containerStyle={[styles.noPadding, stylesHook.noPadding]}
+                      bottomDivider={false}
+                      onPress={() => setSelectedIndex(0)}
+                      title={HDSegwitBech32Wallet.typeReadable}
+                      checkmark={selectedIndex === 0}
+                    />
+                    <BlueListItem
+                      containerStyle={[styles.noPadding, stylesHook.noPadding]}
+                      bottomDivider={false}
+                      onPress={() => setSelectedIndex(1)}
+                      title={SegwitP2SHWallet.typeReadable}
+                      checkmark={selectedIndex === 1}
+                    />
+                    <BlueListItem
+                      containerStyle={[styles.noPadding, stylesHook.noPadding]}
+                      bottomDivider={false}
+                      onPress={() => setSelectedIndex(2)}
+                      title={HDSegwitP2SHWallet.typeReadable}
+                      checkmark={selectedIndex === 2}
                     />
                   </View>
-                </>
-              );
-            }
-          })()}
-          {isAdvancedOptionsEnabled && selectedWalletType === ButtonSelected.ONCHAIN && !isLoading && (
-            <BlueButtonLink style={styles.import} title={entropyButtonText} onPress={navigateToEntropy} />
-          )}
-          <BlueSpacing20 />
-          <View style={styles.createButton}>
-            {!isLoading ? <BlueButton testID="Create" title={loc.wallets.add_create} onPress={createWallet} /> : <ActivityIndicator />}
+                );
+              } else if (selectedWalletType === ButtonSelected.OFFCHAIN) {
+                return (
+                  <>
+                    <BlueSpacing20 />
+                    <Text style={[styles.advancedText, stylesHook.advancedText]}>{loc.settings.advanced_options}</Text>
+                    <BlueSpacing20 />
+                    <BlueText>{loc.wallets.add_lndhub}</BlueText>
+                    <View style={[styles.lndUri, stylesHook.lndUri]}>
+                      <TextInput
+                        value={walletBaseURI}
+                        onChangeText={setWalletBaseURI}
+                        onSubmitEditing={Keyboard.dismiss}
+                        placeholder={loc.wallets.add_lndhub_placeholder}
+                        clearButtonMode="while-editing"
+                        autoCapitalize="none"
+                        textContentType="URL"
+                        autoCorrect={false}
+                        placeholderTextColor="#81868e"
+                        style={styles.textInputCommon}
+                        editable={!isLoading}
+                        underlineColorAndroid="transparent"
+                      />
+                    </View>
+                  </>
+                );
+              }
+            })()}
+            {isAdvancedOptionsEnabled && selectedWalletType === ButtonSelected.ONCHAIN && !isLoading && (
+              <BlueButtonLink style={styles.import} title={entropyButtonText} onPress={navigateToEntropy} />
+            )}
           </View>
-          {!isLoading && (
-            <BlueButtonLink
-              testID="ImportWallet"
-              style={styles.import}
-              title={loc.wallets.add_import_wallet}
-              onPress={navigateToImportWallet}
-            />
-          )}
+        </KeyboardAvoidingView>
+      </View>
+      <View style={styles.buttonContainer}>
+        <View style={styles.createButton}>
+          {!isLoading ? <BlueButton testID="Create" title={loc.wallets.add_create} onPress={createWallet} /> : <ActivityIndicator />}
         </View>
-      </KeyboardAvoidingView>
+        {!isLoading && (
+          <BlueButtonLink
+            testID="ImportWallet"
+            style={styles.import}
+            title={loc.wallets.add_import_wallet}
+            onPress={navigateToImportWallet}
+          />
+        )}
+        <BlueSpacing20 />
+      </View>
     </ScrollView>
   );
 };
@@ -237,8 +241,9 @@ WalletsAdd.navigationOptions = navigationStyle(
 );
 
 const styles = StyleSheet.create({
-  createButton: {
+  root: {
     flex: 1,
+    justifyContent: 'space-between',
   },
   textInputCommon: {
     flex: 1,
@@ -267,6 +272,10 @@ const styles = StyleSheet.create({
   },
   noPadding: {
     paddingHorizontal: 0,
+  },
+  buttonContainer: {
+    marginBottom: 24,
+    paddingHorizontal: 16,
   },
 });
 
