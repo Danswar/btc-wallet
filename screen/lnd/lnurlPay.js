@@ -78,7 +78,6 @@ const LnurlPay = () => {
       setAmount(amountSat);
       setUnit(amountUnit);
       setIsLoading(false);
-      console.log(wallet.decodeInvoice(invoice));
     }
   }, [invoice]);
 

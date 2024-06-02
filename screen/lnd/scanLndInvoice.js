@@ -39,6 +39,7 @@ const ScanLndInvoice = () => {
   const [unit, setUnit] = useState(BitcoinUnit.SATS);
   const [decoded, setDecoded] = useState();
   const [amount, setAmount] = useState();
+  const [amountSat, setAmountSat] = useState();
   const [isAmountInitiallyEmpty, setIsAmountInitiallyEmpty] = useState();
   const [desc, setDesc] = useState();
   const [expiresIn, setExpiresIn] = useState();
@@ -107,7 +108,9 @@ const ScanLndInvoice = () => {
         setIsAmountInitiallyEmpty(newDecoded.num_satoshis === '0');
         setDestination(data);
         setIsLoading(false);
+        setUnit(BitcoinUnit.SATS);
         setAmount(newDecoded.num_satoshis);
+        setAmountSat(newDecoded.num_satoshis);
         setExpiresIn(newExpiresIn);
         setDecoded(newDecoded);
         setDesc(newDecoded.description);
@@ -118,6 +121,7 @@ const ScanLndInvoice = () => {
         setTimeout(() => alert(Err.message), 10);
         setIsLoading(false);
         setAmount();
+        setAmountSat();
         setDestination();
         setExpiresIn();
         setDecoded();
@@ -133,11 +137,24 @@ const ScanLndInvoice = () => {
   };
 
   const processLnurlPay = () => {
+    let error;
+    if(amountSat === 0) {
+      error = loc.send.details_amount_field_is_not_valid;
+    }else if(!Lnurl.isLightningAddress(destination)) {
+      error = loc.send.details_address_field_is_not_valid;
+    }
+
+    if (error) {
+      alert(error);
+      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
+      return;
+    }
+
     navigate('SendDetailsRoot', {
       screen: 'LnurlPay',
       params: {
         destination: destination,
-        amountSat: amount,
+        amountSat: amountSat,
         description: desc,
         walletID: walletID || wallet.getID(),
       },
@@ -157,18 +174,6 @@ const ScanLndInvoice = () => {
       }
     }
 
-    let amountSats = amount;
-    switch (unit) {
-      case BitcoinUnit.SATS:
-        amountSats = parseInt(amountSats, 10); // nop
-        break;
-      case BitcoinUnit.BTC:
-        amountSats = currency.btcToSatoshi(amountSats);
-        break;
-      case BitcoinUnit.LOCAL_CURRENCY:
-        amountSats = currency.btcToSatoshi(currency.fiatToBTC(amountSats));
-        break;
-    }
     setIsLoading(true);
 
     const newExpiresIn = (decoded.timestamp * 1 + decoded.expiry * 1) * 1000; // ms
@@ -190,7 +195,7 @@ const ScanLndInvoice = () => {
       screen: 'LnurlPay',
       params: {
         invoice: invoice,
-        amountSat: amountSats,
+        amountSat: amountSat,
         amountUnit: BitcoinUnit.SATS,
         description: decoded.description,
         walletID: walletID || wallet.getID(),
@@ -237,7 +242,7 @@ const ScanLndInvoice = () => {
 
   const getFees = () => {
     const min = 0;
-    const max = Math.floor(amount * 0.03);
+    const max = Math.floor(amountSat * 0.03);
     return `${min} ${BitcoinUnit.SATS} - ${max} ${BitcoinUnit.SATS}`;
   };
 
@@ -262,6 +267,30 @@ const ScanLndInvoice = () => {
     }
   };
 
+  const onUseAllPressed = () => {
+    setAmount(wallet.getBalance());
+    setAmountSat(wallet.getBalance());
+    setUnit(BitcoinUnit.SATS);
+  };
+
+  const handleAmountInputChange = (text, newUnit) => {
+    setAmount(text);
+    
+    let sats;
+    switch (newUnit || unit) {
+      case BitcoinUnit.BTC:
+        sats = currency.btcToSatoshi(text);
+        break;
+      case BitcoinUnit.LOCAL_CURRENCY:
+        sats = AmountInput.getCachedSatoshis(text) || currency.btcToSatoshi(currency.fiatToBTC(text));
+        break;
+      case BitcoinUnit.SATS:
+        sats = parseInt(text, 10);
+        break;
+    }
+    setAmountSat(sats);
+  }
+
   if (wallet === undefined || !wallet) {
     return (
       <View style={[styles.loadingIndicator, stylesHook.root]}>
@@ -282,14 +311,15 @@ const ScanLndInvoice = () => {
 
             <View>
               <AmountInput
-                pointerEvents={isAmountInitiallyEmpty ? 'auto' : 'none'}
                 isLoading={isLoading}
                 amount={amount}
                 onAmountUnitChange={setUnit}
-                onChangeText={setAmount}
+                onChangeText={handleAmountInputChange}
                 disabled={getAreInputsDisabled()}
                 unit={unit}
                 inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
+                showMaxButton
+                onPressMax={onUseAllPressed}
               />
             </View>
 
@@ -326,7 +356,7 @@ const ScanLndInvoice = () => {
             </View>
             <View style={styles.fee}>
               <BlueText style={stylesHook.fee}>{loc.send.create_fee}</BlueText>
-              <BlueText style={stylesHook.fee}>{amount > 0 ? getFees() : '-'}</BlueText>
+              <BlueText style={stylesHook.fee}>{amountSat > 0 ? getFees() : '-'}</BlueText>
             </View>
           </KeyboardAvoidingView>
           <BlueCard>
