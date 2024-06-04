@@ -257,7 +257,7 @@ const SendDetails = () => {
     for (const opt of options) {
       let targets = [];
       for (const transaction of addresses) {
-        if (transaction.amount === BitcoinUnit.MAX) {
+        if (transaction.amount === wallet.getBalance()) {
           // single output with MAX
           targets = [{ address: transaction.address }];
           break;
@@ -500,8 +500,8 @@ const SendDetails = () => {
 
     const targets = [];
     for (const transaction of addresses) {
-      if (transaction.amount === BitcoinUnit.MAX) {
-        // output with MAX
+      if (transaction.amountSats === wallet.getBalance()) {
+        // output with MAX, a target with no value signals to send all funds
         targets.push({ address: transaction.address });
         continue;
       }
@@ -548,7 +548,7 @@ const SendDetails = () => {
         psbtBase64: psbt.toBase64(),
         walletID: wallet.getID(),
         launchedBy: routeParams.launchedBy,
-        isTxSigned: true
+        isTxSigned: true,
       });
       setIsLoading(false);
       return;
@@ -609,16 +609,26 @@ const SendDetails = () => {
   const onUseAllPressed = () => {
     ReactNativeHapticFeedback.trigger('notificationWarning');
     Keyboard.dismiss();
-    setAddresses(addrs => {
-      addrs[scrollIndex.current].amount = BitcoinUnit.MAX;
-      addrs[scrollIndex.current].amountSats = BitcoinUnit.MAX;
-      return [...addrs];
-    });
     setUnits(u => {
       u[scrollIndex.current] = BitcoinUnit.BTC;
       return [...u];
     });
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setAddresses(addrs => {
+      const currentBalance = wallet.getBalance();
+      addrs[scrollIndex.current].amountSats = currentBalance;
+      switch (units[scrollIndex.current]) {
+        case BitcoinUnit.SATS:
+          addrs[scrollIndex.current].amount = currency.satoshiToBTC(currentBalance);
+          break;
+        case BitcoinUnit.BTC:
+          addrs[scrollIndex.current].amount = currency.satoshiToBTC(currentBalance);
+          break;
+        case BitcoinUnit.LOCAL_CURRENCY:
+          addrs[scrollIndex.current].amount = currency.satoshiToLocalCurrency(currentBalance);
+          break;
+      }
+      return [...addrs];
+    });
   };
 
   const formatFee = fee => formatBalance(fee, feeUnit, true);
@@ -845,6 +855,8 @@ const SendDetails = () => {
           editable={isEditable}
           disabled={!isEditable}
           inputAccessoryViewID={InputAccessoryAllFunds.InputAccessoryViewID}
+          showMaxButton
+          onPressMax={onUseAllPressed}
         />
 
         {frozenBalance > 0 && (
@@ -948,10 +960,10 @@ const SendDetails = () => {
                 </View>
               )}
             </TouchableOpacity>
-            {renderCreateButton()}
             {renderFeeSelectionModal()}
           </KeyboardAvoidingView>
         </View>
+        {renderCreateButton()}
         <BlueDismissKeyboardInputAccessory />
         {Platform.select({
           ios: <InputAccessoryAllFunds canUseAll={balance > 0} onUseAllPressed={onUseAllPressed} balance={allBalance} />,
