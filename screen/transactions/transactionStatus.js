@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { View, ActivityIndicator, Text, TouchableOpacity, StyleSheet, StatusBar, BackHandler } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
@@ -16,6 +16,7 @@ import loc, { formatBalanceWithoutSuffix } from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import * as BlueElectrum from '../../blue_modules/BlueElectrum';
 import NetworkTransactionFees from '../../models/networkTransactionFees';
+const currency = require('../../blue_modules/currency');
 
 const buttonStatus = Object.freeze({
   possible: 1,
@@ -37,6 +38,14 @@ const TransactionsStatus = () => {
   const fetchTxInterval = useRef();
   const [intervalMs, setIntervalMs] = useState(1000);
   const [eta, setEta] = useState('');
+  
+  const feeSats = useMemo(() => {
+    if (!tx) return 0;
+    const inAmount = tx.inputs.reduce((acc, {value})=>(acc + value), 0);
+    const outAmount = tx.outputs.reduce((acc, {value})=>(acc + value), 0);
+    return currency.btcToSatoshi(inAmount - outAmount);
+  }, [tx]);
+
   const stylesHook = StyleSheet.create({
     value: {
       color: colors.alternativeTextColor2,
@@ -52,6 +61,12 @@ const TransactionsStatus = () => {
     },
     details: {
       backgroundColor: colors.lightButton,
+    },
+    transactionDetailsTitle: {
+      color: colors.foregroundColor,
+    },
+    transactionDetailsSubtitle: {
+      color: colors.feeText,
     },
   });
 
@@ -405,10 +420,21 @@ const TransactionsStatus = () => {
             </View>
           </View>
 
-          {tx.fee && (
+          {tx.value < 0 && (
+            <View style={styles.center}>
+              <View>
+                <Text style={[styles.transactionDetailsTitle, stylesHook.transactionDetailsTitle]}>{loc.send.create_to}</Text>
+                <Text style={[styles.transactionDetailsSubtitle, stylesHook.transactionDetailsSubtitle]}>
+                  {tx?.outputs[0]?.scriptPubKey?.addresses[0]}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {feeSats && (
             <View style={styles.fee}>
               <BlueText style={styles.feeText}>
-                {loc.send.create_fee.toLowerCase()} {formatBalanceWithoutSuffix(tx.fee, wallet.current.preferredBalanceUnit, true)}{' '}
+                {loc.send.create_fee.toLowerCase()} {formatBalanceWithoutSuffix(feeSats, wallet.current.preferredBalanceUnit, true)}{' '}
                 {wallet.current.preferredBalanceUnit !== BitcoinUnit.LOCAL_CURRENCY && wallet.current.preferredBalanceUnit}
               </BlueText>
             </View>
@@ -492,7 +518,7 @@ const styles = StyleSheet.create({
     marginBottom: 13,
   },
   feeText: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: '500',
     marginBottom: 4,
     color: '#00c49f',
@@ -535,6 +561,11 @@ const styles = StyleSheet.create({
   detailsText: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  transactionDetailsTitle: {
+    fontWeight: '500',
+    fontSize: 17,
+    marginBottom: 2,
   },
 });
 
