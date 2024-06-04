@@ -618,8 +618,6 @@ const SendDetails = () => {
       addrs[scrollIndex.current].amountSats = currentBalance;
       switch (units[scrollIndex.current]) {
         case BitcoinUnit.SATS:
-          addrs[scrollIndex.current].amount = currency.satoshiToBTC(currentBalance);
-          break;
         case BitcoinUnit.BTC:
           addrs[scrollIndex.current].amount = currency.satoshiToBTC(currentBalance);
           break;
