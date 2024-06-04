@@ -132,8 +132,6 @@ const WalletHome = ({ navigation }) => {
   useEffect(() => {
     if (!wallets) return;
     const interval = setInterval(() => {
-      console.log('##### refreshing balances #####');
-      if(isLoading) return;
       refreshBalances().catch(console.error);
     }, 20 * 1000);
     return () => clearInterval(interval);
