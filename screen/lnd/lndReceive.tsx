@@ -29,7 +29,7 @@ interface RouteParams {
 }
 
 const LNDReceive = () => {
-  const { wallets, saveToDisk, setSelectedWallet } = useContext(BlueStorageContext);
+  const { wallets, saveToDisk, setSelectedWallet, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
   const { walletID } = useRoute().params as RouteParams;
   const wallet = useRef(
     wallets.find((item: any) => item.getID() === walletID) || wallets.find((item: any) => item.chain === Chain.OFFCHAIN),
@@ -94,6 +94,7 @@ const LNDReceive = () => {
           setDescription(updatedUserInvoice.description);
         }
         setIsPaid(true);
+        fetchAndSaveWalletTransactions(walletID);
         return;
       }
 

@@ -149,12 +149,12 @@ const ScanLndInvoice = () => {
       ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
       return;
     }
-
+    const isMax = amount === wallet.getBalance();
     navigate('SendDetailsRoot', {
       screen: 'LnurlPay',
       params: {
         destination: destination,
-        amountSat: amountSat,
+        amountSat: isMax ? Math.floor(amount * 0.97) : amountSat, // max 3% fee set by LNBits
         description: desc,
         walletID: walletID || wallet.getID(),
       },
