@@ -145,11 +145,11 @@ const Asset = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    const refresingInterval = setInterval(() => {
-      if (!isLoading) refreshTransactions();
+    const refreshingInterval = setInterval(() => {
+      refreshTransactions();
     }, 20 * 1000);
     return () => {
-      clearInterval(refresingInterval);
+      clearInterval(refreshingInterval);
     };
   }, []);
 
