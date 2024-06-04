@@ -38,6 +38,7 @@ import { TransactionPendingIconBig } from '../../components/TransactionPendingIc
 import * as BlueElectrum from '../../blue_modules/BlueElectrum';
 import { SuccessView } from '../send/success';
 import useInputAmount from '../../hooks/useInputAmount';
+import NetworkTransactionFees from '../../models/networkTransactionFees';
 const currency = require('../../blue_modules/currency');
 
 const ReceiveDetails = () => {
@@ -132,15 +133,15 @@ const ReceiveDetails = () => {
             const rez = await BlueElectrum.multiGetTransactionByTxid([tx.tx_hash], 10, true);
             if (rez && rez[tx.tx_hash] && rez[tx.tx_hash].vsize) {
               const satPerVbyte = Math.round(tx.fee / rez[tx.tx_hash].vsize);
-              const fees = await BlueElectrum.estimateFees();
-              if (satPerVbyte >= fees.fast) {
-                setEta(loc.formatString(loc.transactions.eta_10m));
-              }
-              if (satPerVbyte >= fees.medium && satPerVbyte < fees.fast) {
-                setEta(loc.formatString(loc.transactions.eta_3h));
-              }
-              if (satPerVbyte < fees.medium) {
-                setEta(loc.formatString(loc.transactions.eta_1d));
+              const fees = await NetworkTransactionFees.recommendedFees();
+              if (satPerVbyte >= fees.fastestFee) {
+                setEta(loc.formatString(loc.transactions.eta_fastest));
+              } else if (satPerVbyte >= fees.mediumFee) {
+                setEta(loc.formatString(loc.transactions.eta_fast));
+              } else if (satPerVbyte >= fees.slowFee) {
+                setEta(loc.formatString(loc.transactions.eta_medium));
+              } else {
+                setEta(loc.formatString(loc.transactions.eta_slow));
               }
             }
           }

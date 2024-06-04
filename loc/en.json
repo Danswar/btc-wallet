@@ -94,7 +94,12 @@
     "please_pay": "Please pay",
     "preimage": "Preimage",
     "sats": "sats.",
-    "wasnt_paid_and_expired": "This invoice was not paid and has expired."
+    "wasnt_paid_and_expired": "This invoice was not paid and has expired.",
+    "payment_hash": "Payment Hash",
+    "value": "Value",
+    "description": "Description",
+    "memo": "Memo",
+    "domain": "Domain"
   },
   "plausibledeniability": {
     "create_fake_storage": "Create Encrypted Storage",
@@ -385,9 +390,10 @@
     "pending": "Pending",
     "pending_with_amount": "Pending {amt1} ({amt2})",
     "received_with_amount": "+{amt1} ({amt2})",
-    "eta_10m": "ETA: In ~10 minutes",
-    "eta_3h": "ETA: In ~3 hours",
-    "eta_1d": "ETA: In ~1 day",
+    "eta_fastest": "ETA: In ~9 minutes",
+    "eta_fast": "ETA: In ~10 to 30 minutes",
+    "eta_medium": "ETA: In ~30 minutes to 3 hours",
+    "eta_slow": "ETA: In ~1 day",
     "view_wallet": "View {walletLabel}",
     "list_title": "Transactions",
     "open_url_error": "Unable to open the link with the default browser. Please change your default browser and try again.",

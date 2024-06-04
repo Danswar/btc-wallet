@@ -47,6 +47,9 @@ import BuyFr from '../../img/dfx/buttons/buy_fr.png';
 import SellFr from '../../img/dfx/buttons/sell_fr.png';
 import BuyIt from '../../img/dfx/buttons/buy_it.png';
 import SellIt from '../../img/dfx/buttons/sell_it.png';
+import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/networkTransactionFees';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
 
 const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
@@ -77,6 +80,7 @@ const Asset = ({ navigation }) => {
   const { isAvailable: isDfxAvailable, openServices, isProcessing: isDfxProcessing } = useDfxSessionContext();
   const { width } = useWindowDimensions();
   const [isHandlingOpenServices, setIsHandlingOpenServices] = useState(false);
+  const [changeAddress, setChangeAddress] = useState('');
 
   const getButtonImages = lang => {
     switch (lang) {
@@ -186,19 +190,68 @@ const Asset = ({ navigation }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallets]);
 
-  const handleOpenServices = service => {
+  const getChangeAddressAsync = async (wallet) => {
+    if (changeAddress) return changeAddress; // cache
+
+    let change;
+    if (WatchOnlyWallet.type === wallet.type && !wallet.isHd()) {
+      // plain watchonly - just get the address
+      change = wallet.getAddress();
+    } else {
+      // otherwise, lets call widely-used getChangeAddressAsync()
+      try {
+        change = await Promise.race([sleep(2000), wallet.getChangeAddressAsync()]);
+      } catch (_) {}
+
+      if (!change) {
+        // either sleep expired or getChangeAddressAsync threw an exception
+        if (wallet instanceof AbstractHDElectrumWallet) {
+          change = wallet._getInternalAddressByIndex(wallet.getNextFreeChangeAddressIndex());
+        } else {
+          // legacy wallets
+          change = wallet.getAddress();
+        }
+      }
+    }
+    if (change) setChangeAddress(change); // cache
+    return change;
+  };
+
+  const getEstimatedOnChainFee = async () => {
+    const lutxo = wallet.getUtxo();
+    const changeAddress = await getChangeAddressAsync(wallet);
+    const dustTarget = [{ address: '36JxaUrpDzkEerkTf1FzwHNE1Hb7cCjgJV' }];
+    const networkTransactionFees = await NetworkTransactionFees.recommendedFees();
+    await AsyncStorage.setItem(NetworkTransactionFee.StorageKey, JSON.stringify(networkTransactionFees));
+    // dummy transaction, not to be broadcasted
+    const { fee } = wallet.createTransaction(lutxo, dustTarget, Number(networkTransactionFees.fastestFee), changeAddress, false);
+    return fee;
+  };
+
+  const getBalanceByDfxService = async service => {
+    const balance = wallet.getBalance();
+    if (service === DfxService.SELL) {
+      const fee = wallet.chain === Chain.ONCHAIN ? await getEstimatedOnChainFee() : balance * 0.03; // max 3% fee for LNBits
+      return balance - fee;
+    }
+    return balance;
+  };
+
+  const handleOpenServices = async service => {
     setIsHandlingOpenServices(true);
-    openServices(walletID, new BigNumber(currency.satoshiToBTC(wallet.getBalance())).toString(), service)
-      .catch(e =>
-        Alert.alert('Something went wrong', e.message?.toString(), [
-          {
-            text: loc._.ok,
-            onPress: () => { },
-            style: 'default',
-          },
-        ]),
-      )
-      .finally(() => setIsHandlingOpenServices(false));
+    try {
+      const maxBalance = await getBalanceByDfxService(service);
+      openServices(walletID, new BigNumber(currency.satoshiToBTC(maxBalance)).toString(), service);
+    } catch (e) {
+      Alert.alert('Something went wrong', e.message?.toString(), [
+        {
+          text: loc._.ok,
+          onPress: () => {},
+          style: 'default',
+        },
+      ]);
+    }
+    setIsHandlingOpenServices(false);
   };
 
   // if description of transaction has been changed we want to show new one
