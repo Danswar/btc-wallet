@@ -38,22 +38,7 @@ const LNDViewInvoice = () => {
   const fetchInvoiceInterval = useRef();
   const [isLoadingNfcInvoice, setIsLoadingNfcInvoice] = useState(false);
   const isModal = useNavigationState(state => state.routeNames[0] === LNDCreateInvoice.routeName);
-  
-  const handleNfcRead = useCallback(
-    async payload => {
-      setIsLoadingNfcInvoice(true);
-      if (BoltCard.isBoltcardWidthdrawUrl(payload)) {
-        await stopReading();
-        const { isError, reason } = await BoltCard.widthdraw(payload, invoice.payment_request);
-        if (isError) {
-          alert(reason);
-          setIsLoadingNfcInvoice(false);
-        }
-      }
-    },
-    [invoice.payment_request],
-  );
-  const { isNfcActive, startReading, stopReading } = useNFC(handleNfcRead);
+  const { isNfcActive, startReading, stopReading } = useNFC();
   
   const stylesHook = StyleSheet.create({
     root: {
@@ -70,10 +55,29 @@ const LNDViewInvoice = () => {
     },
   });
 
+  const handleNfcRead = useCallback(
+    async payload => {
+      setIsLoadingNfcInvoice(true);
+      if (BoltCard.isBoltcardWidthdrawUrl(payload)) {
+        await stopReading();
+        const { isError, reason } = await BoltCard.widthdraw(payload, invoice.payment_request);
+        if (isError) {
+          alert(reason);
+          setIsLoadingNfcInvoice(false);
+        }
+      }
+    },
+    [invoice.payment_request],
+  );
+
+  const handleStartReadingNfc = async () => {
+    startReading(handleNfcRead)
+  }
+
   useEffect(() => {
     if (!invoice?.payment_request || isLoading) return;
     if (Platform.OS === 'android' && !isNfcActive) {
-      startReading();
+      handleStartReadingNfc();
     }
     return () => {
       stopReading();
@@ -280,7 +284,7 @@ const LNDViewInvoice = () => {
               ) : (
                 Platform.select({
                   ios: (
-                    <SecondButton onPress={startReading} title={'Use Boltcard'} image={{ source: require('../../img/bolt-card.png') }} />
+                    <SecondButton onPress={handleStartReadingNfc} title={'Use Boltcard'} image={{ source: require('../../img/bolt-card.png') }} />
                   ),
                   android: (
                     <View style={styles.buttonsContainer}>

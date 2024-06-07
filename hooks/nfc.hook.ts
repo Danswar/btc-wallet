@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import NfcManager, { NfcEvents, Ndef, TagEvent } from 'react-native-nfc-manager';
 
 interface NFCInterface {
-  startReading: () => void;
+  startReading: (callback: (payload: string) => void) => void;
   stopReading: () => Promise<void>;
   isNfcActive: boolean;
   isNfcReady: boolean;
 }
 
-export function useNFC(callback: (payload: string) => void): NFCInterface {
+export function useNFC(): NFCInterface {
   const [isNfcReady, setIsNfcReady] = useState(false);
   const [isNfcActive, setIsNfcActive] = useState(false);
 
@@ -19,7 +19,7 @@ export function useNFC(callback: (payload: string) => void): NFCInterface {
     };
   }, []);
 
-  const startReading = async () => {
+  const startReading = async (callback: (payload: string) => void) => {
     if (isNfcActive) return;
     setIsNfcActive(true);
     NfcManager.setEventListener(NfcEvents.DiscoverTag, async (tag: TagEvent) => {
@@ -36,6 +36,7 @@ export function useNFC(callback: (payload: string) => void): NFCInterface {
   const stopReading = async () => {
     setIsNfcActive(false);
     setIsNfcReady(false);
+    NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
     await NfcManager.cancelTechnologyRequest();
   };
 
