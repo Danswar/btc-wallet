@@ -43,6 +43,8 @@ const LNDReceive = () => {
   const [invoiceRequest, setInvoiceRequest] = useState();
   const invoicePolling = useRef<NodeJS.Timer | undefined>();
   const [isPaid, setIsPaid] = useState(false);
+  const inputAmountRef = useRef<TextInput | null>(null);
+  const inputDescriptionRef = useRef<TextInput | null>(null);
 
   const styleHooks = StyleSheet.create({
     customAmount: {
@@ -111,14 +113,15 @@ const LNDReceive = () => {
   };
 
   const generateInvoice = async () => {
-    if (!Keyboard.isVisible()) return;
+    if(isInvoiceLoading) return;
+    setIsInvoiceLoading(true);
     Keyboard.dismiss();
 
     if (amountSats === 0 || isNaN(amountSats)) {
       setInvoiceRequest(undefined);
+      setIsInvoiceLoading(false);
       return;
     }
-    setIsInvoiceLoading(true);
     const invoiceRequest = await wallet.current.addInvoice(amountSats, description);
     ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
     const decoded = await wallet.current.decodeInvoice(invoiceRequest);
@@ -135,20 +138,19 @@ const LNDReceive = () => {
     setIsInvoiceLoading(false);
   };
 
-  useEffect(() => {
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', generateInvoice);
-    return () => {
-      keyboardDidHideListener.remove();
-      cancelInvoicePolling();
-    };
-  }, []);
-
   const onWalletChange = (id: string) => {
     const newWallet = wallets.find(w => w.getID() === id);
     if (!newWallet) return;
 
     if (newWallet.chain !== Chain.OFFCHAIN) {
       return replace('ReceiveDetails', { walletID: id });
+    }
+  };
+
+  const handleOnBlur = () => {
+    const isFocusOnSomeInput = inputAmountRef.current?.isFocused() || inputDescriptionRef.current?.isFocused();
+    if (!isFocusOnSomeInput) {
+      generateInvoice();
     }
   };
 
@@ -170,7 +172,7 @@ const LNDReceive = () => {
 
   return (
     <KeyboardAvoidingView behavior="position" style={[styles.root, styleHooks.root]}>
-      <TouchableWithoutFeedback onPress={generateInvoice} accessible={false}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.allVerticalSpace}>
           <View style={styles.pickerContainer}>
             <BlueWalletSelect wallets={wallets} value={wallet.current?.getID()} onChange={onWalletChange} />
@@ -191,11 +193,12 @@ const LNDReceive = () => {
             <View style={styles.share}>
               <View style={[styles.customAmount, styleHooks.customAmount]}>
                 <TextInput
+                  ref={inputAmountRef}
                   placeholderTextColor="#81868e"
                   placeholder="Amount (optional)"
                   style={[styles.customAmountText, styleHooks.customAmountText]}
                   inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-                  onSubmitEditing={generateInvoice}
+                  onBlur={handleOnBlur}
                   {...inputProps}
                 />
                 <Text style={styles.inputUnit}>{formattedUnit}</Text>
@@ -210,13 +213,14 @@ const LNDReceive = () => {
               </View>
               <View style={[styles.customAmount, styleHooks.customAmount]}>
                 <TextInput
+                  ref={inputDescriptionRef}
                   onChangeText={setDescription}
                   placeholder={`${loc.receive.details_label} (optional)`}
                   value={description}
                   numberOfLines={1}
                   placeholderTextColor="#81868e"
                   style={[styles.customAmountText, styleHooks.customAmountText]}
-                  onSubmitEditing={generateInvoice}
+                  onBlur={handleOnBlur}
                 />
               </View>
               <BlueCard>
