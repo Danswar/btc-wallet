@@ -88,6 +88,7 @@ import loc from './loc';
 import Asset from './screen/wallets/asset';
 import AddLightning from './screen/wallets/dfx/add-lightning';
 import LNDReceive from './screen/lnd/lndReceive';
+import FeatureFlags from './screen/settings/FeatureFlags';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -119,6 +120,7 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="Language" component={Language} options={Language.navigationOptions(theme)} />
       <WalletsStack.Screen name="EncryptStorage" component={EncryptStorage} options={EncryptStorage.navigationOptions(theme)} />
       <WalletsStack.Screen name="GeneralSettings" component={GeneralSettings} options={GeneralSettings.navigationOptions(theme)} />
+      <WalletsStack.Screen name="FeatureFlags" component={FeatureFlags} options={FeatureFlags.navigationOptions(theme)} />
       <WalletsStack.Screen name="NetworkSettings" component={NetworkSettings} options={NetworkSettings.navigationOptions(theme)} />
       <WalletsStack.Screen
         name="NotificationSettings"

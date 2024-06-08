@@ -43,6 +43,8 @@ class AppStorage {
   static ADVANCED_MODE_ENABLED = 'advancedmodeenabled';
   static DO_NOT_TRACK = 'donottrack';
   static HANDOFF_STORAGE_KEY = 'HandOff';
+  static FEATURE_FLAGS = 'feature_flags';
+  static FF_LDS_DEV_API = 'ff_lds_dev_api';
 
   static keys2migrate = [AppStorage.HANDOFF_STORAGE_KEY, AppStorage.DO_NOT_TRACK, AppStorage.ADVANCED_MODE_ENABLED];
 
@@ -835,6 +837,28 @@ class AppStorage {
 
   setIsAdvancedModeEnabled = async value => {
     await AsyncStorage.setItem(AppStorage.ADVANCED_MODE_ENABLED, value ? '1' : '');
+  };
+
+  isFeatureFlagsEnabled = async () => {
+    try {
+      return !!(await AsyncStorage.getItem(AppStorage.FEATURE_FLAGS));
+    } catch (_) {}
+    return false;
+  };
+
+  setIsFeatureFlagsEnabled = async value => {
+    await AsyncStorage.setItem(AppStorage.FEATURE_FLAGS, value ? '1' : '');
+  };
+
+  isLdsDevEnabled = async () => {
+    try {
+      return !!(await AsyncStorage.getItem(AppStorage.FF_LDS_DEV_API));
+    } catch (_) {}
+    return false;
+  };
+
+  setIsLdsDevEnabled = async value => {
+    await AsyncStorage.setItem(AppStorage.FF_LDS_DEV_API, value ? '1' : '');
   };
 
   isHandoffEnabled = async () => {
