@@ -20,7 +20,7 @@ const Settings = () => {
   const { walletID } = useRoute().params;
   // By simply having it here, it'll re-render the UI if language is changed
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { wallets, language } = useContext(BlueStorageContext);
+  const { wallets, language, showFeatureFlag } = useContext(BlueStorageContext);
   const lndWallet = wallets.find(wallet => wallet.type === LightningLdsWallet.type);
   const multiDeviceWallet = wallets.find(wallet => wallet.type === MultisigHDWallet.type);
 
@@ -57,6 +57,7 @@ const Settings = () => {
         <BlueListItem title={loc.settings.network} onPress={() => navigate('NetworkSettings')} testID="NetworkSettings" chevron />
         <BlueListItem title={loc.settings.tools} onPress={() => navigate('Tools')} testID="Tools" chevron />
         <BlueListItem title={loc.settings.about} onPress={() => navigate('About')} testID="AboutButton" chevron />
+        {showFeatureFlag && <BlueListItem title="Feature Flags" onPress={() => navigate('FeatureFlags')} chevron />}
       </ScrollView>
     </>
   );

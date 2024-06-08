@@ -27,6 +27,8 @@ export const BlueStorageProvider = ({ children }) => {
   const getPreferredCurrencyAsyncStorage = useAsyncStorage(currency.PREFERRED_CURRENCY).getItem;
   const getLanguageAsyncStorage = useAsyncStorage(LOC_STORAGE_KEY).getItem;
   const [isHandOffUseEnabled, setIsHandOffUseEnabled] = useState(false);
+  const [showFeatureFlag, setShowFeatureFlags] = useState(false);
+  const [ldsDEV, setLdsDEV] = useState(false);
   const [isElectrumDisabled, setIsElectrumDisabled] = useState(true);
   const [isTorDisabled, setIsTorDisabled] = useState(false);
   const [isPrivacyBlurEnabled, setIsPrivacyBlurEnabled] = useState(true);
@@ -52,6 +54,16 @@ export const BlueStorageProvider = ({ children }) => {
     return BlueApp.setIsHandoffEnabled(value);
   };
 
+  const setShowFeatureFlagsAsyncStorage = value => {
+    setShowFeatureFlags(value);
+    return BlueApp.setIsFeatureFlagsEnabled(value);
+  }
+
+  const setLdsDEVAsyncStorage = value => {
+    setLdsDEV(value);
+    return BlueApp.setIsLdsDevEnabled(value);
+  };
+
   const saveToDisk = async (force = false) => {
     if (BlueApp.getWallets().length === 0 && !force) {
       console.log('not saving empty wallets array');
@@ -72,9 +84,17 @@ export const BlueStorageProvider = ({ children }) => {
       try {
         const enabledHandoff = await BlueApp.isHandoffEnabled();
         setIsHandOffUseEnabled(!!enabledHandoff);
+        const enabledFeatureFlags = await BlueApp.isFeatureFlagsEnabled();
+        setShowFeatureFlags(!!enabledFeatureFlags);
+        const enabledLdsDev = await BlueApp.isLdsDevEnabled();
+        setLdsDEV(!!enabledLdsDev);
       } catch (_e) {
         setIsHandOffUseEnabledAsyncStorage(false);
         setIsHandOffUseEnabled(false);
+        setShowFeatureFlagsAsyncStorage(false);
+        setShowFeatureFlags(false);
+        setLdsDEVAsyncStorage(false);
+        setLdsDEV(false);
       }
     })();
   }, []);
@@ -279,6 +299,11 @@ export const BlueStorageProvider = ({ children }) => {
         setIsTorDisabled,
         isPrivacyBlurEnabled,
         setIsPrivacyBlurEnabled,
+        // Feature flags
+        showFeatureFlag,
+        setShowFeatureFlagsAsyncStorage,
+        ldsDEV,
+        setLdsDEVAsyncStorage,
       }}
     >
       {children}
