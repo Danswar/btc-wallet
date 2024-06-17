@@ -136,7 +136,11 @@ const ScanLndInvoice = () => {
     Keyboard.dismiss();
     if (Lnurl.isLnurl(destinationString)) return setLnurlDestination(destinationString);
     if (Lnurl.isLightningAddress(destinationString)) return setLightningAddressDestination(destinationString);
-    if (DeeplinkSchemaMatch.isLightningInvoice(destinationString) || DeeplinkSchemaMatch.isBothBitcoinAndLightning(destinationString))
+    if (
+      DeeplinkSchemaMatch.isLightningInvoice(destinationString) ||
+      DeeplinkSchemaMatch.isBothBitcoinAndLightning(destinationString) ||
+      DeeplinkSchemaMatch.isTestnetLightningInvoice(destinationString)
+    )
       return setLightningInvoiceDestination(destinationString);
   };
 
@@ -219,7 +223,11 @@ const ScanLndInvoice = () => {
 
   const next = () => {
     if (Lnurl.isLnurl(destination) || Lnurl.isLightningAddress(destination)) return processLnurlPay();
-    if (DeeplinkSchemaMatch.isLightningInvoice(destination) || DeeplinkSchemaMatch.isBothBitcoinAndLightning(destination))
+    if (
+      DeeplinkSchemaMatch.isLightningInvoice(destination) ||
+      DeeplinkSchemaMatch.isBothBitcoinAndLightning(destination) ||
+      DeeplinkSchemaMatch.isTestnetLightningInvoice(destination)
+    )
       return processInvoicePay();
 
     // make sure we have a valid destination

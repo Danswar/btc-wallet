@@ -133,7 +133,7 @@ class DeeplinkSchemaMatch {
           },
         },
       ]);
-    } else if (DeeplinkSchemaMatch.isLightningInvoice(event.url)) {
+    } else if (DeeplinkSchemaMatch.isLightningInvoice(event.url) || DeeplinkSchemaMatch.isTestnetLightningInvoice(event.url)) {
       completionHandler([
         'SendDetailsRoot',
         {
@@ -384,6 +384,18 @@ class DeeplinkSchemaMatch {
       invoice.toLowerCase().startsWith('lightning:lnb') ||
       invoice.toLowerCase().startsWith('lightning://lnb') ||
       invoice.toLowerCase().startsWith('lnb')
+    ) {
+      isValidLightningInvoice = true;
+    }
+    return isValidLightningInvoice;
+  }
+
+  static isTestnetLightningInvoice(invoice) {
+    let isValidLightningInvoice = false;
+    if (
+      invoice.toLowerCase().startsWith('lightning:lntb') ||
+      invoice.toLowerCase().startsWith('lightning://lntb') ||
+      invoice.toLowerCase().startsWith('lntb')
     ) {
       isValidLightningInvoice = true;
     }
