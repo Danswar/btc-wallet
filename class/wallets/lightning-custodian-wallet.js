@@ -3,6 +3,7 @@ import Frisbee from 'frisbee';
 import bolt11 from 'bolt11';
 import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
 import { isTorDaemonDisabled } from '../../blue_modules/environment';
+import Config from 'react-native-config';
 const torrific = require('../../blue_modules/torrific');
 
 export class LightningCustodianWallet extends LegacyWallet {
@@ -119,6 +120,14 @@ export class LightningCustodianWallet extends LegacyWallet {
   }
 
   async payInvoice(invoice, freeAmount = 0) {
+    const isDevAccount = this.getBaseURI().indexOf(Config.REACT_APP_LDS_DEV_URL) !== -1;
+    const isTestnetInvoice = invoice.startsWith('lntb');
+    const isTestnetToMainnet = isTestnetInvoice && !isDevAccount;
+    const isMainnetToTestnet = !isTestnetInvoice && isDevAccount;
+    if (isTestnetToMainnet || isMainnetToTestnet) {
+      throw new Error('Cross transfer between LN testnet and mainnet is not allowed.');
+    }
+
     const response = await this._api.post('/payinvoice', {
       body: { invoice, amount: freeAmount },
       headers: {
@@ -524,7 +533,6 @@ export class LightningCustodianWallet extends LegacyWallet {
    */
   decodeInvoice(invoice) {
     const { payeeNodeKey, tags, satoshis, millisatoshis, timestamp } = bolt11.decode(invoice);
-
     const decoded = {
       destination: payeeNodeKey,
       num_satoshis: satoshis ? satoshis.toString() : '0',

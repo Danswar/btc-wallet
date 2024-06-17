@@ -50,6 +50,7 @@ import SellIt from '../../img/dfx/buttons/sell_it.png';
 import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/networkTransactionFees';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
+import Config from 'react-native-config';
 
 const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
@@ -282,6 +283,10 @@ const Asset = ({ navigation }) => {
 
     return false;
   };
+
+  const isLightningTestnet = () => {
+    return isLightning() && wallet?.getBaseURI()?.startsWith(Config.REACT_APP_LDS_DEV_URL);
+  }
 
   const isMultiSig = () => wallet.type === MultisigHDWallet.type;
 
@@ -573,7 +578,7 @@ const Asset = ({ navigation }) => {
           </View>
         )
       }
-
+      {isLightningTestnet() && (<View style={styles.testnetBanner}><Text>Testnet</Text></View>)}
       <View style={[styles.list, stylesHook.list]}>
         <FlatList
           getItemLayout={getItemLayout}
@@ -701,5 +706,10 @@ const styles = StyleSheet.create({
   },
   receiveIcon: {
     transform: [{ rotate: I18nManager.isRTL ? '45deg' : '-45deg' }],
+  },
+  testnetBanner: {
+    backgroundColor: 'red',
+    padding: 5,
+    alignItems: 'center',
   },
 });
