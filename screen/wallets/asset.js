@@ -38,6 +38,7 @@ import TransactionsNavigationHeader from '../../components/TransactionsNavigatio
 import PropTypes from 'prop-types';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import Config from 'react-native-config';
 
 import BuyEn from '../../img/dfx/buttons/buy_en.png';
 import SellEn from '../../img/dfx/buttons/sell_en.png';
@@ -282,6 +283,10 @@ const Asset = ({ navigation }) => {
 
     return false;
   };
+
+  const isLightningTestnet = () => {
+    return isLightning() && wallet?.getBaseURI()?.startsWith(Config.REACT_APP_LDS_DEV_URL);
+  }
 
   const isMultiSig = () => wallet.type === MultisigHDWallet.type;
 
@@ -540,40 +545,42 @@ const Asset = ({ navigation }) => {
           })
         }
       />
-      {
-        !isMultiSig() && (
-          <View style={stylesHook.dfxContainer}>
-            {isDfxAvailable && (
-              <>
-                <BlueText>{loc.wallets.external_services}</BlueText>
-                <View style={stylesHook.dfxButtonContainer}>
-                  {isDfxProcessing ? (
-                    <ActivityIndicator />
-                  ) : (
-                    <>
-                      <View>
-                        <ImageButton
-                          source={buttonImages[0]}
-                          onPress={() => handleOpenServices(DfxService.BUY)}
-                          disabled={isHandlingOpenServices}
-                        />
-                      </View>
-                      <View>
-                        <ImageButton
-                          source={buttonImages[1]}
-                          onPress={() => handleOpenServices(DfxService.SELL)}
-                          disabled={isHandlingOpenServices}
-                        />
-                      </View>
-                    </>
-                  )}
-                </View>
-              </>
-            )}
-          </View>
-        )
-      }
-
+      {!isMultiSig() && (
+        <View style={stylesHook.dfxContainer}>
+          {isDfxAvailable && (
+            <>
+              <BlueText>{loc.wallets.external_services}</BlueText>
+              <View style={stylesHook.dfxButtonContainer}>
+                {isDfxProcessing ? (
+                  <ActivityIndicator />
+                ) : (
+                  <>
+                    <View>
+                      <ImageButton
+                        source={buttonImages[0]}
+                        onPress={() => handleOpenServices(DfxService.BUY)}
+                        disabled={isHandlingOpenServices}
+                      />
+                    </View>
+                    <View>
+                      <ImageButton
+                        source={buttonImages[1]}
+                        onPress={() => handleOpenServices(DfxService.SELL)}
+                        disabled={isHandlingOpenServices}
+                      />
+                    </View>
+                  </>
+                )}
+              </View>
+            </>
+          )}
+        </View>
+      )}
+      {isLightningTestnet() && (
+        <View style={styles.testnetBanner}>
+          <Text>Testnet</Text>
+        </View>
+      )}
       <View style={[styles.list, stylesHook.list]}>
         <FlatList
           getItemLayout={getItemLayout}
@@ -701,5 +708,10 @@ const styles = StyleSheet.create({
   },
   receiveIcon: {
     transform: [{ rotate: I18nManager.isRTL ? '45deg' : '-45deg' }],
+  },
+  testnetBanner: {
+    backgroundColor: 'red',
+    padding: 5,
+    alignItems: 'center',
   },
 });
