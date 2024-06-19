@@ -103,8 +103,6 @@ const LNDReceive = () => {
       const userInvoices = await wallet.current.getUserInvoices(20);
       const updatedUserInvoice = userInvoices.find(i => i.payment_request === invoice);
       if (!updatedUserInvoice) {
-        cancelInvoicePolling();
-        setInvoiceRequest(undefined);
         return;
       }
 
@@ -348,10 +346,10 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     paddingHorizontal: 10,
   },
-  flex:{
+  flex: {
     flex: 1,
   },
-  grow:{
+  grow: {
     flexGrow: 1,
   },
   doneButton: {

@@ -398,8 +398,8 @@ class AppStorage {
             break;
           case LightningCustodianWallet.type:
           case LightningLdsWallet.type: {
-            /** @type {LightningCustodianWallet} */
-            unserializedWallet = LightningCustodianWallet.fromJson(key);
+            unserializedWallet =
+              tempObj.type === LightningCustodianWallet.type ? LightningCustodianWallet.fromJson(key) : LightningLdsWallet.fromJson(key);
             let lndhub = false;
             try {
               lndhub = await AsyncStorage.getItem(AppStorage.LNDHUB);
@@ -583,7 +583,6 @@ class AppStorage {
    */
   async saveToDisk() {
     if (savingInProgress) {
-      console.warn('saveToDisk is in progress');
       if (++savingInProgress > 10) alert('Critical error. Last actions were not saved'); // should never happen
       await new Promise(resolve => setTimeout(resolve, 1000 * savingInProgress)); // sleep
       return this.saveToDisk();

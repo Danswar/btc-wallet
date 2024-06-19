@@ -663,5 +663,9 @@
     "currency": "Your currency",
     "info": "You will be notified by email when the bank transfer to your account is done.",
     "confirm": "Cash out to bank account"
+  },
+  "boltcard": {
+    "title_create": "Create BoltCard",
+    "alert_message_write_card": "Ready to write card. Hold NFC card to phone until all keys are changed."
   }
 }

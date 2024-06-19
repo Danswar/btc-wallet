@@ -3,7 +3,8 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -497,9 +498,9 @@
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWallet.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 38;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = Y4QBY6387T;
+				DEVELOPMENT_TEAM = SH38Y67WR9;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -527,7 +528,8 @@
 					"-lc++",
 				);
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = swiss.dfx.bitcoin;
+				PRODUCT_BUNDLE_IDENTIFIER = swiss.dfx.bitcoin.daniel;
+				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = swiss.dfx.bitcoin.d;
 				PRODUCT_NAME = Bitcoin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = "$(OVERRIDE_SUPPORTS_MACCATALYST:default=YES)";
@@ -548,9 +550,9 @@
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWalletRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 38;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = Y4QBY6387T;
+				DEVELOPMENT_TEAM = SH38Y67WR9;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
@@ -573,7 +575,7 @@
 					"-lc++",
 				);
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = swiss.dfx.bitcoin;
+				PRODUCT_BUNDLE_IDENTIFIER = swiss.dfx.bitcoin.daniel;
 				PRODUCT_NAME = Bitcoin;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTS_MACCATALYST = "$(OVERRIDE_SUPPORTS_MACCATALYST:default=YES)";

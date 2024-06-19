@@ -16,11 +16,13 @@ import {
   View,
   I18nManager,
   useWindowDimensions,
+  Touchable,
+  TouchableOpacity,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useRoute, useNavigation, useTheme, useFocusEffect } from '@react-navigation/native';
 import { Chain } from '../../models/bitcoinUnits';
-import { BlueText } from '../../BlueComponents';
+import { BlueButton, BlueText } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
 import { MultisigHDWallet, WatchOnlyWallet } from '../../class';
 import ActionSheet from '../ActionSheet';
@@ -50,6 +52,7 @@ import SellIt from '../../img/dfx/buttons/sell_it.png';
 import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/networkTransactionFees';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
+import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
 
 const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
@@ -62,8 +65,15 @@ const buttonFontSize =
     : PixelRatio.roundToNearestPixel(Dimensions.get('window').width / 26);
 
 const Asset = ({ navigation }) => {
-  const { wallets, saveToDisk, setSelectedWallet, refreshAllWalletTransactions, walletTransactionUpdateStatus, isElectrumDisabled } =
-    useContext(BlueStorageContext);
+  const {
+    wallets,
+    saveToDisk,
+    setSelectedWallet,
+    refreshAllWalletTransactions,
+    walletTransactionUpdateStatus,
+    isElectrumDisabled,
+    ldsDEV,
+  } = useContext(BlueStorageContext);
   const { name, params } = useRoute();
   const walletID = params.walletID;
   const [isLoading, setIsLoading] = useState(false);
@@ -120,6 +130,7 @@ const Asset = ({ navigation }) => {
       marginVertical: 10,
       gap: 10,
     },
+
   });
 
   /**
@@ -199,7 +210,7 @@ const Asset = ({ navigation }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallets]);
 
-  const getChangeAddressAsync = async (wallet) => {
+  const getChangeAddressAsync = async wallet => {
     if (changeAddress) return changeAddress; // cache
 
     let change;
@@ -378,7 +389,7 @@ const Asset = ({ navigation }) => {
     <TransactionListItem item={item.item} itemPriceUnit={itemPriceUnit} timeElapsed={timeElapsed} walletID={walletID} />
   );
 
-  const importPsbt = (base64Psbt) => {
+  const importPsbt = base64Psbt => {
     try {
       if (Boolean(multisigWallet) && multisigWallet.howManySignaturesCanWeMake()) {
         navigation.navigate('SendDetailsRoot', {
@@ -386,11 +397,11 @@ const Asset = ({ navigation }) => {
           params: {
             psbtBase64: base64Psbt,
             walletID: multisigWallet.getID(),
-          }
+          },
         });
       }
-    } catch (_) { }
-  }
+    } catch (_) {}
+  };
   const onBarCodeRead = value => {
     if (!value || isLoading) return;
 
@@ -443,7 +454,7 @@ const Asset = ({ navigation }) => {
             style: 'default',
           },
 
-          { text: loc._.cancel, onPress: () => { }, style: 'cancel' },
+          { text: loc._.cancel, onPress: () => {}, style: 'cancel' },
         ],
         { cancelable: false },
       );
@@ -482,7 +493,7 @@ const Asset = ({ navigation }) => {
       const buttons = [
         {
           text: loc._.cancel,
-          onPress: () => { },
+          onPress: () => {},
           style: 'cancel',
         },
         {
@@ -526,6 +537,25 @@ const Asset = ({ navigation }) => {
     index,
   });
 
+  const handleGoToBoltCard = () => {
+    return wallet.getBoltcard()?.isPhisicalCardWritten ? navigate('BoltCardDetails') : navigate('AddBoltcard');
+  };
+
+  renderRightHeaderComponent = () => {
+    switch (wallet.type) {
+      case LightningLdsWallet.type:
+        return (
+          <TouchableOpacity onPress={handleGoToBoltCard} style={styles.boltcardButton}>
+            <Image source={require('../../img/bolt-card-link.png')} style={{ width: 1.30 * 30, height: 30 }} />
+            <Text style={stylesHook.listHeaderText}>BoltCard</Text>
+          </TouchableOpacity>
+        )
+
+      default:
+        return null;
+    }
+  }
+
   return (
     <View style={styles.flex}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent animated />
@@ -539,40 +569,39 @@ const Asset = ({ navigation }) => {
             saveToDisk();
           })
         }
+        rightHeaderComponent={renderRightHeaderComponent()}
       />
-      {
-        !isMultiSig() && (
-          <View style={stylesHook.dfxContainer}>
-            {isDfxAvailable && (
-              <>
-                <BlueText>{loc.wallets.external_services}</BlueText>
-                <View style={stylesHook.dfxButtonContainer}>
-                  {isDfxProcessing ? (
-                    <ActivityIndicator />
-                  ) : (
-                    <>
-                      <View>
-                        <ImageButton
-                          source={buttonImages[0]}
-                          onPress={() => handleOpenServices(DfxService.BUY)}
-                          disabled={isHandlingOpenServices}
-                        />
-                      </View>
-                      <View>
-                        <ImageButton
-                          source={buttonImages[1]}
-                          onPress={() => handleOpenServices(DfxService.SELL)}
-                          disabled={isHandlingOpenServices}
-                        />
-                      </View>
-                    </>
-                  )}
-                </View>
-              </>
-            )}
-          </View>
-        )
-      }
+      {!isMultiSig() && (
+        <View style={stylesHook.dfxContainer}>
+          {isDfxAvailable && (
+            <>
+              <BlueText>{loc.wallets.external_services}</BlueText>
+              <View style={stylesHook.dfxButtonContainer}>
+                {isDfxProcessing ? (
+                  <ActivityIndicator />
+                ) : (
+                  <>
+                    <View>
+                      <ImageButton
+                        source={buttonImages[0]}
+                        onPress={() => handleOpenServices(DfxService.BUY)}
+                        disabled={isHandlingOpenServices}
+                      />
+                    </View>
+                    <View>
+                      <ImageButton
+                        source={buttonImages[1]}
+                        onPress={() => handleOpenServices(DfxService.SELL)}
+                        disabled={isHandlingOpenServices}
+                      />
+                    </View>
+                  </>
+                )}
+              </View>
+            </>
+          )}
+        </View>
+      )}
 
       <View style={[styles.list, stylesHook.list]}>
         <FlatList
@@ -702,4 +731,5 @@ const styles = StyleSheet.create({
   receiveIcon: {
     transform: [{ rotate: I18nManager.isRTL ? '45deg' : '-45deg' }],
   },
+  boltcardButton: { justifyContent: 'center', alignItems: 'center', marginTop: 10 },
 });
