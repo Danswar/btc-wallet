@@ -398,8 +398,8 @@ class AppStorage {
             break;
           case LightningCustodianWallet.type:
           case LightningLdsWallet.type: {
-            /** @type {LightningCustodianWallet} */
-            unserializedWallet = LightningCustodianWallet.fromJson(key);
+            unserializedWallet =
+              tempObj.type === LightningCustodianWallet.type ? LightningCustodianWallet.fromJson(key) : LightningLdsWallet.fromJson(key);
             let lndhub = false;
             try {
               lndhub = await AsyncStorage.getItem(AppStorage.LNDHUB);
