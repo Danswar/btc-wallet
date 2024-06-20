@@ -655,7 +655,7 @@ const Asset = ({ navigation }) => {
 
 export default Asset;
 
-Asset.navigationOptions = navigationStyle({
+Asset.navigationOptions = navigationStyle({}, (options, { navigation, route }) => ({
   headerStyle: {
     backgroundColor: 'transparent',
     borderBottomWidth: 0,
@@ -667,17 +667,16 @@ Asset.navigationOptions = navigationStyle({
     <TouchableOpacity
       accessibilityRole="button"
       testID="Settings"
-      /*onPress={() =>
-        route?.params?.walletID &&
+      onPress={() =>
         navigation.navigate('Settings', {
           walletID: route?.params?.walletID,
         })
-      }*/
+      }
     >
       <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
     </TouchableOpacity>
   ),
-});
+}));
 
 Asset.propTypes = {
   navigation: PropTypes.shape(),

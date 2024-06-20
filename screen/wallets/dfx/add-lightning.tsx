@@ -173,19 +173,18 @@ const styles = StyleSheet.create({
   },
 });
 
-AddLightning.navigationOptions = navigationStyle({}, opts => ({
+AddLightning.navigationOptions = navigationStyle({}, (opts, { navigation, route }) => ({
   ...opts,
   headerTitle: loc.wallets.add_lndhub,
   headerRight: () => (
     <TouchableOpacity
       accessibilityRole="button"
       testID="Settings"
-      /*onPress={() =>
-      route?.params?.walletID &&
-      navigation.navigate('Settings', {
-        walletID: route?.params?.walletID,
-      })
-    }*/
+      onPress={() =>
+        navigation.navigate('Settings', {
+          walletID: route?.params?.walletID,
+        })
+      }
     >
       <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
     </TouchableOpacity>

@@ -199,10 +199,10 @@ const WalletsAddMultisig = () => {
   };
 
   return (
-   <SafeAreaView style={stylesHook.root}>
+    <SafeAreaView style={stylesHook.root}>
       <View style={styles.descriptionContainer}>
         <View style={styles.imageWrapper}>
-        <LottieView source={require('../../img/msvault.json')} autoPlay ref={loadingAnimation} loop={false} />
+          <LottieView source={require('../../img/msvault.json')} autoPlay ref={loadingAnimation} loop={false} />
         </View>
         <Text style={[styles.textdesc, stylesHook.textdesc]}>
           <Text style={[styles.textdescBold, stylesHook.textdesc]}>{loc.multisig.what_is_multidevice}</Text>
@@ -339,25 +339,21 @@ WalletsAddMultisig.getCurrentFormatReadable = f => {
   }
 };
 
-
-
-WalletsAddMultisig.navigationOptions = navigationStyle({
+WalletsAddMultisig.navigationOptions = navigationStyle({}, (options, { navigation, route }) => ({
   headerTitle: loc.wallets.multi_sig_wallet_label,
   headerRight: () => (
     <TouchableOpacity
       accessibilityRole="button"
       testID="Settings"
-      /*onPress={() =>
-        route?.params?.walletID &&
+      onPress={() =>
         navigation.navigate('Settings', {
           walletID: route?.params?.walletID,
         })
-      }*/
+      }
     >
       <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
     </TouchableOpacity>
   ),
-
-});
+}));
 
 export default WalletsAddMultisig;
