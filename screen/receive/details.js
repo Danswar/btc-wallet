@@ -11,7 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Image
+  Image,
 } from 'react-native';
 import { useNavigation, useRoute, useTheme, useFocusEffect } from '@react-navigation/native';
 import Share from 'react-native-share';
@@ -60,8 +60,8 @@ const ReceiveDetails = () => {
   const [displayBalance, setDisplayBalance] = useState('');
   const fetchAddressInterval = useRef();
   const { inputProps, amountSats, formattedUnit, changeToNextUnit } = useInputAmount();
-  
-   const stylesHook = StyleSheet.create({
+
+  const stylesHook = StyleSheet.create({
     modalContent: {
       backgroundColor: colors.modal,
       borderTopColor: colors.foregroundColor,
@@ -252,50 +252,50 @@ const ReceiveDetails = () => {
 
   const renderReceiveDetails = () => {
     return (
-      <KeyboardAvoidingView
-        enabled={!Platform.isPad}
-        behavior="position"
-      >
-        <View style={styles.scrollBody}>
-          <QRCodeComponent value={bip21encoded} />
-          <BlueCopyTextToClipboard text={isCustom ? bip21encoded : address} textStyle={{ marginVertical: 24 }} />
-        </View>
-        <View style={styles.share}>
-          <View style={[styles.customAmount, stylesHook.customAmount]}>
-            <TextInput
-              placeholderTextColor="#81868e"
-              placeholder="Amount (optional)"
-              style={[styles.customAmountText, stylesHook.customAmountText]}
-              inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-              {...inputProps}
-            />
-            <Text style={styles.inputUnit}>{formattedUnit}</Text>
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel={loc._.change_input_currency}
-              style={styles.changeToNextUnitButton}
-              onPress={changeToNextUnit}
-            >
-              <Image source={require('../../img/round-compare-arrows-24-px.png')} />
-            </TouchableOpacity>
+      <KeyboardAvoidingView enabled={!Platform.isPad} behavior="position">
+        <ScrollView contentInsetAdjustmentBehavior="automatic">
+          <View style={styles.scrollBody}>
+            <QRCodeComponent value={bip21encoded} />
+            <BlueCopyTextToClipboard text={isCustom ? bip21encoded : address} textStyle={{ marginVertical: 24 }} />
           </View>
-          <View style={[styles.customAmount, stylesHook.customAmount]}>
-            <TextInput
-              onChangeText={setCustomLabel}
-              placeholderTextColor="#81868e"
-              placeholder={`${loc.receive.details_label} (optional)`}
-              value={customLabel || ''}
-              numberOfLines={1}
-              style={[styles.customAmountText, stylesHook.customAmountText]}
-              testID="CustomAmountDescription"
-              inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-            />
+          <View style={styles.share}>
+            <View style={[styles.customAmount, stylesHook.customAmount]}>
+              <TextInput
+                placeholderTextColor="#81868e"
+                placeholder="Amount (optional)"
+                style={[styles.customAmountText, stylesHook.customAmountText]}
+                inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
+                {...inputProps}
+              />
+              <Text style={styles.inputUnit}>{formattedUnit}</Text>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={loc._.change_input_currency}
+                style={styles.changeToNextUnitButton}
+                onPress={changeToNextUnit}
+              >
+                <Image source={require('../../img/round-compare-arrows-24-px.png')} />
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.customAmount, stylesHook.customAmount]}>
+              <TextInput
+                onChangeText={setCustomLabel}
+                placeholderTextColor="#81868e"
+                placeholder={`${loc.receive.details_label} (optional)`}
+                value={customLabel || ''}
+                numberOfLines={1}
+                style={[styles.customAmountText, stylesHook.customAmountText]}
+                testID="CustomAmountDescription"
+                inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
+              />
+            </View>
+            <BlueCard>
+              <BlueButton onPress={handleShareButtonPressed} title={loc.receive.details_share} />
+            </BlueCard>
           </View>
-          <BlueCard>
-            <BlueButton onPress={handleShareButtonPressed} title={loc.receive.details_share} />
-          </BlueCard>
-        </View>
-        <BlueDismissKeyboardInputAccessory />
+          <BlueDismissKeyboardInputAccessory />
+          <BlueSpacing40 />
+        </ScrollView>
       </KeyboardAvoidingView>
     );
   };
@@ -368,11 +368,11 @@ const ReceiveDetails = () => {
     const btcAmout = Number(currency.satoshiToBTC(amountSats));
     const hasOptional = btcAmout || customLabel;
     setIsCustom(hasOptional);
-    if(hasOptional){
+    if (hasOptional) {
       setBip21encoded(DeeplinkSchemaMatch.bip21encode(address, { amount: btcAmout, label: customLabel }));
     }
-  }, [amountSats, customLabel]); 
-  
+  }, [amountSats, customLabel]);
+
   const handleShareButtonPressed = () => {
     Share.open({ message: bip21encoded }).catch(error => console.log(error));
   };
@@ -466,17 +466,17 @@ const styles = StyleSheet.create({
     minHeight: 33,
   },
   pickerContainer: { marginHorizontal: 16 },
-  inputUnit:{
+  inputUnit: {
     color: '#81868e',
     fontSize: 16,
     marginRight: 10,
     marginLeft: 10,
   },
-  changeToNextUnitButton:{
+  changeToNextUnitButton: {
     borderLeftColor: '#676b71',
     borderLeftWidth: 1,
     paddingHorizontal: 10,
-  }
+  },
 });
 
 ReceiveDetails.navigationOptions = navigationStyle(
