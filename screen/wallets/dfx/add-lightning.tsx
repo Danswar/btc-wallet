@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
-import { ScrollView, StyleSheet, View, Text, Linking, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, Linking, Alert, TouchableOpacity } from 'react-native';
+import { Icon } from 'react-native-elements';
 import navigationStyle from '../../../components/navigationStyle';
 import loc from '../../../loc';
 import {
@@ -175,6 +176,20 @@ const styles = StyleSheet.create({
 AddLightning.navigationOptions = navigationStyle({}, opts => ({
   ...opts,
   headerTitle: loc.wallets.add_lndhub,
+  headerRight: () => (
+    <TouchableOpacity
+      accessibilityRole="button"
+      testID="Settings"
+      /*onPress={() =>
+      route?.params?.walletID &&
+      navigation.navigate('Settings', {
+        walletID: route?.params?.walletID,
+      })
+    }*/
+    >
+      <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
+    </TouchableOpacity>
+  ),
   gestureEnabled: false,
 }));
 

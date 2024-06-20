@@ -5,7 +5,7 @@ import { Icon } from 'react-native-elements';
 import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BlueButton, BlueListItem, BlueSpacing20 } from '../../BlueComponents';
+import { BlueButton, BlueListItem, BlueSpacing20, SecondButton } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
 import BottomModal from '../../components/BottomModal';
 import { MultisigHDWallet } from '../../class';
@@ -75,6 +75,8 @@ const WalletsAddMultisig = () => {
     navigate('WalletsAddMultisigStep2', { m, n, format, walletLabel });
     setIsLoading(false);
   };
+
+  const onBack = () => navigate('WalletTransactions');
 
   const setFormatP2wsh = () => setFormat(MultisigHDWallet.FORMAT_P2WSH);
 
@@ -197,10 +199,10 @@ const WalletsAddMultisig = () => {
   };
 
   return (
-    <SafeAreaView style={stylesHook.root}>
+   <SafeAreaView style={stylesHook.root}>
       <View style={styles.descriptionContainer}>
         <View style={styles.imageWrapper}>
-          <LottieView source={require('../../img/msvault.json')} autoPlay ref={loadingAnimation} loop={false} />
+        <LottieView source={require('../../img/msvault.json')} autoPlay ref={loadingAnimation} loop={false} />
         </View>
         <Text style={[styles.textdesc, stylesHook.textdesc]}>
           <Text style={[styles.textdescBold, stylesHook.textdesc]}>{loc.multisig.what_is_multidevice}</Text>
@@ -235,6 +237,8 @@ const WalletsAddMultisig = () => {
           onPress={onLetsStartPress}
           isLoading={isLoading}
         />
+        <BlueSpacing20 />
+        <SecondButton title={loc._.cancel} onPress={onBack} />
       </View>
       {renderModal()}
     </SafeAreaView>
@@ -335,8 +339,25 @@ WalletsAddMultisig.getCurrentFormatReadable = f => {
   }
 };
 
+
+
 WalletsAddMultisig.navigationOptions = navigationStyle({
-  headerTitle: null,
+  headerTitle: loc.wallets.multi_sig_wallet_label,
+  headerRight: () => (
+    <TouchableOpacity
+      accessibilityRole="button"
+      testID="Settings"
+      /*onPress={() =>
+        route?.params?.walletID &&
+        navigation.navigate('Settings', {
+          walletID: route?.params?.walletID,
+        })
+      }*/
+    >
+      <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
+    </TouchableOpacity>
+  ),
+
 });
 
 export default WalletsAddMultisig;

@@ -16,6 +16,7 @@ import {
   View,
   I18nManager,
   useWindowDimensions,
+  TouchableOpacity,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useRoute, useNavigation, useTheme, useFocusEffect } from '@react-navigation/native';
@@ -200,7 +201,7 @@ const Asset = ({ navigation }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallets]);
 
-  const getChangeAddressAsync = async (wallet) => {
+  const getChangeAddressAsync = async wallet => {
     if (changeAddress) return changeAddress; // cache
 
     let change;
@@ -286,7 +287,7 @@ const Asset = ({ navigation }) => {
 
   const isLightningTestnet = () => {
     return isLightning() && wallet?.getBaseURI()?.startsWith(Config.REACT_APP_LDS_DEV_URL);
-  }
+  };
 
   const isMultiSig = () => wallet.type === MultisigHDWallet.type;
 
@@ -383,7 +384,7 @@ const Asset = ({ navigation }) => {
     <TransactionListItem item={item.item} itemPriceUnit={itemPriceUnit} timeElapsed={timeElapsed} walletID={walletID} />
   );
 
-  const importPsbt = (base64Psbt) => {
+  const importPsbt = base64Psbt => {
     try {
       if (Boolean(multisigWallet) && multisigWallet.howManySignaturesCanWeMake()) {
         navigation.navigate('SendDetailsRoot', {
@@ -391,11 +392,11 @@ const Asset = ({ navigation }) => {
           params: {
             psbtBase64: base64Psbt,
             walletID: multisigWallet.getID(),
-          }
+          },
         });
       }
-    } catch (_) { }
-  }
+    } catch (_) {}
+  };
   const onBarCodeRead = value => {
     if (!value || isLoading) return;
 
@@ -448,7 +449,7 @@ const Asset = ({ navigation }) => {
             style: 'default',
           },
 
-          { text: loc._.cancel, onPress: () => { }, style: 'cancel' },
+          { text: loc._.cancel, onPress: () => {}, style: 'cancel' },
         ],
         { cancelable: false },
       );
@@ -487,7 +488,7 @@ const Asset = ({ navigation }) => {
       const buttons = [
         {
           text: loc._.cancel,
-          onPress: () => { },
+          onPress: () => {},
           style: 'cancel',
         },
         {
@@ -662,6 +663,20 @@ Asset.navigationOptions = navigationStyle({
     // shadowRadius: 0,
     shadowOffset: { height: 0, width: 0 },
   },
+  headerRight: () => (
+    <TouchableOpacity
+      accessibilityRole="button"
+      testID="Settings"
+      /*onPress={() =>
+        route?.params?.walletID &&
+        navigation.navigate('Settings', {
+          walletID: route?.params?.walletID,
+        })
+      }*/
+    >
+      <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
+    </TouchableOpacity>
+  ),
 });
 
 Asset.propTypes = {
