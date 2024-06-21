@@ -9,6 +9,7 @@ import {
   BlueFormInput,
   BlueSpacing10,
   BlueSpacing20,
+  BlueSpacing40,
   BlueSpacingAuto,
   BlueText,
   SafeBlueArea,
@@ -33,6 +34,7 @@ const AddLightning = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [useCustom, setUseCustom] = useState(false);
+  const [useDFXswiss, setUseDFXswiss] = useState(false);
   const [customAddress, setCustomAddress] = useState<string>();
   const [signature, setSignature] = useState<string>();
   const [lndUrl, setLndUrl] = useState<string>();
@@ -99,11 +101,33 @@ const AddLightning = () => {
     <SafeBlueArea>
       <ScrollView contentContainerStyle={styles.scrollableContainer}>
         <View style={styles.contentContainer}>
-          <SelectButton active={!useCustom} onPress={() => setUseCustom(false)}>
+          <SelectButton
+            active={!useCustom && !useDFXswiss}
+            onPress={() => {
+              setUseCustom(false);
+              setUseDFXswiss(false);
+            }}
+          >
             <BlueText>lightning.space</BlueText>
           </SelectButton>
           <BlueSpacing10 />
-          <SelectButton active={useCustom} onPress={() => setUseCustom(true)}>
+          <SelectButton
+            active={useDFXswiss}
+            onPress={() => {
+              setUseDFXswiss(true);
+              setUseCustom(false);
+            }}
+          >
+            <BlueText>DFX.swiss</BlueText>
+          </SelectButton>
+          <BlueSpacing10 />
+          <SelectButton
+            active={useCustom}
+            onPress={() => {
+              setUseCustom(true);
+              setUseDFXswiss(false);
+            }}
+          >
             <BlueText>{loc.wallets.add_lndhub_custom}</BlueText>
           </SelectButton>
 
@@ -138,10 +162,20 @@ const AddLightning = () => {
             </>
           )}
 
+          {useDFXswiss && (
+            <>
+              <View style={styles.contentContainer}>
+                <BlueSpacing40 />
+                <BlueSpacing40 />
+                <BlueText style={styles.notAvailable}>{loc.wallets.add_lndhub_DFXswiss_not_available}</BlueText>
+              </View>
+            </>
+          )}
+
           <BlueSpacingAuto />
 
           <Text style={styles.disclaimer}>{loc.wallets.add_lndhub_disclaimer}</Text>
-          <BlueButton title={loc._.continue} onPress={onCreate} disabled={useCustom && !dataValid} isLoading={isLoading} />
+          <BlueButton title={loc._.continue} onPress={onCreate} disabled={(useCustom && !dataValid) || useDFXswiss} isLoading={isLoading} />
           <BlueSpacing20 />
           {/* @ts-ignore component in JS */}
           <SecondButton title={loc._.cancel} onPress={onBack} />
@@ -170,6 +204,12 @@ const styles = StyleSheet.create({
     margin: 20,
     color: '#9aa0aa',
     textAlign: 'center',
+  },
+  notAvailable: {
+    margin: 40,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });
 
