@@ -177,7 +177,6 @@ export function DfxSessionContextProvider(props: PropsWithChildren<any>): JSX.El
       connect(wallets.filter((w: any) => w.type !== MultisigHDWallet.type).map((w: any) => w.getID()))
         .then(() => setIsInitialized(true))
         .catch(e => {
-          // Handle the error without showing an alert
           console.error('Something went wrong', e.message?.toString());
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
