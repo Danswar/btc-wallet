@@ -109,7 +109,7 @@ export function DfxSessionContextProvider(props: PropsWithChildren<any>): JSX.El
   async function createAccessToken(walletId: string): Promise<string> {
     if (walletId === mainWalletId) {
       if (!mainAddress) throw new Error('Address is not defined');
-      const signature = await getOwnershipProof();  
+      const signature = await getOwnershipProof();
       return await createSession(mainAddress, signature);
     } else {
       const wallet = wallets.find((w: any) => w.getID?.() === walletId);
@@ -176,15 +176,9 @@ export function DfxSessionContextProvider(props: PropsWithChildren<any>): JSX.El
       !isProcessing &&
       connect(wallets.filter((w: any) => w.type !== MultisigHDWallet.type).map((w: any) => w.getID()))
         .then(() => setIsInitialized(true))
-        .catch(e =>
-          Alert.alert('Something went wrong', e.message?.toString(), [
-            {
-              text: loc._.ok,
-              onPress: () => { },
-              style: 'default',
-            },
-          ]),
-        );
+        .catch(e => {
+          console.error('Something went wrong', e.message?.toString());
+        });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallets]);
 
