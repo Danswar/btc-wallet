@@ -47,7 +47,9 @@ const DeleteBolcard: React.FC = () => {
         if (Platform.OS === 'android') setIsHoldCardModalVisible(true);
         await wipeCard(ldsWallet.getBoltcard()?.secrets as BolcardSecrets);
       }
-      await deleteBoltcard(ldsWallet.getAdminKey(), ldsWallet.getBoltcard() as BoltCard);
+      try {
+        await deleteBoltcard(ldsWallet.getAdminKey(), ldsWallet.getBoltcard() as BoltCard);
+      } catch (_) { }
       ldsWallet.deleteBoltcard();
       await saveToDisk();
       cardWipedSuccess();

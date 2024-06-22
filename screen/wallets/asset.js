@@ -72,7 +72,7 @@ const Asset = ({ navigation }) => {
     refreshAllWalletTransactions,
     walletTransactionUpdateStatus,
     isElectrumDisabled,
-    ldsDEV,
+    isPayCardEnabled
   } = useContext(BlueStorageContext);
   const { name, params } = useRoute();
   const walletID = params.walletID;
@@ -547,7 +547,7 @@ const Asset = ({ navigation }) => {
   renderRightHeaderComponent = () => {
     switch (wallet.type) {
       case LightningLdsWallet.type:
-        if(!ldsDEV) return null;
+        if(!isPayCardEnabled) return null;
         return (
           <TouchableOpacity onPress={handleGoToBoltCard} style={styles.boltcardButton}>
             <Image source={require('../../img/bolt-card-link.png')} style={{ width: 1.30 * 30, height: 30 }} />

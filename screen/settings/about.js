@@ -10,7 +10,6 @@ import {
   useWindowDimensions,
   Platform,
   Alert,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import { useNavigation, useTheme } from '@react-navigation/native';
 import { Icon } from 'react-native-elements';
@@ -23,7 +22,6 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import alert from '../../components/Alert';
 import { HDSegwitBech32Wallet } from '../../class';
 import Config from 'react-native-config';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
 
 const A = require('../../blue_modules/analytics');
 const branch = require('../../current-branch.json');
@@ -32,8 +30,6 @@ const About = () => {
   const { navigate } = useNavigation();
   const { colors } = useTheme();
   const { width, height } = useWindowDimensions();
-  const { setShowFeatureFlagsAsyncStorage } = useContext(BlueStorageContext);
-  const [featureFlagCounter, setFeatureFlagCounter] = useState(0);
   const styles = StyleSheet.create({
     copyToClipboard: {
       justifyContent: 'center',
@@ -137,20 +133,11 @@ const About = () => {
     });
   };
 
-  const handleEnableFeatureFlags = () => {
-    setFeatureFlagCounter(prev => prev + 1);
-    if (featureFlagCounter >= 10) {
-      setShowFeatureFlagsAsyncStorage(true);
-    }
-  };
-
   return (
     <ScrollView testID="AboutScrollView" contentInsetAdjustmentBehavior="automatic">
       <BlueCard>
         <View style={styles.center}>
-          <TouchableWithoutFeedback onPress={handleEnableFeatureFlags}>
-            <Image style={styles.logo} source={require('../../img/dfx/logo.png')} />
-          </TouchableWithoutFeedback>
+          <Image style={styles.logo} source={require('../../img/dfx/logo.png')} />
           <Text style={styles.textFree}>{loc.settings.about_free}</Text>
           <Text style={styles.textBackup}>{formatStringAddTwoWhiteSpaces(loc.settings.about_backup)}</Text>
           {((Platform.OS === 'android' && hasGmsSync()) || Platform.OS !== 'android') && (
