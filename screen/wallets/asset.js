@@ -52,6 +52,7 @@ import SellIt from '../../img/dfx/buttons/sell_it.png';
 import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/networkTransactionFees';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
+import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
 
 const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
@@ -64,8 +65,15 @@ const buttonFontSize =
     : PixelRatio.roundToNearestPixel(Dimensions.get('window').width / 26);
 
 const Asset = ({ navigation }) => {
-  const { wallets, saveToDisk, setSelectedWallet, refreshAllWalletTransactions, walletTransactionUpdateStatus, isElectrumDisabled } =
-    useContext(BlueStorageContext);
+  const {
+    wallets,
+    saveToDisk,
+    setSelectedWallet,
+    refreshAllWalletTransactions,
+    walletTransactionUpdateStatus,
+    isElectrumDisabled,
+    isPayCardEnabled
+  } = useContext(BlueStorageContext);
   const { name, params } = useRoute();
   const walletID = params.walletID;
   const [isLoading, setIsLoading] = useState(false);
@@ -488,7 +496,7 @@ const Asset = ({ navigation }) => {
       const buttons = [
         {
           text: loc._.cancel,
-          onPress: () => { },
+          onPress: () => {},
           style: 'cancel',
         },
         {
@@ -532,6 +540,26 @@ const Asset = ({ navigation }) => {
     index,
   });
 
+  const handleGoToBoltCard = () => {
+    return wallet.getBoltcard()?.isPhisicalCardWritten ? navigate('BoltCardDetails') : navigate('AddBoltcard');
+  };
+
+  renderRightHeaderComponent = () => {
+    switch (wallet.type) {
+      case LightningLdsWallet.type:
+        if(!isPayCardEnabled) return null;
+        return (
+          <TouchableOpacity onPress={handleGoToBoltCard} style={styles.boltcardButton}>
+            <Image source={require('../../img/bolt-card-link.png')} style={{ width: 1.30 * 30, height: 30 }} />
+            <Text style={stylesHook.listHeaderText}>{loc.boltcard.pay_card}</Text>
+          </TouchableOpacity>
+        )
+
+      default:
+        return null;
+    }
+  }
+
   return (
     <View style={styles.flex}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent animated />
@@ -545,6 +573,7 @@ const Asset = ({ navigation }) => {
             saveToDisk();
           })
         }
+        rightHeaderComponent={renderRightHeaderComponent()}
       />
       {!isMultiSig() && (
         <View style={stylesHook.dfxContainer}>
@@ -733,5 +762,6 @@ const styles = StyleSheet.create({
   walletDetails:{
     paddingLeft: 12,
     paddingVertical:12
-  }
+  },
+  boltcardButton: { justifyContent: 'center', alignItems: 'center', marginTop: 10 },
 });

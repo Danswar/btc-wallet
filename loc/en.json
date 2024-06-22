@@ -664,5 +664,32 @@
     "currency": "Your currency",
     "info": "You will be notified by email when the bank transfer to your account is done.",
     "confirm": "Cash out to bank account"
+  },
+  "boltcard": {
+    "pay_card": "Pay Card",
+    "title_create": "Create Pay Card",
+    "alert_message_write_card": "Ready to write card. Hold NFC card to phone until all keys are changed.",
+    "what_pay_card_is": "Pay Card is the world's first Bitcoin debit card that allows you to spend your Bitcoin over the Lightning Network with a contactless payment card powered by Near-field Communication (NFC).",
+    "how_to_create": "To create your first Pay Card, tap the Create button and hold your compatible NFC card or ring until all keys are set.",
+    "always_backup": "Always make backup copies of all keys written to the card. Without them, you may not be able to change them in the future.",
+    "create_boltcard": "Create",
+    "title_details": "Pay Card Details",
+    "title_backup": "Backup Pay Card",
+    "title_delete": "Delete Pay Card",
+    "title_restore": "Reset Pay Card",
+    "keys_written": "All key were set correctly",
+    "hold_card": "Hold your card or ring until all keys are set",
+    "delete_card_title": "Are you sure you want to delete this card?",
+    "how_to_delete": "To continue with the deletion process you may have to hold the card close to your device to reset all the keys.",
+    "also_wipe_card": "Also reset my card.",
+    "lost_card": "In case you have lost your card or no longer have access to it, you can check in the box bellow to skip the card reset.",
+    "confirm_delete": "Yes, delete this card",
+    "card_written_title": "This card has already some keys written",
+    "card_written_message": "It seems that your card has already some keys written. We can help you reset the card and so you can try setting it up again.",
+    "how_to_reset": "All that you need to reset your card is to scan your keys backup and we will take care of the rest.",
+    "now_tap": "Now tap your card and wait until all keys are reset",
+    "start_nfc": "Start NFC",
+    "scan_backup": "Scan Backup",
+    "cancel": "Cancel"
   }
 }
