@@ -197,7 +197,7 @@ const WalletHome = ({ navigation }) => {
   };
 
   const navigateToAddMultisig = () => {
-    navigate('AddWalletRoot', {
+    navigate('WalletsRoot', {
       screen: 'WalletsAddMultisig',
       params: {
         walletLabel: loc.multisig.default_label
@@ -344,6 +344,12 @@ const WalletHome = ({ navigation }) => {
     }
   };
 
+  const onReceiveButtonPressed = () => {
+    if (multisigWallet) return navigate('ReceiveDetailsRoot', { screen: 'ReceiveDetails', params: { walletID: multisigWallet.getID() } });
+    if (lnWallet) return navigate('ReceiveDetailsRoot', { screen: 'LNDReceive', params: { walletID: lnWallet.getID() } });
+    return navigate('ReceiveDetailsRoot', { screen: 'ReceiveDetails', params: { walletID: wallet.getID() } });
+  };
+
   const onScanButtonPressed = () => {
     scanqrHelper(navigate, name, false).then(d => onBarScanned(d));
   };
@@ -414,13 +420,7 @@ const WalletHome = ({ navigation }) => {
           <FButton
             testID="ReceiveButton"
             text={loc.receive.header}
-            onPress={() => {
-              if (wallet.chain === Chain.OFFCHAIN) {
-                navigate('ReceiveDetailsRoot', { screen: 'LNDReceive', params: { walletID: wallet.getID() } });
-              } else {
-                navigate('ReceiveDetailsRoot', { screen: 'ReceiveDetails', params: { walletID: wallet.getID() } });
-              }
-            }}
+            onPress={onReceiveButtonPressed}
             icon={
               <View style={styles.receiveIcon}>
                 <Icon name="arrow-down" size={buttonFontSize} type="font-awesome" color={colors.buttonAlternativeTextColor} />
@@ -530,6 +530,8 @@ const styles = StyleSheet.create({
   walletDetails: {
     justifyContent: 'center',
     alignItems: 'flex-end',
+    paddingLeft: 12,
+    paddingVertical:12
   },
   backupSeedContainer: {
     flex: 1,

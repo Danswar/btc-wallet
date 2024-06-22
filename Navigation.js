@@ -105,6 +105,16 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="WalletTransactions" component={WalletHome} options={WalletHome.navigationOptions(theme)} />
       <WalletsStack.Screen name="WalletAsset" component={Asset} options={Asset.navigationOptions(theme)} />
       <WalletsStack.Screen name="AddLightning" component={AddLightning} options={AddLightning.navigationOptions(theme)} />
+      <AddWalletStack.Screen
+        name="WalletsAddMultisig"
+        component={WalletsAddMultisig}
+        options={WalletsAddMultisig.navigationOptions(theme)}
+      />
+      <AddWalletStack.Screen
+        name="WalletsAddMultisigStep2"
+        component={WalletsAddMultisigStep2}
+        options={WalletsAddMultisigStep2.navigationOptions(theme)}
+      />
       <WalletsStack.Screen name="AddBoltcard" component={AddBoltcard} options={AddBoltcard.navigationOptions(theme)} />
       <WalletsStack.Screen name="BoltCardDetails" component={BoltcardDetails} options={BoltcardDetails.navigationOptions(theme)} />
       <WalletsStack.Screen name="BackupBoltcard" component={BackupBolcard} options={BackupBolcard.navigationOptions(theme)} />
@@ -214,16 +224,6 @@ const AddWalletRoot = () => {
       />
       <AddWalletStack.Screen name="PleaseBackupLdk" component={PleaseBackupLdk} options={PleaseBackupLdk.navigationOptions(theme)} />
       <AddWalletStack.Screen name="ProvideEntropy" component={ProvideEntropy} options={ProvideEntropy.navigationOptions(theme)} />
-      <AddWalletStack.Screen
-        name="WalletsAddMultisig"
-        component={WalletsAddMultisig}
-        options={WalletsAddMultisig.navigationOptions(theme)}
-      />
-      <AddWalletStack.Screen
-        name="WalletsAddMultisigStep2"
-        component={WalletsAddMultisigStep2}
-        options={WalletsAddMultisigStep2.navigationOptions(theme)}
-      />
       <AddWalletStack.Screen
         name="WalletsAddMultisigHelp"
         component={WalletsAddMultisigHelp}
