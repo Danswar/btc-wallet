@@ -428,6 +428,7 @@
     "add_lndhub_signature": "DFX signature",
     "add_lndhub_url": "LNDHub admin URL",
     "add_lndhub_instructions": "How to use your own LNDHub",
+    "add_lndhub_DFXswiss_not_available": "This service will be available soon",
     "add_placeholder": "my first wallet",
     "add_title": "Create Wallet",
     "add_wallet_name": "Name",

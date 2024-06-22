@@ -16,6 +16,7 @@ import {
   View,
   I18nManager,
   useWindowDimensions,
+  TouchableOpacity,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useRoute, useNavigation, useTheme, useFocusEffect } from '@react-navigation/native';
@@ -654,15 +655,30 @@ const Asset = ({ navigation }) => {
 
 export default Asset;
 
-Asset.navigationOptions = navigationStyle({
+Asset.navigationOptions = navigationStyle({}, (options, { navigation, route }) => ({
+  ...options,
   headerStyle: {
     backgroundColor: 'transparent',
     borderBottomWidth: 0,
     elevation: 0,
-    // shadowRadius: 0,
     shadowOffset: { height: 0, width: 0 },
   },
-});
+  headerRight: () => (
+    <TouchableOpacity
+      accessibilityRole="button"
+      testID="Settings"
+      style={styles.walletDetails}
+      onPress={() => {
+        route?.params?.walletID &&
+          navigation.navigate('Settings', {
+            walletID: route?.params?.walletID,
+          });
+      }}
+    >
+      <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
+    </TouchableOpacity>
+  ),
+}));
 
 Asset.propTypes = {
   navigation: PropTypes.shape(),
@@ -714,4 +730,8 @@ const styles = StyleSheet.create({
     padding: 5,
     alignItems: 'center',
   },
+  walletDetails:{
+    paddingLeft: 12,
+    paddingVertical:12
+  }
 });
