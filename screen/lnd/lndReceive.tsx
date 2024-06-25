@@ -103,8 +103,6 @@ const LNDReceive = () => {
       const userInvoices = await wallet.current.getUserInvoices(20);
       const updatedUserInvoice = userInvoices.find(i => i.payment_request === invoice);
       if (!updatedUserInvoice) {
-        cancelInvoicePolling();
-        setInvoiceRequest(undefined);
         return;
       }
 

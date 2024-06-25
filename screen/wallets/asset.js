@@ -16,6 +16,7 @@ import {
   View,
   I18nManager,
   useWindowDimensions,
+  TouchableOpacity,
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useRoute, useNavigation, useTheme, useFocusEffect } from '@react-navigation/native';
@@ -51,6 +52,7 @@ import SellIt from '../../img/dfx/buttons/sell_it.png';
 import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/networkTransactionFees';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
+import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
 
 const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
@@ -63,8 +65,15 @@ const buttonFontSize =
     : PixelRatio.roundToNearestPixel(Dimensions.get('window').width / 26);
 
 const Asset = ({ navigation }) => {
-  const { wallets, saveToDisk, setSelectedWallet, refreshAllWalletTransactions, walletTransactionUpdateStatus, isElectrumDisabled } =
-    useContext(BlueStorageContext);
+  const {
+    wallets,
+    saveToDisk,
+    setSelectedWallet,
+    refreshAllWalletTransactions,
+    walletTransactionUpdateStatus,
+    isElectrumDisabled,
+    isPayCardEnabled
+  } = useContext(BlueStorageContext);
   const { name, params } = useRoute();
   const walletID = params.walletID;
   const [isLoading, setIsLoading] = useState(false);
@@ -487,7 +496,7 @@ const Asset = ({ navigation }) => {
       const buttons = [
         {
           text: loc._.cancel,
-          onPress: () => { },
+          onPress: () => {},
           style: 'cancel',
         },
         {
@@ -531,6 +540,26 @@ const Asset = ({ navigation }) => {
     index,
   });
 
+  const handleGoToBoltCard = () => {
+    return wallet.getBoltcard()?.isPhisicalCardWritten ? navigate('BoltCardDetails') : navigate('AddBoltcard');
+  };
+
+  renderRightHeaderComponent = () => {
+    switch (wallet.type) {
+      case LightningLdsWallet.type:
+        if(!isPayCardEnabled) return null;
+        return (
+          <TouchableOpacity onPress={handleGoToBoltCard} style={styles.boltcardButton}>
+            <Image source={require('../../img/pay-card-link.png')} style={{ width: 1.30 * 30, height: 30 }} />
+            <Text style={stylesHook.listHeaderText}>{loc.boltcard.pay_card}</Text>
+          </TouchableOpacity>
+        )
+
+      default:
+        return null;
+    }
+  }
+
   return (
     <View style={styles.flex}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent animated />
@@ -544,6 +573,7 @@ const Asset = ({ navigation }) => {
             saveToDisk();
           })
         }
+        rightHeaderComponent={renderRightHeaderComponent()}
       />
       {!isMultiSig() && (
         <View style={stylesHook.dfxContainer}>
@@ -654,15 +684,30 @@ const Asset = ({ navigation }) => {
 
 export default Asset;
 
-Asset.navigationOptions = navigationStyle({
+Asset.navigationOptions = navigationStyle({}, (options, { navigation, route }) => ({
+  ...options,
   headerStyle: {
     backgroundColor: 'transparent',
     borderBottomWidth: 0,
     elevation: 0,
-    // shadowRadius: 0,
     shadowOffset: { height: 0, width: 0 },
   },
-});
+  headerRight: () => (
+    <TouchableOpacity
+      accessibilityRole="button"
+      testID="Settings"
+      style={styles.walletDetails}
+      onPress={() => {
+        route?.params?.walletID &&
+          navigation.navigate('Settings', {
+            walletID: route?.params?.walletID,
+          });
+      }}
+    >
+      <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
+    </TouchableOpacity>
+  ),
+}));
 
 Asset.propTypes = {
   navigation: PropTypes.shape(),
@@ -714,4 +759,9 @@ const styles = StyleSheet.create({
     padding: 5,
     alignItems: 'center',
   },
+  walletDetails:{
+    paddingLeft: 12,
+    paddingVertical:12
+  },
+  boltcardButton: { justifyContent: 'center', alignItems: 'center', marginTop: 10 },
 });

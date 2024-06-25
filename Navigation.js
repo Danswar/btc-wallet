@@ -89,6 +89,11 @@ import Asset from './screen/wallets/asset';
 import AddLightning from './screen/wallets/dfx/add-lightning';
 import LNDReceive from './screen/lnd/lndReceive';
 import FeatureFlags from './screen/settings/FeatureFlags';
+import AddBoltcard from './screen/boltcard/add';
+import BoltcardDetails from './screen/boltcard/details';
+import BackupBolcard from './screen/boltcard/backup';
+import DeleteBolcard from './screen/boltcard/delete';
+import WrittenCardError from './screen/boltcard/writtenCardError';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -100,6 +105,21 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="WalletTransactions" component={WalletHome} options={WalletHome.navigationOptions(theme)} />
       <WalletsStack.Screen name="WalletAsset" component={Asset} options={Asset.navigationOptions(theme)} />
       <WalletsStack.Screen name="AddLightning" component={AddLightning} options={AddLightning.navigationOptions(theme)} />
+      <AddWalletStack.Screen
+        name="WalletsAddMultisig"
+        component={WalletsAddMultisig}
+        options={WalletsAddMultisig.navigationOptions(theme)}
+      />
+      <AddWalletStack.Screen
+        name="WalletsAddMultisigStep2"
+        component={WalletsAddMultisigStep2}
+        options={WalletsAddMultisigStep2.navigationOptions(theme)}
+      />
+      <WalletsStack.Screen name="AddBoltcard" component={AddBoltcard} options={AddBoltcard.navigationOptions(theme)} />
+      <WalletsStack.Screen name="BoltCardDetails" component={BoltcardDetails} options={BoltcardDetails.navigationOptions(theme)} />
+      <WalletsStack.Screen name="BackupBoltcard" component={BackupBolcard} options={BackupBolcard.navigationOptions(theme)} />
+      <WalletsStack.Screen name="DeleteBoltcard" component={DeleteBolcard} options={DeleteBolcard.navigationOptions(theme)} />
+      <WalletsStack.Screen name="WrittenCardError" component={WrittenCardError} options={WrittenCardError.navigationOptions(theme)} />
       <WalletsStack.Screen name="LdkOpenChannel" component={LdkOpenChannel} options={LdkOpenChannel.navigationOptions(theme)} />
       <WalletsStack.Screen name="LdkInfo" component={LdkInfo} options={LdkInfo.navigationOptions(theme)} />
       <WalletsStack.Screen name="WalletDetails" component={WalletDetails} options={WalletDetails.navigationOptions(theme)} />
@@ -204,16 +224,6 @@ const AddWalletRoot = () => {
       />
       <AddWalletStack.Screen name="PleaseBackupLdk" component={PleaseBackupLdk} options={PleaseBackupLdk.navigationOptions(theme)} />
       <AddWalletStack.Screen name="ProvideEntropy" component={ProvideEntropy} options={ProvideEntropy.navigationOptions(theme)} />
-      <AddWalletStack.Screen
-        name="WalletsAddMultisig"
-        component={WalletsAddMultisig}
-        options={WalletsAddMultisig.navigationOptions(theme)}
-      />
-      <AddWalletStack.Screen
-        name="WalletsAddMultisigStep2"
-        component={WalletsAddMultisigStep2}
-        options={WalletsAddMultisigStep2.navigationOptions(theme)}
-      />
       <AddWalletStack.Screen
         name="WalletsAddMultisigHelp"
         component={WalletsAddMultisigHelp}
