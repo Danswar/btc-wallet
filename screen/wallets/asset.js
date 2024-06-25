@@ -550,7 +550,7 @@ const Asset = ({ navigation }) => {
         if(!isPayCardEnabled) return null;
         return (
           <TouchableOpacity onPress={handleGoToBoltCard} style={styles.boltcardButton}>
-            <Image source={require('../../img/bolt-card-link.png')} style={{ width: 1.30 * 30, height: 30 }} />
+            <Image source={require('../../img/pay-card-link.png')} style={{ width: 1.30 * 30, height: 30 }} />
             <Text style={stylesHook.listHeaderText}>{loc.boltcard.pay_card}</Text>
           </TouchableOpacity>
         )

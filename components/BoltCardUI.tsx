@@ -47,7 +47,7 @@ const BoltCardUI: React.FC<BoltCardProps> = ({ cardholder, txLimit, dailyLimit, 
           </View>
           <View style={styles.brandsContainer}>
             <Image source={require('../img/dfx/logo.png')} style={{ width: 18 * 3.19, height: 18 }} />
-            <Image source={require('../img/bolt-card.png')} style={styles.boltcardLogo} />
+            <Image source={require('../img/nfc.png')} style={styles.boltcardLogo} />
           </View>
         </ImageBackground>
       </ImageBackground>
@@ -102,12 +102,13 @@ const styles = StyleSheet.create({
   },
   brandsContainer: {
     justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
   boltcardLogo: {
-    width: 50,
-    height: 50,
-    marginTop: 8,
-    marginLeft: 8,
+    width: 28,
+    height: 28,
+    marginBottom: 10,
+    alignSelf: 'flex-end',
   },
   metalic: {
     letterSpacing: 0.3,
