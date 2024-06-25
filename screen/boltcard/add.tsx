@@ -26,7 +26,7 @@ const AddBoltcard: React.FC = () => {
   const [isHoldCardModalVisible, setIsHoldCardModalVisible] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { address, signMessage } = useWalletContext();
-  const { createBoltcard, getBoltcards, getBoltcardSecret, updateBoltcard } = useLdsBoltcards();
+  const { genFreshCardDetails, createBoltcard, getBoltcards, getBoltcardSecret, updateBoltcard } = useLdsBoltcards();
   const { writeCard, stopNfcSession } = useNtag424();
   const { getUser } = useLds();
 
@@ -43,7 +43,17 @@ const AddBoltcard: React.FC = () => {
   const checkAlreadyCreatedBoltcard = async () => {
     if (!ldsWallet.getBoltcard()) {
       const [cardInServer] = await getBoltcards(ldsWallet.getInvoiceId());
-      const serverDetails = cardInServer || (await createBoltcard(ldsWallet.getAdminKey()));
+      
+      let serverDetails = cardInServer
+      if(!serverDetails){
+        const adminKey = ldsWallet.getAdminKey();
+        const freshCardDetails = await genFreshCardDetails();
+        const ldsAddress = ldsWallet.lnAddress as string;
+        const [prefix] = ldsAddress.split('@');
+        freshCardDetails.card_name = `${prefix} PAY CARD`;
+        serverDetails = await createBoltcard(adminKey, freshCardDetails);
+      }
+
       const secrets = await getBoltcardSecret(serverDetails);
       const boltcard = new BoltCard(serverDetails, secrets);
       ldsWallet.setBoltcard(boltcard);

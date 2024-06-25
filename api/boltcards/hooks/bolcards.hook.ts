@@ -7,7 +7,8 @@ const createHash = require('create-hash');
 
 type UseLdsBoltcards = {
   getBoltcards: (invoiceId: string) => Promise<BoltCardModel[]>;
-  createBoltcard: (adminKey: string) => Promise<BoltCardModel>;
+  createBoltcard: (adminKey: string, freshCardDetails: BoltcardCreateDTO) => Promise<BoltCardModel>;
+  genFreshCardDetails: () => Promise<BoltcardCreateDTO>;
   getBoltcardSecret: (boltcard: BoltCardModel) => Promise<BolcardSecrets>;
   updateBoltcard: (adminKey: string, boltcard: BoltcardUpdateDTO) => Promise<BoltCardModel>;
   enableBoltcard: (adminKey: string, boltcard: BoltcardUpdateDTO, state: boolean) => Promise<BoltCardModel>;
@@ -47,8 +48,7 @@ export function useLdsBoltcards(): UseLdsBoltcards {
     return call<BoltCardModel[]>({ method: 'GET', url: BoltcardUrl.cards, apiKey: invoiceId });
   };
 
-  const createBoltcard = async (adminKey: string): Promise<BoltCardModel> => {
-    const freshCardDetails = await genFreshCardDetails();
+  const createBoltcard = async (adminKey: string, freshCardDetails: BoltcardCreateDTO): Promise<BoltCardModel> => {
     return call<BoltCardModel>({ method: 'POST', url: BoltcardUrl.cards, apiKey: adminKey, data: freshCardDetails });
   };
 
@@ -79,7 +79,7 @@ export function useLdsBoltcards(): UseLdsBoltcards {
     await call<void>({ method: 'DELETE', url: `${BoltcardUrl.cards}/${boltcard.id}`, apiKey: adminKey });
   };
 
-  return { getBoltcards, createBoltcard, getBoltcardSecret, updateBoltcard, enableBoltcard, getHits, deleteBoltcard };
+  return { getBoltcards, genFreshCardDetails, createBoltcard, getBoltcardSecret, updateBoltcard, enableBoltcard, getHits, deleteBoltcard };
 }
 
 export default useLdsBoltcards;
