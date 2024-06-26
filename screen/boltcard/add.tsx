@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, Dimensions } from 'react-native';
 import { Image, Text } from 'react-native-elements';
 import navigationStyle from '../../components/navigationStyle';
 import { BlueButton } from '../../BlueComponents';
@@ -43,9 +43,9 @@ const AddBoltcard: React.FC = () => {
   const checkAlreadyCreatedBoltcard = async () => {
     if (!ldsWallet.getBoltcard()) {
       const [cardInServer] = await getBoltcards(ldsWallet.getInvoiceId());
-      
-      let serverDetails = cardInServer
-      if(!serverDetails){
+
+      let serverDetails = cardInServer;
+      if (!serverDetails) {
         const adminKey = ldsWallet.getAdminKey();
         const freshCardDetails = await genFreshCardDetails();
         const ldsAddress = ldsWallet.lnAddress as string;
@@ -136,14 +136,12 @@ const AddBoltcard: React.FC = () => {
   return (
     <SafeAreaView style={stylesHooks.root}>
       <View style={styles.imageContainer}>
-        <View style={styles.logoContainer}>
-          <Image source={require('../../img/bolt-card.png')} style={styles.boltcardLogo} />
+        <View style={styles.modalCardIconContainer}>
+          <Image source={require('../../img/bolt-card-link.png')} style={styles.boltcardLinkImage} />
         </View>
       </View>
       <View style={styles.descriptionContainer}>
-        <Text style={[styles.textdesc, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.what_pay_card_is}</Text>
         <Text style={[styles.textdesc, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.how_to_create}</Text>
-        <Text style={[styles.textdesc, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.always_backup}</Text>
       </View>
       <View style={styles.buttonContiner}>
         <BlueButton title={loc.boltcard.create_boltcard} onPress={handleOnPress} isLoading={isLoading} />
@@ -152,41 +150,43 @@ const AddBoltcard: React.FC = () => {
     </SafeAreaView>
   );
 };
-
+const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
   imageContainer: {
     marginVertical: 24,
     alignItems: 'center',
+    padding: '10%',
   },
   descriptionContainer: {
     flexGrow: 1,
     alignContent: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: '10%',
   },
   textdesc: {
     fontWeight: '500',
     alignSelf: 'center',
     textAlign: 'center',
     marginBottom: 16,
+    fontSize: 16,
   },
   textdescBold: {
     fontWeight: '700',
-    alignSelf: 'center',
-    textAlign: 'center',
   },
-  logoContainer: {
-    backgroundColor: '#000',
-    padding: 4,
-    borderRadius: 15,
+  modalCardIconContainer: {
+    marginBottom: 24,
+    alignItems: 'center',
   },
-  boltcardLogo: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
+  boltcardLinkImage: {
+    width: width * 0.3,
+    height: width * 0.23,
   },
   buttonContiner: {
-    paddingHorizontal: 24,
+    paddingHorizontal: '10%',
     marginVertical: 18,
   },
 });
