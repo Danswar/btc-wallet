@@ -9,10 +9,10 @@ import loc from '../loc';
 interface HoldCardModalProps {
   isHoldCardModalVisible: boolean;
   onCancelHoldCard: () => void;
-  isSuccess: boolean;
+  isSuccess?: boolean;
 }
 
-export const HoldCardModal: React.FC<HoldCardModalProps> = ({ isHoldCardModalVisible, isSuccess, onCancelHoldCard }) => {
+export const HoldCardModal: React.FC<HoldCardModalProps> = ({ isHoldCardModalVisible, isSuccess = false, onCancelHoldCard }) => {
   const { colors } = useTheme();
   const stylesHooks = StyleSheet.create({
     textdesc: {

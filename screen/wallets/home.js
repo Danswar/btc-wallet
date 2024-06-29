@@ -33,6 +33,7 @@ import PropTypes from 'prop-types';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
+import BoltCard from '../../class/boltcard';
 
 const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
@@ -222,6 +223,11 @@ const WalletHome = ({ navigation }) => {
 
   const onBarScanned = value => {
     if (!value) return;
+
+    if(BoltCard.isPossiblyBoltcardTapDetails(value)) {
+      navigate('TappedCardDetails', { tappedCardDetails: value });
+      return;
+    }
 
     if (DeeplinkSchemaMatch.isPossiblyPSBTString(value)) {
       importPsbt(value);
@@ -431,7 +437,12 @@ const WalletHome = ({ navigation }) => {
         <FButton
           onPress={onScanButtonPressed}
           onLongPress={sendButtonLongPress}
-          icon={<Image resizeMode="stretch" source={scanImage} />}
+          icon={
+            <View style={styles.scanIconContainer}>
+              <Image resizeMode="stretch" source={scanImage} />
+              <Image style={{ width: 20, height: 20 }} source={require('../../img/nfc.png')} />
+            </View>
+          }
           text={loc.send.details_scan}
         />
         {(wallet.allowSend() || (wallet.type === WatchOnlyWallet.type && wallet.isHd())) && (
@@ -549,4 +560,9 @@ const styles = StyleSheet.create({
   receiveIcon: {
     transform: [{ rotate: I18nManager.isRTL ? '45deg' : '-45deg' }],
   },
+  scanIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });
