@@ -24,6 +24,7 @@ import Lnurl from '../../class/lnurl';
 import useLdsBoltcards from '../../api/boltcards/hooks/bolcards.hook';
 import { useNtag424 } from '../../api/boltcards/hooks/ntag424.hook';
 import { HoldCardModal } from '../../components/HoldCardModal';
+import alert from '../../components/Alert';
 
 const styles = StyleSheet.create({
   scrollViewContent: {
@@ -143,55 +144,59 @@ const TappedCardDetails = () => {
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      if (tappedCardDetails) {
-        setUid(tappedCardDetails.uid ?? '');
-        setSecrets(tappedCardDetails.secrets);
-        const { k0Version, k1Version, k2Version, k3Version, k4Version } = tappedCardDetails;
-        const keyVersions = [k0Version, k1Version, k2Version, k3Version, k4Version];
-        const hasVersion0Keys = keyVersions.some(version => version === '00');
-        const hasVersion1Keys = keyVersions.some(version => version === '01');
-        const allKeysAreVersion0 = keyVersions.every(version => version === '00');
-        const allKeysAreVersion1 = keyVersions.every(version => version === '01');
+      try {
+        if (tappedCardDetails) {
+          setUid(tappedCardDetails.uid ?? '');
+          setSecrets(tappedCardDetails.secrets);
+          const { k0Version, k1Version, k2Version, k3Version, k4Version } = tappedCardDetails;
+          const keyVersions = [k0Version, k1Version, k2Version, k3Version, k4Version];
+          const hasVersion0Keys = keyVersions.some(version => version === '00');
+          const hasVersion1Keys = keyVersions.some(version => version === '01');
+          const allKeysAreVersion0 = keyVersions.every(version => version === '00');
+          const allKeysAreVersion1 = keyVersions.every(version => version === '01');
 
-        setIsEmptyCard(allKeysAreVersion0);
-        setIsAllKeysWritten(allKeysAreVersion1);
-        setIsCardWrittenWithErrors(hasVersion0Keys && hasVersion1Keys);
-        setIsCardDerivatedFromMyWallet(Boolean(tappedCardDetails.secrets) && hasVersion1Keys);
+          setIsEmptyCard(allKeysAreVersion0);
+          setIsAllKeysWritten(allKeysAreVersion1);
+          setIsCardWrittenWithErrors(hasVersion0Keys && hasVersion1Keys);
+          setIsCardDerivatedFromMyWallet(Boolean(tappedCardDetails.secrets) && hasVersion1Keys);
 
-        const _lnurlw = tappedCardDetails.lnurlw_base;
-        setLnurlw(_lnurlw);
-        if (_lnurlw) {
-          try {
-            const { payLink, minWithdrawable, maxWithdrawable, ...rest } = await BoltCard.queryWidthdrawDetails(_lnurlw);
-            setMinWithdraw(minWithdrawable);
-            setMaxWithdraw(maxWithdrawable);
-            setLnurlp(payLink);
-            const { minSendable, maxSendable } = await BoltCard.queryPayDetails(payLink);
-            setMinPay(minSendable);
-            setMaxPay(maxSendable);
+          const _lnurlw = tappedCardDetails.lnurlw_base;
+          setLnurlw(_lnurlw);
+          if (_lnurlw) {
+            try {
+              const { payLink, minWithdrawable, maxWithdrawable, ...rest } = await BoltCard.queryWidthdrawDetails(_lnurlw);
+              setMinWithdraw(minWithdrawable);
+              setMaxWithdraw(maxWithdrawable);
+              setLnurlp(payLink);
+              const { minSendable, maxSendable } = await BoltCard.queryPayDetails(payLink);
+              setMinPay(minSendable);
+              setMaxPay(maxSendable);
 
-            setIsRegisteredInServer(true);
-          } catch (_) { }
-        }
+              setIsRegisteredInServer(true);
+            } catch (_) {}
+          }
 
-        const boltcards = await getBoltcards(lnWallet.getInvoiceId());
-
-        if (lnWallet && _lnurlw && tappedCardDetails.secrets) {
-          try {
-            const [urlPart] = _lnurlw.split('?');
-            const externalId = urlPart.split('/').pop();
-            const currCard = boltcards.find(card => card.external_id === externalId);
-            const uidIsCorrect = currCard?.uid === tappedCardDetails.uid;
-            const k0IsCorrect = currCard?.k0 === tappedCardDetails.secrets.k0;
-            const k1IsCorrect = currCard?.k1 === tappedCardDetails.secrets.k1 && currCard?.k1 === tappedCardDetails.secrets.k3;
-            const k2IsCorrect = currCard?.k2 === tappedCardDetails.secrets.k2 && currCard?.k2 === tappedCardDetails.secrets.k4;
-            setIsRegisteredInServer(uidIsCorrect && k0IsCorrect && k1IsCorrect && k2IsCorrect);
-            setServerDetails(currCard);
-          } catch (_) {
-            console.log(_);
-            setIsRegisteredInServer(false);
+          
+          if (lnWallet && _lnurlw && tappedCardDetails.secrets) {
+            try {
+              const boltcards = await getBoltcards(lnWallet.getInvoiceId());
+              const [urlPart] = _lnurlw.split('?');
+              const externalId = urlPart.split('/').pop();
+              const currCard = boltcards.find(card => card.external_id === externalId);
+              const uidIsCorrect = currCard?.uid === tappedCardDetails.uid;
+              const k0IsCorrect = currCard?.k0 === tappedCardDetails.secrets.k0;
+              const k1IsCorrect = currCard?.k1 === tappedCardDetails.secrets.k1 && currCard?.k1 === tappedCardDetails.secrets.k3;
+              const k2IsCorrect = currCard?.k2 === tappedCardDetails.secrets.k2 && currCard?.k2 === tappedCardDetails.secrets.k4;
+              setIsRegisteredInServer(uidIsCorrect && k0IsCorrect && k1IsCorrect && k2IsCorrect);
+              setServerDetails(currCard);
+            } catch (_) {
+              console.log(_);
+              setIsRegisteredInServer(false);
+            }
           }
         }
+      } catch (error: any) {
+        alert(error.message);
       }
       setIsLoading(false);
     })();
@@ -224,11 +229,10 @@ const TappedCardDetails = () => {
 
   const navigateToBackup = () => navigate('BackupBoltcard');
 
-
   const handleOnCancelHoldCard = () => {
     setHoldCardModalVisible(false);
     stopNfcSession();
-  }
+  };
 
   const onPressWipeCard = async () => {
     if (Platform.OS === 'android') setHoldCardModalVisible(true);
@@ -252,7 +256,6 @@ const TappedCardDetails = () => {
     handleOnCancelHoldCard();
     saveToDisk();
     goBack();
-
   };
 
   return (
