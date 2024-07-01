@@ -839,16 +839,6 @@ class AppStorage {
     await AsyncStorage.setItem(AppStorage.ADVANCED_MODE_ENABLED, value ? '1' : '');
   };
 
-  isPayCardEnabled = async () => {
-    try {
-      return !!(await AsyncStorage.getItem(AppStorage.PAY_CARD));
-    } catch (_) {}
-    return false;
-  };
-
-  setIsPayCardEnabled = async value => {
-    await AsyncStorage.setItem(AppStorage.PAY_CARD, value ? '1' : '');
-  };
 
   isLdsDevEnabled = async () => {
     try {

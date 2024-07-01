@@ -223,11 +223,16 @@ const LNDReceive = () => {
                 ) : (
                   <>
                     <QRCodeComponent value={invoiceRequest ? invoiceRequest : wallet.current.lnAddress} />
-                    <BlueCopyTextToClipboard
-                      text={invoiceRequest || wallet.current.lnAddress}
-                      truncated={Boolean(invoiceRequest)}
-                      textStyle={styles.copyText}
-                    />
+                    <View style={styles.shareContainer}>
+                      <BlueCopyTextToClipboard
+                        text={invoiceRequest || wallet.current.lnAddress}
+                        truncated={Boolean(invoiceRequest)}
+                        textStyle={styles.copyText}
+                      />
+                      <TouchableOpacity accessibilityRole="button" onPress={handleShareButtonPressed}>
+                        <Image source={require('../../img/share-icon.png')} />
+                      </TouchableOpacity>
+                    </View>
                   </>
                 )}
               </View>
@@ -264,28 +269,27 @@ const LNDReceive = () => {
                     onBlur={handleOnBlur}
                   />
                 </View>
-                <View>
-                  {Platform.select({
-                    ios: (
-                      <View style={styles.iosNfcButtonContainer}>
-                        <SecondButton
-                          onPress={startNfcOnIos}
-                          disabled={!Boolean(invoiceRequest)}
-                          title={'Use Boltcard'}
-                          image={{ source: require('../../img/bolt-card.png') }}
-                        />
-                      </View>
-                    ),
-                    android: (
-                      <View style={styles.buttonsContainer}>
-                        <Image source={require('../../img/bolt-card.png')} style={{ width: 40, height: 40 }} />
-                      </View>
-                    ),
-                  })}
+                {invoiceRequest && (
                   <View>
-                    <BlueButton onPress={handleShareButtonPressed} title={loc.receive.details_share} />
+                    {Platform.select({
+                      ios: (
+                        <View style={styles.iosNfcButtonContainer}>
+                          <SecondButton
+                            onPress={startNfcOnIos}
+                            disabled={!Boolean(invoiceRequest)}
+                            title={'Use Boltcard'}
+                            image={{ source: require('../../img/bolt-card.png') }}
+                          />
+                        </View>
+                      ),
+                      android: (
+                        <View style={styles.buttonsContainer}>
+                          <Image source={require('../../img/bolt-card.png')} style={{ width: 40, height: 40 }} />
+                        </View>
+                      ),
+                    })}
                   </View>
-                </View>
+                )}
               </View>
               <BlueDismissKeyboardInputAccessory onPress={generateInvoice} />
             </View>
@@ -364,6 +368,11 @@ const styles = StyleSheet.create({
   },
   iosNfcButtonContainer: {
     marginVertical: 10,
+  },
+  shareContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
 });
 

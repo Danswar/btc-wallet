@@ -45,8 +45,6 @@ const DeleteBolcard: React.FC = () => {
   return (
     <SafeAreaView style={stylesHooks.root}>
       <QRCodeComponent value={getJsonBackup()} isLogoRendered={true} />
-      <BlueSpacing10 />
-      <Text style={[styles.textdesc, stylesHooks.textdesc]}>{loc.boltcard.always_backup}</Text>
     </SafeAreaView>
   );
 };

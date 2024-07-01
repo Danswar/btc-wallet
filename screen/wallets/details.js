@@ -267,6 +267,11 @@ const WalletDetails = () => {
       walletID: wallet.getID(),
     });
 
+  const navigateToBackupPayCardDetails = () =>
+    navigate('BackupBoltcard', {
+      walletID: wallet.getID(),
+    });
+
   const navigateToPaymentCodes = () =>
     navigate('PaymentCodeRoot', {
       screen: 'PaymentCodesList',
@@ -504,6 +509,11 @@ const WalletDetails = () => {
             {wallet.allowBIP47() && isBIP47Enabled && <BlueListItem onPress={navigateToPaymentCodes} title="Show payment codes" chevron />}
             <BlueCard style={styles.address}>
               <View>
+                {[LightningLdsWallet.type].includes(wallet.type) && wallet.getBoltcard() && (
+                  <>
+                    <SecondButton onPress={navigateToBackupPayCardDetails} title={'Backup Pay Card Details'} chevron />
+                  </>
+                )}
                 <BlueSpacing20 />
                 {wallet.type !== MultisigHDWallet.type && (
                   <SecondButton onPress={navigateToWalletExport} testID="WalletExport" title={loc.wallets.details_export_backup} />

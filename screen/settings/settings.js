@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { ScrollView, StyleSheet, Platform, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-
+import { useWalletContext } from '../../contexts/wallet.context';
 import navigationStyle from '../../components/navigationStyle';
 import { BlueListItem, BlueHeaderDefaultSub } from '../../BlueComponents';
 import loc from '../../loc';
@@ -17,10 +17,10 @@ const styles = StyleSheet.create({
 
 const Settings = () => {
   const { navigate } = useNavigation();
-  const { walletID } = useRoute().params;
   // By simply having it here, it'll re-render the UI if language is changed
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { wallets, language } = useContext(BlueStorageContext);
+  const { walletID } = useWalletContext();
   const lndWallet = wallets.find(wallet => wallet.type === LightningLdsWallet.type);
   const multiDeviceWallet = wallets.find(wallet => wallet.type === MultisigHDWallet.type);
 
@@ -36,7 +36,12 @@ const Settings = () => {
       <ScrollView style={styles.root}>
         {Platform.OS === 'android' ? <BlueHeaderDefaultSub leftText={loc.settings.header} /> : <></>}
         <BlueListItem title={loc.settings.general} onPress={() => navigate('GeneralSettings')} testID="GeneralSettings" chevron />
-        <BlueListItem title={loc.wallets.main_wallet_label} onPress={() => navigateToWalletDetails(walletID)} testID="WalletDetails" chevron />
+        <BlueListItem
+          title={loc.wallets.main_wallet_label}
+          onPress={() => navigateToWalletDetails(walletID)}
+          testID="WalletDetails"
+          chevron
+        />
         <BlueListItem
           title={loc.wallets.lightning_wallet_label}
           disabled={!lndWallet}
