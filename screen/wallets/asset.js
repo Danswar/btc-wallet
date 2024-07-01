@@ -53,6 +53,7 @@ import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/netw
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
 import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
+import BoltCard from '../../class/boltcard';
 
 const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
@@ -409,7 +410,10 @@ const Asset = ({ navigation }) => {
     if (!value || isLoading) return;
 
     setIsLoading(true);
-    if (DeeplinkSchemaMatch.isPossiblyPSBTString(value)) {
+
+    if(BoltCard.isPossiblyBoltcardTapDetails(value)) {
+      navigate('TappedCardDetails', { tappedCardDetails: value });
+    }else if (DeeplinkSchemaMatch.isPossiblyPSBTString(value)) {
       importPsbt(value);
     } else if (DeeplinkSchemaMatch.isBothBitcoinAndLightning(value)) {
       const uri = DeeplinkSchemaMatch.isBothBitcoinAndLightning(value);
@@ -663,7 +667,16 @@ const Asset = ({ navigation }) => {
             }
           />
         )}
-        <FButton onPress={onScanButtonPressed} icon={<Image resizeMode="stretch" source={scanImage} />} text={loc.send.details_scan} />
+        <FButton
+          onPress={onScanButtonPressed}
+          icon={
+            <View style={styles.scanIconContainer}>
+              <Image resizeMode="stretch" source={scanImage} />
+              <Image style={{ width: 20, height: 20 }} source={require('../../img/nfc.png')} />
+            </View>
+          }
+          text={loc.send.details_scan}
+        />
         {(wallet.allowSend() || (wallet.type === WatchOnlyWallet.type && wallet.isHd())) && (
           <FButton
             onLongPress={sendButtonLongPress}
@@ -764,4 +777,9 @@ const styles = StyleSheet.create({
     paddingVertical:12
   },
   boltcardButton: { justifyContent: 'center', alignItems: 'center', marginTop: 10 },
+  scanIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });

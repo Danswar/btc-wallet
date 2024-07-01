@@ -690,6 +690,20 @@
     "now_tap": "Now tap your card and wait until all keys are reset",
     "start_nfc": "Start NFC",
     "scan_backup": "Scan Backup",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "is_it_my_card": "Is it my card?",
+    "derivated_from_wallet": "Yes - Keys derivated from my wallet",
+    "not_derivated_from_wallet": "No - Internal keys are not available",
+    "card_state": "Card State",
+    "card_state_empty": "Empty, ready to be written",
+    "card_state_written": "Keys written correctly",
+    "card_written_error": "Keys written with errors",
+    "server_status": "Server Status",
+    "active": "Registered correctly",
+    "unregitered": "Card is not registered, it must be reset",
+    "send_to_card": "Send to Card",
+    "keys_backup": "Keys/Backup",
+    "wipe_card": "Reset card",
+    "unregister_and_wipe": "Unregister and reset card"
   }
 }

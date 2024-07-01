@@ -94,6 +94,7 @@ import BoltcardDetails from './screen/boltcard/details';
 import BackupBolcard from './screen/boltcard/backup';
 import DeleteBolcard from './screen/boltcard/delete';
 import WrittenCardError from './screen/boltcard/writtenCardError';
+import TappedCardDetails from './screen/wallets/tappedCardDetails';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -120,6 +121,7 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="BackupBoltcard" component={BackupBolcard} options={BackupBolcard.navigationOptions(theme)} />
       <WalletsStack.Screen name="DeleteBoltcard" component={DeleteBolcard} options={DeleteBolcard.navigationOptions(theme)} />
       <WalletsStack.Screen name="WrittenCardError" component={WrittenCardError} options={WrittenCardError.navigationOptions(theme)} />
+      <WalletsStack.Screen name="TappedCardDetails" component={TappedCardDetails} options={TappedCardDetails.navigationOptions(theme)} />
       <WalletsStack.Screen name="LdkOpenChannel" component={LdkOpenChannel} options={LdkOpenChannel.navigationOptions(theme)} />
       <WalletsStack.Screen name="LdkInfo" component={LdkInfo} options={LdkInfo.navigationOptions(theme)} />
       <WalletsStack.Screen name="WalletDetails" component={WalletDetails} options={WalletDetails.navigationOptions(theme)} />

@@ -5,6 +5,24 @@ enum Status {
   ERROR = 'ERROR',
 }
 
+interface WidthdrawResponse {
+  tag: 'withdrawRequest' | 'payRequest';
+  callback: string;
+  k1: string;
+  minWithdrawable: number;
+  maxWithdrawable: number;
+  defaultDescription: string;
+  payLink: string;
+}
+
+interface PayResponse {
+  tag: 'payRequest';
+  callback: string;
+  minSendable: number;
+  maxSendable: number;
+  metadata: string;
+}
+
 export default class BoltCard implements BoltCardModel {
   id: string;
   wallet: string;
@@ -58,15 +76,29 @@ export default class BoltCard implements BoltCardModel {
   }
 
   /**
+   * @param payload url
+   * @returns WidthdrawResponse
+   */
+  static async queryWidthdrawDetails(lnurlw: string): Promise<WidthdrawResponse> {
+    const url = lnurlw.replace('lnurlw', 'https');
+    const response = await fetch(url);
+    return await response.json();
+  }
+
+  static async queryPayDetails(lnurlp: string): Promise<PayResponse> {
+    const url = lnurlp.replace('lnurlp', 'https');
+    const response = await fetch(url);
+    return await response.json();
+  }
+
+  /**
    *
    * @param lnurlw payload from the nfc tag (Boltcard or similar)
    * @param paymentRequest A ligning invoice
    */
   static async widthdraw(lnurlw: string, paymentRequest: string) {
     try {
-      const boltcardUrl = lnurlw.replace('lnurlw', 'https');
-      const response = await fetch(boltcardUrl);
-      const { callback, k1 }: { callback: string; k1: string } = await response.json();
+      const { callback, k1 } = await BoltCard.queryWidthdrawDetails(lnurlw);
       const callbackUrl = new URL(callback);
       callbackUrl.searchParams.append('k1', k1);
       callbackUrl.searchParams.append('pr', paymentRequest);
@@ -84,5 +116,18 @@ export default class BoltCard implements BoltCardModel {
 
   updateUid(uid: string) {
     return (this.secrets.uid = uid);
+  }
+
+
+  static isPossiblyBoltcardTapDetails(jsonPayload: any = {}) {
+    return (
+      jsonPayload.hasOwnProperty('lnurlw_base') ||
+      jsonPayload.hasOwnProperty('uid') ||
+      jsonPayload.hasOwnProperty('k0Version') ||
+      jsonPayload.hasOwnProperty('k1Version') ||
+      jsonPayload.hasOwnProperty('k2Version') ||
+      jsonPayload.hasOwnProperty('k3Version') ||
+      jsonPayload.hasOwnProperty('k4Version') 
+    );
   }
 }

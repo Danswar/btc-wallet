@@ -137,13 +137,11 @@ const AddBoltcard: React.FC = () => {
     <SafeAreaView style={stylesHooks.root}>
       <View style={styles.imageContainer}>
         <View style={styles.logoContainer}>
-          <Image source={require('../../img/bolt-card.png')} style={styles.boltcardLogo} />
+          <Image source={require('../../img/pay-card-link.png')} style={{ width: 1.3 * 60, height: 60 }} />
         </View>
       </View>
       <View style={styles.descriptionContainer}>
-        <Text style={[styles.textdesc, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.what_pay_card_is}</Text>
         <Text style={[styles.textdesc, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.how_to_create}</Text>
-        <Text style={[styles.textdesc, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.always_backup}</Text>
       </View>
       <View style={styles.buttonContiner}>
         <BlueButton title={loc.boltcard.create_boltcard} onPress={handleOnPress} isLoading={isLoading} />
@@ -176,7 +174,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   logoContainer: {
-    backgroundColor: '#000',
     padding: 4,
     borderRadius: 15,
   },
