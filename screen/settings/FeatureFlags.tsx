@@ -29,15 +29,6 @@ const FeatureFlags: React.FC = () => {
       <BlueListItem
         // @ts-ignore: Fix later
         Component={Pressable}
-        title="Pay Card area"
-        switch={{ onValueChange: setIsPayCardEnabledAsyncStorage, value: isPayCardEnabled }}
-      />
-      <BlueCard>
-        <BlueText>Access to Pay Card area: Use an NTAG424 as a debit card to make payments over the lightning network</BlueText>
-      </BlueCard>
-      <BlueListItem
-        // @ts-ignore: Fix later
-        Component={Pressable}
         title="LDS DEV API"
         switch={{ onValueChange: setLdsDEVAsyncStorage, value: ldsDEV }}
       />
