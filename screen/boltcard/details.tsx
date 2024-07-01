@@ -203,7 +203,6 @@ const BoltcardDetails: React.FC = () => {
           <View style={styles.optionsContainer}>
             {isEditCard ? OptionButton('Txs', 'format-list-bulleted', toggleTx) : OptionButton('Edit', 'edit', toggleEditCard)}
             {card.enable ? OptionButton('Pause', 'pause', toggleCardActive) : OptionButton('Activate', 'play-arrow', toggleCardActive)}
-            {OptionButton('Backup', 'save', navigateToBackup)}
             {OptionButton('Delete', 'delete', navigateToDelete)}
           </View>
         </View>
@@ -270,11 +269,27 @@ const styles = StyleSheet.create({
   inputLabel: {
     color: '#81868e',
   },
+  walletDetails:{
+    paddingLeft: 12,
+    paddingVertical:12
+  },
 });
 
-BoltcardDetails.navigationOptions = navigationStyle({}, options => ({
+BoltcardDetails.navigationOptions = navigationStyle({}, (options, { navigation, route }) => ({
   ...options,
   title: loc.boltcard.title_details,
+  headerRight: () => (
+    <TouchableOpacity
+      accessibilityRole="button"
+      style={styles.walletDetails}
+      onPress={() =>
+        navigation.navigate('Settings', {
+          walletID: route?.params?.walletID,
+        })
+      }
+    >
+      <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
+    </TouchableOpacity>
+  ),
 }));
-
 export default BoltcardDetails;
