@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
 });
 
 const FeatureFlags: React.FC = () => {
-  const { ldsDEV, setLdsDEVAsyncStorage, isPayCardEnabled, setIsPayCardEnabledAsyncStorage } = useContext(BlueStorageContext);
+  const { ldsDEV, setLdsDEVAsyncStorage } = useContext(BlueStorageContext);
   const [isLoading, setIsLoading] = useState(false);
   const { colors } = useTheme();
 

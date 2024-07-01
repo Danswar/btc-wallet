@@ -271,7 +271,7 @@ const WalletDetails = () => {
     navigate('BackupBoltcard', {
       walletID: wallet.getID(),
     });
-    
+
   const navigateToPaymentCodes = () =>
     navigate('PaymentCodeRoot', {
       screen: 'PaymentCodesList',
@@ -509,7 +509,7 @@ const WalletDetails = () => {
             {wallet.allowBIP47() && isBIP47Enabled && <BlueListItem onPress={navigateToPaymentCodes} title="Show payment codes" chevron />}
             <BlueCard style={styles.address}>
               <View>
-                {[LightningCustodianWallet.type, LightningLdsWallet.type].includes(wallet.type) &&  wallet.getBoltcard()?.isPhisicalCardWritten && (
+                {[LightningLdsWallet.type].includes(wallet.type) && wallet.getBoltcard() && (
                   <>
                     <SecondButton onPress={navigateToBackupPayCardDetails} title={'Backup Pay Card Details'} chevron />
                   </>

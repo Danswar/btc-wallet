@@ -223,7 +223,7 @@ const LNDReceive = () => {
                 ) : (
                   <>
                     <QRCodeComponent value={invoiceRequest ? invoiceRequest : wallet.current.lnAddress} />
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20}}>
+                    <View style={styles.shareContainer}>
                       <BlueCopyTextToClipboard
                         text={invoiceRequest || wallet.current.lnAddress}
                         truncated={Boolean(invoiceRequest)}
@@ -284,7 +284,7 @@ const LNDReceive = () => {
                       ),
                       android: (
                         <View style={styles.buttonsContainer}>
-                        <Image source={require('../../img/bolt-card.png')} style={{ width: 40, height: 40 }} />
+                          <Image source={require('../../img/bolt-card.png')} style={{ width: 40, height: 40 }} />
                         </View>
                       ),
                     })}
@@ -368,6 +368,11 @@ const styles = StyleSheet.create({
   },
   iosNfcButtonContainer: {
     marginVertical: 10,
+  },
+  shareContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
 });
 

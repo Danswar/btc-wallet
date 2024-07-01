@@ -27,7 +27,6 @@ export const BlueStorageProvider = ({ children }) => {
   const getPreferredCurrencyAsyncStorage = useAsyncStorage(currency.PREFERRED_CURRENCY).getItem;
   const getLanguageAsyncStorage = useAsyncStorage(LOC_STORAGE_KEY).getItem;
   const [isHandOffUseEnabled, setIsHandOffUseEnabled] = useState(false);
-  const [isPayCardEnabled, setIsPayCardEnabled] = useState(false);
   const [ldsDEV, setLdsDEV] = useState(false);
   const [isElectrumDisabled, setIsElectrumDisabled] = useState(true);
   const [isTorDisabled, setIsTorDisabled] = useState(false);
@@ -53,11 +52,7 @@ export const BlueStorageProvider = ({ children }) => {
     setIsHandOffUseEnabled(value);
     return BlueApp.setIsHandoffEnabled(value);
   };
-  const setIsPayCardEnabledAsyncStorage = value => {
-    setIsPayCardEnabled(value);
-    return BlueApp.setIsPayCardEnabled(value);
-  };
-
+ 
   const setLdsDEVAsyncStorage = value => {
     setLdsDEV(value);
     return BlueApp.setIsLdsDevEnabled(value);
@@ -83,15 +78,11 @@ export const BlueStorageProvider = ({ children }) => {
       try {
         const enabledHandoff = await BlueApp.isHandoffEnabled();
         setIsHandOffUseEnabled(!!enabledHandoff);
-        const payCardFlag = await BlueApp.isPayCardEnabled();
-        setIsPayCardEnabled(!!payCardFlag);
         const enabledLdsDev = await BlueApp.isLdsDevEnabled();
         setLdsDEV(!!enabledLdsDev);
       } catch (_e) {
         setIsHandOffUseEnabledAsyncStorage(false);
         setIsHandOffUseEnabled(false);
-        setIsPayCardEnabledAsyncStorage(false);
-        setIsPayCardEnabled(false);
         setLdsDEVAsyncStorage(false);
         setLdsDEV(false);
       }
@@ -299,8 +290,6 @@ export const BlueStorageProvider = ({ children }) => {
         isPrivacyBlurEnabled,
         setIsPrivacyBlurEnabled,
         // Feature flags
-        isPayCardEnabled,
-        setIsPayCardEnabledAsyncStorage,
         ldsDEV,
         setLdsDEVAsyncStorage,
       }}
