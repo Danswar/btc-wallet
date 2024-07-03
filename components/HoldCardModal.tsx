@@ -7,12 +7,13 @@ import { SecondButton } from '../BlueComponents';
 import loc from '../loc';
 
 interface HoldCardModalProps {
+  message?: string;
   isHoldCardModalVisible: boolean;
   onCancelHoldCard: () => void;
   isSuccess?: boolean;
 }
 
-export const HoldCardModal: React.FC<HoldCardModalProps> = ({ isHoldCardModalVisible, isSuccess = false, onCancelHoldCard }) => {
+export const HoldCardModal: React.FC<HoldCardModalProps> = ({ message, isHoldCardModalVisible, isSuccess = false, onCancelHoldCard }) => {
   const { colors } = useTheme();
   const stylesHooks = StyleSheet.create({
     textdesc: {
@@ -36,10 +37,16 @@ export const HoldCardModal: React.FC<HoldCardModalProps> = ({ isHoldCardModalVis
           <View style={[styles.contentContainer]}>
             <View style={{ alignItems: 'center' }}>
               <View style={styles.modalCardIconContainer}>
-                <Image source={require('../img/bolt-card-link.png')} style={styles.boltcardLinkImage} />
+                <Image source={require('../img/pay-card-link.png')} style={styles.boltcardLinkImage} />
               </View>
-              <Text style={[styles.title, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.hold_card}</Text>
-              <ActivityIndicator color={colors.foregroundColor} />
+              {message ? (
+                <Text style={[styles.title, styles.textdescBold, stylesHooks.textdesc]}>{message}</Text>
+              ) : (
+                <>
+                  <Text style={[styles.title, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.hold_card}</Text>
+                  <ActivityIndicator color={colors.foregroundColor} />
+                </>
+              )}
             </View>
             <View style={styles.modalButtonContainer}>
               <SecondButton title="Cancel" onPress={onCancelHoldCard} />
@@ -64,7 +71,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modalContainer: {
-    minHeight: 320,
+    minHeight: 360,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     borderColor: 'rgba(0, 0, 0, 0.1)',

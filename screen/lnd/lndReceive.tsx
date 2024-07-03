@@ -23,6 +23,7 @@ import {
   BlueCopyTextToClipboard,
   BlueSpacing40,
   SecondButton,
+  BlueSpacing10,
 } from '../../BlueComponents';
 import QRCodeComponent from '../../components/QRCodeComponent';
 import navigationStyle from '../../components/navigationStyle';
@@ -230,7 +231,7 @@ const LNDReceive = () => {
                         textStyle={styles.copyText}
                       />
                       <TouchableOpacity accessibilityRole="button" onPress={handleShareButtonPressed}>
-                        <Image source={require('../../img/share-icon.png')} />
+                        <Image resizeMode="stretch" source={require('../../img/share-icon.png')}  style={{width:18, height: 20}} />
                       </TouchableOpacity>
                     </View>
                   </>
@@ -269,7 +270,7 @@ const LNDReceive = () => {
                     onBlur={handleOnBlur}
                   />
                 </View>
-                {invoiceRequest && (
+                {invoiceRequest ? (
                   <View>
                     {Platform.select({
                       ios: (
@@ -288,7 +289,13 @@ const LNDReceive = () => {
                         </View>
                       ),
                     })}
+                    <BlueSpacing10 />
                   </View>
+                ) : (
+                  <>
+                    <BlueSpacing40 />
+                    <BlueSpacing40 />
+                  </>
                 )}
               </View>
               <BlueDismissKeyboardInputAccessory onPress={generateInvoice} />
@@ -350,10 +357,10 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     paddingHorizontal: 10,
   },
-  flex:{
+  flex: {
     flex: 1,
   },
-  grow:{
+  grow: {
     flexGrow: 1,
   },
   doneButton: {
