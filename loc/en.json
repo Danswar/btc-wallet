@@ -704,6 +704,8 @@
     "send_to_card": "Send to Card",
     "keys_backup": "Keys/Backup",
     "wipe_card": "Reset card",
-    "unregister_and_wipe": "Unregister and reset card"
+    "unregister_and_wipe": "Unregister and reset card",
+    "tap_and_hold": "Please tap and hold your card",
+    "writting_hold": "Writing, please hold your card"
   }
 }

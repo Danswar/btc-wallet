@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { Icon, Switch, Text } from 'react-native-elements';
 import navigationStyle from '../../components/navigationStyle';
@@ -8,53 +8,82 @@ import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
 import { BolcardSecrets } from '../../models/boltcard';
 import { AbstractWallet } from '../../class';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import { useNtag424 } from '../../api/boltcards/hooks/ntag424.hook';
 import useLdsBoltcards from '../../api/boltcards/hooks/bolcards.hook';
 import BoltCard from '../../class/boltcard';
 import { HoldCardModal } from '../../components/HoldCardModal';
 import loc from '../../loc';
+import { getProgressStringGenerator } from '../../helpers/stringProgressBar';
 
 const DeleteBolcard: React.FC = () => {
   const { wallets, saveToDisk } = useContext(BlueStorageContext);
   const { navigate } = useNavigation();
   const { colors } = useTheme();
+  const { boltcardUid } = useRoute().params as { boltcardUid: string };
   const ldsWallet = wallets.find((w: AbstractWallet) => w.type === LightningLdsWallet.type) as LightningLdsWallet;
+  const card = ldsWallet.getBoltcards().find((c: BoltCard) => c.uid === boltcardUid) as BoltCard;
   const [resetCard, setResetCard] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isHoldCardModalVisible, setIsHoldCardModalVisible] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [progressMessage, setProgressMessage] = useState('');
   const { deleteBoltcard } = useLdsBoltcards();
-  const { wipeCard, stopNfcSession } = useNtag424();
+  const { startNfcSession, getCardUid, wipeCard, stopNfcSession, updateModalMessageIos } = useNtag424({ manualSessionControl: true });
 
   const onCancelHoldCard = () => {
     stopNfcSession();
     setIsHoldCardModalVisible(false);
   };
 
-  const cardWipedSuccess = () => {
-    setIsSuccess(true);
-    setTimeout(() => {
-      navigate('WalletsRoot', { screen: 'WalletAsset', params: { walletID: ldsWallet.getID() } });
-    }, 2000);
+  useEffect(() => {
+    return () => {
+      stopNfcSession();
+    };
+  }, []);
+
+  const updateProgress = async (message: string) => {
+    if (Platform.OS === 'ios') return await updateModalMessageIos(message);
+    if (Platform.OS === 'android') return setProgressMessage(message);
   };
 
   const handleOnPress = async () => {
     try {
       if (isLoading) return;
       setIsLoading(true);
+      if(Platform.OS === 'android') setIsHoldCardModalVisible(true);
+      const progress = getProgressStringGenerator(resetCard ? 3 : 2);
+
       if (resetCard) {
+        await startNfcSession(`${loc.boltcard.tap_and_hold}\n\n${progress.initialMessage}`);
         if (Platform.OS === 'android') setIsHoldCardModalVisible(true);
-        await wipeCard(ldsWallet.getBoltcard()?.secrets as BolcardSecrets);
+        const cardUid = await getCardUid();
+        updateProgress(`${loc.boltcard.writting_hold}\n\n${progress.next()}`);
+        if (cardUid !== card.uid) throw new Error('Card UID mismatch');
+        await wipeCard(card.secrets as BolcardSecrets);
+        updateProgress(`${loc.boltcard.writting_hold}\n\n${progress.next()}`);
       }
       try {
-        await deleteBoltcard(ldsWallet.getAdminKey(), ldsWallet.getBoltcard() as BoltCard);
-      } catch (_) { }
-      ldsWallet.deleteBoltcard();
+        await deleteBoltcard(ldsWallet.getAdminKey(), card);
+        updateProgress(`${loc.boltcard.writting_hold}\n\n${progress.next()}`);
+      } catch (_) {
+        console.log(_);
+      }
+      ldsWallet.deleteBoltcard(card);
       await saveToDisk();
-      cardWipedSuccess();
+      await stopNfcSession();
+      setIsSuccess(true);
+      setTimeout(() => {
+        if (ldsWallet.getBoltcards().length > 0) {
+          const lastCard = ldsWallet.getBoltcards().at(-1) as BoltCard;
+          navigate('BoltCardDetails', {boltcardUid: lastCard.uid});
+        } else {
+          navigate('WalletTransactions');
+        }
+      }, 1000);
     } catch (error) {
       setIsLoading(false);
+      stopNfcSession();
       console.error(error);
     }
   };
@@ -81,6 +110,7 @@ const DeleteBolcard: React.FC = () => {
         </View>
         <View>
           <Text style={[styles.titleDesc, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.delete_card_title}</Text>
+          <Text style={[styles.textdesc, styles.textdescBold, stylesHooks.textdesc]}>{`UID: ${boltcardUid}`}</Text>
           <BlueSpacing20 />
           <Text style={[styles.textdesc, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.how_to_delete}</Text>
           <Text style={[styles.textdesc, styles.textdescBold, stylesHooks.textdesc]}>{loc.boltcard.lost_card}</Text>
@@ -95,7 +125,12 @@ const DeleteBolcard: React.FC = () => {
         </View>
         <BlueButton title={loc.boltcard.confirm_delete} onPress={handleOnPress} isLoading={isLoading} />
       </View>
-      <HoldCardModal isHoldCardModalVisible={isHoldCardModalVisible} isSuccess={isSuccess} onCancelHoldCard={onCancelHoldCard} />
+      <HoldCardModal
+        message={progressMessage}
+        isHoldCardModalVisible={isHoldCardModalVisible}
+        isSuccess={isSuccess}
+        onCancelHoldCard={onCancelHoldCard}
+      />
     </SafeAreaView>
   );
 };

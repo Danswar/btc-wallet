@@ -544,7 +544,7 @@ const Asset = ({ navigation }) => {
   });
 
   const handleGoToBoltCard = () => {
-    return wallet.getBoltcard()?.isPhisicalCardWritten ? navigate('BoltCardDetails') : navigate('AddBoltcard');
+    return wallet.getBoltcards().length > 0 ? navigate('BoltCardDetails') : navigate('AddBoltcard');
   };
 
   renderRightHeaderComponent = () => {

@@ -16,18 +16,20 @@ import loc from '../../loc';
 import BoltCard from '../../class/boltcard';
 import { TypeError } from '../../helpers/ErrorCodes';
 import { HoldCardModal } from '../../components/HoldCardModal';
+import { getProgressStringGenerator } from '../../helpers/stringProgressBar';
 
 const AddBoltcard: React.FC = () => {
   const { wallets, saveToDisk } = useContext(BlueStorageContext);
-  const { navigate, replace } = useNavigation();
+  const { navigate } = useNavigation();
   const { colors } = useTheme();
   const ldsWallet = wallets.find((w: AbstractWallet) => w.type === LightningLdsWallet.type) as LightningLdsWallet;
   const [isLoading, setIsLoading] = useState(false);
   const [isHoldCardModalVisible, setIsHoldCardModalVisible] = useState(false);
+  const [progressMessage, setProgressMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const { address, signMessage } = useWalletContext();
-  const { genFreshCardDetails, createBoltcard, getBoltcards, getBoltcardSecret, updateBoltcard } = useLdsBoltcards();
-  const { writeCard, stopNfcSession } = useNtag424();
+  const { genFreshCardDetails, createBoltcard, getBoltcardSecret, getBoltcards } = useLdsBoltcards();
+  const { startNfcSession, getCardUid, writeCard, stopNfcSession, updateModalMessageIos } = useNtag424({ manualSessionControl: true });
   const { getUser } = useLds();
 
   const updateInvoiceUrl = async () => {
@@ -40,24 +42,29 @@ const AddBoltcard: React.FC = () => {
     }
   };
 
-  const checkAlreadyCreatedBoltcard = async () => {
-    if (!ldsWallet.getBoltcard()) {
-      const [cardInServer] = await getBoltcards(ldsWallet.getInvoiceId());
-      
-      let serverDetails = cardInServer
-      if(!serverDetails){
-        const adminKey = ldsWallet.getAdminKey();
-        const freshCardDetails = await genFreshCardDetails();
-        const ldsAddress = ldsWallet.lnAddress as string;
-        const [prefix] = ldsAddress.split('@');
-        freshCardDetails.card_name = `${prefix} PAY CARD`;
-        serverDetails = await createBoltcard(adminKey, freshCardDetails);
-      }
+  const updateCardsInStorage = async () => {
+    const serverCards = await getBoltcards(ldsWallet.getAdminKey());
+    const localCards = ldsWallet.getBoltcards();
 
-      const secrets = await getBoltcardSecret(serverDetails);
-      const boltcard = new BoltCard(serverDetails, secrets);
-      ldsWallet.setBoltcard(boltcard);
-    }
+    // Remove cards that are not in the server
+    localCards.forEach(localCard => {
+      const serverCard = serverCards.find(card => card.uid === localCard.uid);
+      if (!serverCard) {
+        ldsWallet.deleteBoltcard(localCard);
+      }
+    });
+
+    // Add cards that are in the server but not in the local
+    await Promise.all(
+      serverCards.map(async serverCard => {
+        const localCard = localCards.find(card => card.uid === serverCard.uid);
+        if (!localCard) {
+          const secrets = await getBoltcardSecret(serverCard);
+          const boltcard = new BoltCard(serverCard, secrets);
+          ldsWallet.addBoltcard(boltcard);
+        }
+      }),
+    );
   };
 
   useEffect(() => {
@@ -65,7 +72,7 @@ const AddBoltcard: React.FC = () => {
       setIsLoading(true);
       try {
         await updateInvoiceUrl();
-        await checkAlreadyCreatedBoltcard();
+        await updateCardsInStorage();
         await saveToDisk();
       } catch (_) {}
       setIsLoading(false);
@@ -86,35 +93,53 @@ const AddBoltcard: React.FC = () => {
     }
   };
 
-  const setupCardAndServer = async () => {
-    const adminKey = ldsWallet.getAdminKey();
-    const boltcard = ldsWallet.getBoltcard() as BoltCard;
-    const { uid } = await writeCard(boltcard.secrets);
-    boltcard.isPhisicalCardWritten = true;
-    const updated = await updateBoltcard(adminKey, { ...boltcard, uid }); // To set the real uid from the phisical card
-    boltcard.uid = updated.uid;
-    await saveToDisk();
-  };
-
-  const cardWrittenSucces = async () => {
-    setIsSuccess(true);
-    setTimeout(() => {
-      replace('BoltCardDetails');
-    }, 2000);
-  };
-
   const onCancelHoldCard = () => {
     stopNfcSession();
     setIsHoldCardModalVisible(false);
+  };
+
+  const updateProgress = async (message: string) => {
+    if (Platform.OS === 'ios') return await updateModalMessageIos(message);
+    if (Platform.OS === 'android') return setProgressMessage(message);
   };
 
   const handleOnPress = async () => {
     try {
       setIsLoading(true);
       if (Platform.OS === 'android') setIsHoldCardModalVisible(true);
-      await setupCardAndServer();
-      cardWrittenSucces();
+
+      const progress = getProgressStringGenerator(6);
+      await startNfcSession(`${loc.boltcard.tap_and_hold}\n\n${progress.initialMessage}`);
+
+      const cardUid = await getCardUid();
+      updateProgress(`${loc.boltcard.writting_hold}\n\n${progress.next()}`);
+
+      const freshCardDetails = await genFreshCardDetails();
+      updateProgress(`${loc.boltcard.writting_hold}\n\n${progress.next()}`);
+
+      const ldsAddress = ldsWallet.lnAddress as string;
+      const [prefix] = ldsAddress.split('@');
+      freshCardDetails.card_name = `${prefix} PAY CARD`;
+      freshCardDetails.uid = cardUid as string;
+      const serverDetails = await createBoltcard(ldsWallet.getAdminKey(), freshCardDetails);
+      updateProgress(`${loc.boltcard.writting_hold}\n\n${progress.next()}`);
+
+      const secrets = await getBoltcardSecret(serverDetails);
+      updateProgress(`${loc.boltcard.writting_hold}\n\n${progress.next()}`);
+
+      await writeCard(secrets);
+      updateProgress(`${loc.boltcard.writting_hold}\n\n${progress.next()}`);
+
+      const boltcard = new BoltCard(serverDetails, secrets);
+      ldsWallet.addBoltcard(boltcard);
+      await saveToDisk();
+      stopNfcSession();
+      updateProgress(`${loc.boltcard.writting_hold}\n\n${progress.next()}`);
+
+      setIsSuccess(true);
+      setTimeout(() => navigate('BoltCardDetails', { boltcardUid: boltcard.uid }), 2000);
     } catch (error: any) {
+      stopNfcSession();
       setupBoltcardErrorHandler(error);
       setIsHoldCardModalVisible(false);
     } finally {
@@ -146,7 +171,12 @@ const AddBoltcard: React.FC = () => {
       <View style={styles.buttonContiner}>
         <BlueButton title={loc.boltcard.create_boltcard} onPress={handleOnPress} isLoading={isLoading} />
       </View>
-      <HoldCardModal isHoldCardModalVisible={isHoldCardModalVisible} isSuccess={isSuccess} onCancelHoldCard={onCancelHoldCard} />
+      <HoldCardModal
+        message={progressMessage}
+        isHoldCardModalVisible={isHoldCardModalVisible}
+        isSuccess={isSuccess}
+        onCancelHoldCard={onCancelHoldCard}
+      />
     </SafeAreaView>
   );
 };

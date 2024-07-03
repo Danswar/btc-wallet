@@ -9,6 +9,7 @@ export class LightningLdsWallet extends LightningCustodianWallet {
   addressOwnershipProof?: string;
   lndhubInvoiceUrl?: string;
   boltcard?: BoltCard;
+  boltcards: BoltCard[] = [];
 
   static create(address: string, addressOwnershipProof: string): LightningLdsWallet {
     const wallet = new LightningLdsWallet();
@@ -49,7 +50,19 @@ export class LightningLdsWallet extends LightningCustodianWallet {
     this.boltcard = _boltcard;
   }
 
-  deleteBoltcard(): void {
-    this.boltcard = undefined;
+  addBoltcard(_boltcard: BoltCard): BoltCard {
+    const existingCard = this.boltcards.find(card => card.uid === _boltcard.uid);
+    if (!existingCard) {
+      this.boltcards.push(_boltcard);
+    };
+    return _boltcard;
+  }
+
+  getBoltcards(): BoltCard[] {
+    return this.boltcards;
+  }
+
+  deleteBoltcard(cardDetails: BoltCard): void {
+    this.boltcards = this.boltcards.filter(card => card.uid !== cardDetails.uid);
   }
 }

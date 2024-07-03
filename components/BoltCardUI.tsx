@@ -1,24 +1,58 @@
 import React from 'react';
+import LinearGradient from 'react-native-linear-gradient';
 import { ImageBackground, StyleSheet, View } from 'react-native';
 import { Image, Text } from 'react-native-elements';
+import createHash from 'create-hash';
+
+const colors = [
+  '#6b5f3c',
+  '#640000',
+  '#4c3463',
+  '#6f4e37',
+  '#800020',
+  '#01579B',
+  '#1B5E20',
+  '#33691E',
+  '#827717',
+  '#cd9575',
+  '#ff884d',
+  '#1A237E',
+  '#0D47A1',
+  '#004D40',
+  '#004D40',
+  '#3E2723',
+  '#263238',
+];
 
 interface BoltCardProps {
+  uid: string;
   cardholder: string;
   txLimit: number;
   dailyLimit: number;
   isActive: boolean;
 }
 
-const BoltCardUI: React.FC<BoltCardProps> = ({ cardholder, txLimit, dailyLimit, isActive }) => {
+const BoltCardUI: React.FC<BoltCardProps> = ({ uid, cardholder, txLimit, dailyLimit, isActive }) => {
   const stylesHooks = StyleSheet.create({
     stateIndicatorLight: {
       backgroundColor: isActive ? '#00ff00' : '#ffe200',
     },
   });
 
+  const formattedUid = uid
+    .toUpperCase()
+    .match(/.{1,4}/g)
+    ?.join(' ');
+
+  function derivateColor(): string {
+    const hash = createHash('sha256').update(uid).digest().toString('hex');
+    const index = parseInt(hash.substring(0, 10), 16) % colors.length;
+    return colors[index];
+  }
+
   return (
     <View style={styles.cardContainer}>
-      <ImageBackground style={styles.card} imageStyle={styles.backgroundImageStyle} source={require('../img/background.png')}>
+      <LinearGradient colors={[derivateColor(), '#263238']} style={styles.backgroundImageStyle}>
         <ImageBackground
           style={[styles.card, styles.cardInternalContainer]}
           imageStyle={[styles.backgroundImageStyle, { width: 250, height: 200 }]}
@@ -30,6 +64,9 @@ const BoltCardUI: React.FC<BoltCardProps> = ({ cardholder, txLimit, dailyLimit, 
               <Text style={styles.stateIndicatorText}>{isActive ? 'Active' : 'Pause'}</Text>
             </View>
             <View>
+              <View>
+                <Text style={[styles.uid, styles.metalic]}>{formattedUid}</Text>
+              </View>
               <View>
                 <Text style={[styles.cardName, styles.metalic]}>{cardholder.toUpperCase()}</Text>
               </View>
@@ -50,7 +87,7 @@ const BoltCardUI: React.FC<BoltCardProps> = ({ cardholder, txLimit, dailyLimit, 
             <Image source={require('../img/nfc.png')} style={styles.boltcardLogo} />
           </View>
         </ImageBackground>
-      </ImageBackground>
+      </LinearGradient>
     </View>
   );
 };
@@ -59,7 +96,6 @@ const styles = StyleSheet.create({
   cardContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
   },
   card: {
     width: '100%',
@@ -117,9 +153,14 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: -0.5, height: 0.5 },
     textShadowRadius: 10,
   },
-  cardName: {
+  uid: {
     fontWeight: 'bold',
     fontSize: 18,
+    marginBottom: 4,
+  },
+  cardName: {
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   detailTitle: {
     fontWeight: 'bold',
