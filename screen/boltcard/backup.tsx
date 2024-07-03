@@ -30,7 +30,7 @@ const DeleteBolcard: React.FC = () => {
   });
 
   const getJsonBackup = () => {
-    const card = ldsWallet.getBoltcard() as BoltCard;
+    const card = ldsWallet.getBoltcards()[0] as BoltCard;
     return JSON.stringify({
       action: 'wipe',
       k0: card.secrets.k0,

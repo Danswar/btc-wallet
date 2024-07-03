@@ -509,7 +509,7 @@ const WalletDetails = () => {
             {wallet.allowBIP47() && isBIP47Enabled && <BlueListItem onPress={navigateToPaymentCodes} title="Show payment codes" chevron />}
             <BlueCard style={styles.address}>
               <View>
-                {[LightningLdsWallet.type].includes(wallet.type) && wallet.getBoltcard() && (
+                {[LightningLdsWallet.type].includes(wallet.type) && wallet.getBoltcards()[0] && (
                   <>
                     <SecondButton onPress={navigateToBackupPayCardDetails} title={'Backup Pay Card Details'} chevron />
                   </>
