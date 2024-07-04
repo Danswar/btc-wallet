@@ -26,6 +26,7 @@ import {
 import { randomBytes } from './class/rng';
 import alert from './components/Alert';
 import { LightningLdsWallet } from './class/wallets/lightning-lds-wallet';
+import { TaprootLdsWallet } from './class/wallets/taproot-lds-wallet';
 
 const encryption = require('./blue_modules/encryption');
 const Realm = require('realm');
@@ -396,10 +397,16 @@ class AppStorage {
           case SLIP39SegwitBech32Wallet.type:
             unserializedWallet = SLIP39SegwitBech32Wallet.fromJson(key);
             break;
+          case TaprootLdsWallet.type:
           case LightningCustodianWallet.type:
           case LightningLdsWallet.type: {
             unserializedWallet =
-              tempObj.type === LightningCustodianWallet.type ? LightningCustodianWallet.fromJson(key) : LightningLdsWallet.fromJson(key);
+              tempObj.type === LightningCustodianWallet.type
+                ? LightningCustodianWallet.fromJson(key)
+                : tempObj.type === LightningLdsWallet.type
+                ? LightningLdsWallet.fromJson(key)
+                : TaprootLdsWallet.fromJson(key);
+                
             let lndhub = false;
             try {
               lndhub = await AsyncStorage.getItem(AppStorage.LNDHUB);

@@ -8,6 +8,7 @@ import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import { MultisigHDWallet } from '../../class';
 import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
+import { TaprootLdsWallet, TaprootLdsWalletType } from '../../class/wallets/taproot-lds-wallet';
 
 const styles = StyleSheet.create({
   root: {
@@ -23,6 +24,9 @@ const Settings = () => {
   const { walletID } = useWalletContext();
   const lndWallet = wallets.find(wallet => wallet.type === LightningLdsWallet.type);
   const multiDeviceWallet = wallets.find(wallet => wallet.type === MultisigHDWallet.type);
+  const chfTaprootWallet = wallets.find(
+    wallet => wallet.type === TaprootLdsWallet.type && wallet.getCurrencyName() === TaprootLdsWalletType.CHF,
+  );
 
   const navigateToWalletDetails = id => {
     navigate('WalletDetails', {
@@ -54,6 +58,13 @@ const Settings = () => {
           disabled={!multiDeviceWallet}
           onPress={() => navigateToWalletDetails(multiDeviceWallet?.getID())}
           testID="WalletDetailsMultisig"
+          chevron
+        />
+        <BlueListItem
+          title={loc.wallets.chf_taproot_wallet_label}
+          disabled={!chfTaprootWallet}
+          onPress={() => navigateToWalletDetails(chfTaprootWallet?.getID())}
+          testID="WalletDetailsLnd"
           chevron
         />
         <BlueListItem title={loc.settings.currency} onPress={() => navigate('Currency')} testID="Currency" chevron />

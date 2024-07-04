@@ -34,6 +34,7 @@ import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
 import BoltCard from '../../class/boltcard';
+import { TaprootLdsWallet, TaprootLdsWalletType } from '../../class/wallets/taproot-lds-wallet';
 
 const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
@@ -44,35 +45,13 @@ const buttonFontSize =
     ? 22
     : PixelRatio.roundToNearestPixel(Dimensions.get('window').width / 26);
 
-const dummyLnWallet = { chain: Chain.OFFCHAIN, isDummy: true, isLdWallet: true };
-const dummyMultiSigWallet = { chain: Chain.ONCHAIN, isDummy: true, isMultisig: true };
 const dummyTaroWallets = [
-  { chain: Chain.OFFCHAIN, isDummy: true, isTapRoot: true, asset: 'USD' },
-  { chain: Chain.OFFCHAIN, isDummy: true, isTapRoot: true, asset: 'EUR' },
-  { chain: Chain.OFFCHAIN, isDummy: true, isTapRoot: true, asset: 'CHF' },
+  { title: 'USD', subtitle: 'Taro Protocol' },
+  { title: 'EUR', subtitle: 'Taro Protocol' },
 ];
-const getWalletSubtitle = wallet => {
-  if (wallet.type === LightningLdsWallet.type || wallet.isLdWallet) { return loc.wallets.lightning_wallet_label }
-  if (wallet.type === MultisigHDWallet.type || wallet.isMultisig) { return loc.wallets.multi_sig_wallet_label }
-  if (wallet.isTapRoot) { return 'Taro Protocol' }
-  if (wallet.chain === Chain.ONCHAIN) { return loc.wallets.main_wallet_label }
-  return ''
-}
 
 const WalletHome = ({ navigation }) => {
-  const { wallets, saveToDisk, setSelectedWallet, isElectrumDisabled } = useContext(BlueStorageContext);
-
-  const displayWallets = useMemo(() => {
-    const LnWallet = wallets.find(w => w.type === LightningLdsWallet.type) || dummyLnWallet;
-    const multisigWallet = wallets.find(w => w.type === MultisigHDWallet.type) || dummyMultiSigWallet;
-    const tmpWallets = [];
-    tmpWallets.push(multisigWallet);
-    tmpWallets.push(wallets[0]);
-    tmpWallets.push(LnWallet);
-    tmpWallets.push(...dummyTaroWallets);
-    return tmpWallets;
-  }, [wallets]);
-
+  const { wallets, saveToDisk, setSelectedWallet, isElectrumDisabled, ldsDEV } = useContext(BlueStorageContext);
   const walletID = useMemo(() => wallets[0]?.getID(), [wallets]);
   const multisigWallet = useMemo(() => wallets.find(w => w.type === MultisigHDWallet.type), [wallets]);
   const lnWallet = useMemo(() => wallets.find(w => w.type === LightningLdsWallet.type), [wallets]);
@@ -165,7 +144,7 @@ const WalletHome = ({ navigation }) => {
       console.log('saving to disk');
       await saveToDisk();
     }
-    
+
     await saveToDisk();
     setIsLoading(false);
   };
@@ -188,25 +167,7 @@ const WalletHome = ({ navigation }) => {
     });
   };
 
-  const navigateToAddLightning = () => {
-    navigate('WalletsRoot', {
-      screen: 'AddLightning',
-      params: {
-        walletID: wallet.getID()
-      },
-    });
-  };
-
-  const navigateToAddMultisig = () => {
-    navigate('WalletsRoot', {
-      screen: 'WalletsAddMultisig',
-      params: {
-        walletLabel: loc.multisig.default_label
-      },
-    });
-  };
-
-  const importPsbt = (base64Psbt) => {
+  const importPsbt = base64Psbt => {
     try {
       const psbt = bitcoin.Psbt.fromBase64(base64Psbt); // if it doesnt throw - all good, its valid
       if (Boolean(multisigWallet) && multisigWallet.howManySignaturesCanWeMake() > 0) {
@@ -360,6 +321,81 @@ const WalletHome = ({ navigation }) => {
     scanqrHelper(navigate, name, false).then(d => onBarScanned(d));
   };
 
+
+  const navigateToAddMultisig = () => {
+    navigate('WalletsRoot', {
+      screen: 'WalletsAddMultisig',
+      params: {
+        walletLabel: loc.multisig.default_label,
+      },
+    });
+  };
+
+  const navigateToAddLightning = () => {
+    navigate('WalletsRoot', {
+      screen: 'AddLightning',
+      params: {
+        walletID: wallet.getID(),
+      },
+    });
+  };
+
+  const navigateToAddTaproot = asset => {
+    navigate('WalletsRoot', {
+      screen: 'AddLightning',
+      params: {
+        walletID: wallet.getID(),
+        asset,
+      },
+    });
+  };
+
+  const displayWallets = useMemo(() => {
+    const tmpWallets = [];
+
+    const multisigWallet = wallets.find(w => w.type === MultisigHDWallet.type);
+    tmpWallets.push({
+      wallet: multisigWallet,
+      title: 'Bitcoin',
+      isActivated: true,
+      subtitle: loc.wallets.multi_sig_wallet_label,
+      walletID: multisigWallet?.getID?.(),
+      onDummyPress: navigateToAddMultisig,
+    });
+
+    const onChainWallet = wallets[0];
+    tmpWallets.push({
+      wallet: onChainWallet,
+      title: 'Bitcoin',
+      isActivated: true,
+      subtitle: loc.wallets.main_wallet_label,
+      walletID: onChainWallet.getID?.(),
+    });
+
+    const LnWallet = wallets.find(w => w.type === LightningLdsWallet.type);
+    tmpWallets.push({
+      wallet: LnWallet,
+      title: 'Bitcoin',
+      isActivated: true,
+      subtitle: loc.wallets.lightning_wallet_label,
+      walletID: LnWallet?.getID?.(),
+      onDummyPress: navigateToAddLightning,
+    });
+
+    const chfTaprootWallet = wallets.find(w => w.type === TaprootLdsWallet.type && w.getCurrencyName() === TaprootLdsWalletType.CHF);
+    tmpWallets.push({
+      wallet: chfTaprootWallet,
+      title: 'CHF',
+      isActivated: ldsDEV,
+      subtitle: 'Taro Protocol',
+      walletID: chfTaprootWallet?.getID?.(),
+      onDummyPress: () => navigateToAddTaproot(TaprootLdsWalletType.CHF),
+    });
+
+    tmpWallets.push(...dummyTaroWallets);
+    return tmpWallets;
+  }, [wallets]);
+
   return (
     <View style={styles.flex}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent animated />
@@ -384,38 +420,42 @@ const WalletHome = ({ navigation }) => {
       </View> */}
 
       <View style={[styles.list, stylesHook.list]}>
-        {displayWallets.map((w, i) => (
+        {displayWallets.map((item, i) => (
           <TouchableOpacity
             key={i}
-            disabled={w.isDummy}
-            onPress={() => navigate('WalletsRoot', { screen: 'WalletAsset', params: { walletID: w.getID() } })}
+            disabled={!item.wallet}
+            onPress={() => navigate('WalletsRoot', { screen: 'WalletAsset', params: { walletID: item.wallet?.getID() } })}
           >
-            {w.isDummy ? (
+            {item.wallet ? (
               <BlueListItem
-                title={w.asset ?? 'Bitcoin'}
+                title={item.title}
                 subtitleNumberOfLines={1}
-                subtitle={getWalletSubtitle(w)}
+                subtitle={item.subtitle}
                 Component={View}
-                {...(w.isTapRoot ? {
-                  rightTitle: loc.wallets.coming_soon,
-                  rightTitleStyle: stylesHook.comingSoon
-                } : {
-                  rightElement: <SecondButton
-                    title={loc._.add}
-                    icon={{ name: 'plus', type: 'font-awesome', color: 'white', size: 12 }}
-                    onPress={w.isLdWallet ? navigateToAddLightning : navigateToAddMultisig}
-                  />
-                })}
+                rightTitle={formatBalance(item.wallet.getBalance(), item.wallet.getPreferredBalanceUnit(), true).toString()}
+                rightTitleStyle={styles.walletBalance}
+                chevron
               />
             ) : (
               <BlueListItem
-                title={'Bitcoin'}
+                title={item.title}
                 subtitleNumberOfLines={1}
-                subtitle={getWalletSubtitle(w)}
+                subtitle={item.subtitle}
                 Component={View}
-                rightTitle={formatBalance(w.getBalance(), w.getPreferredBalanceUnit(), true).toString()}
-                rightTitleStyle={styles.walletBalance}
-                chevron
+                {...(item.isActivated
+                  ? {
+                      rightElement: (
+                        <SecondButton
+                          title={loc._.add}
+                          icon={{ name: 'plus', type: 'font-awesome', color: 'white', size: 12 }}
+                          onPress={item.onDummyPress}
+                        />
+                      ),
+                    }
+                  : {
+                      rightTitle: loc.wallets.coming_soon,
+                      rightTitleStyle: stylesHook.comingSoon,
+                    })}
               />
             )}
           </TouchableOpacity>

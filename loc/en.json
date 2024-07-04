@@ -411,6 +411,7 @@
     "main_wallet_label": "On-Chain Wallet",
     "lightning_wallet_label": "Lightning Wallet",
     "multi_sig_wallet_label": "Multi-Device Wallet",
+    "chf_taproot_wallet_label": "CHF Taproot Wallet",
     "add_bitcoin": "Bitcoin",
     "add_bitcoin_explain": "Simple and powerful Bitcoin wallet",
     "add_create": "Create",
