@@ -103,9 +103,9 @@ export default class LnurlPaySuccess extends Component {
                     }}
                   />
                 ) : (
-                  <Text selectable style={{ ...styles.successText, ...styles.successValue }}>
+                  <BlueText selectable style={{ ...styles.successText, ...styles.successValue }}>
                     {message}
-                  </Text>
+                  </BlueText>
                 )}
               </View>
             </BlueCard>
