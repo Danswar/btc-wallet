@@ -411,6 +411,7 @@
     "main_wallet_label": "On-Chain Wallet",
     "lightning_wallet_label": "Lightning Wallet",
     "multi_sig_wallet_label": "Multi-Device Wallet",
+    "chf_taproot_wallet_label": "CHF Taproot Wallet",
     "add_bitcoin": "Bitcoin",
     "add_bitcoin_explain": "Simple and powerful Bitcoin wallet",
     "add_create": "Create",
@@ -704,6 +705,8 @@
     "send_to_card": "Send to Card",
     "keys_backup": "Keys/Backup",
     "wipe_card": "Reset card",
-    "unregister_and_wipe": "Unregister and reset card"
+    "unregister_and_wipe": "Unregister and reset card",
+    "tap_and_hold": "Please tap and hold your card",
+    "writting_hold": "Writing, please hold your card"
   }
 }

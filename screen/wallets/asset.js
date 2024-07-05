@@ -73,7 +73,6 @@ const Asset = ({ navigation }) => {
     refreshAllWalletTransactions,
     walletTransactionUpdateStatus,
     isElectrumDisabled,
-    isPayCardEnabled
   } = useContext(BlueStorageContext);
   const { name, params } = useRoute();
   const walletID = params.walletID;
@@ -545,13 +544,12 @@ const Asset = ({ navigation }) => {
   });
 
   const handleGoToBoltCard = () => {
-    return wallet.getBoltcard()?.isPhisicalCardWritten ? navigate('BoltCardDetails') : navigate('AddBoltcard');
+    return wallet.getBoltcards().length > 0 ? navigate('BoltCardDetails') : navigate('AddBoltcard');
   };
 
   renderRightHeaderComponent = () => {
     switch (wallet.type) {
       case LightningLdsWallet.type:
-        if(!isPayCardEnabled) return null;
         return (
           <TouchableOpacity onPress={handleGoToBoltCard} style={styles.boltcardButton}>
             <Image source={require('../../img/pay-card-link.png')} style={{ width: 1.30 * 30, height: 30 }} />

@@ -15,15 +15,17 @@ import {
   SecondButton,
   SelectButton,
 } from '../../../BlueComponents';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import { useLds } from '../../../api/lds/hooks/lds.hook';
 import { useWalletContext } from '../../../contexts/wallet.context';
 import { BlueStorageContext } from '../../../blue_modules/storage-context';
 import { Chain, WalletLabel } from '../../../models/bitcoinUnits';
 import { LightningLdsWallet } from '../../../class/wallets/lightning-lds-wallet';
 import Lnurl from '../../../class/lnurl';
+import { AssetDetails, TaprootLdsWallet, TaprootLdsWalletType } from '../../../class/wallets/taproot-lds-wallet';
 
 const AddLightning = () => {
+  const { asset = TaprootLdsWalletType.BTC } = useRoute().params as { asset: TaprootLdsWalletType };
   const { navigate } = useNavigation();
   const { address, signMessage } = useWalletContext();
   const { getUser } = useLds();
@@ -60,7 +62,6 @@ const AddLightning = () => {
   const create = async () => {
     if (useCustom) {
       if (!dataValid) throw new Error('Invalid input');
-
       await createWallet(lndUrl, customAddress, signature);
     } else {
       if (!address) throw new Error('Address is not defined');
@@ -68,11 +69,20 @@ const AddLightning = () => {
       const { lightning } = await getUser(address, m => signMessage(m, address));
 
       for (const lnWallet of lightning.wallets) {
-        if (lnWallet.asset.name === 'BTC' && lnWallet.lndhubAdminUrl) {
+        // Lightinig BTC
+        if (lnWallet.asset.name === 'BTC' && asset === TaprootLdsWalletType.BTC && lnWallet.lndhubAdminUrl) {
           await createWallet(lnWallet.lndhubAdminUrl, lightning.address, lightning.addressOwnershipProof);
-        }
 
-        // TODO (david): taproot wallet?
+          // Taproot
+        } else if (lnWallet.asset.name === asset && lnWallet.lndhubAdminUrl) {
+          await createTaprootAsset(
+            lnWallet.lndhubAdminUrl,
+            lightning.address,
+            lightning.addressOwnershipProof,
+            lnWallet.asset as AssetDetails,
+            lnWallet.lnbitsWalletId,
+          );
+        }
       }
     }
 
@@ -96,6 +106,28 @@ const AddLightning = () => {
     await addAndSaveWallet(wallet);
   };
 
+  const createTaprootAsset = async (
+    lndhubAdminUrl: string,
+    lnAddress: string,
+    addressOwnershipProof: string,
+    assetDetails: AssetDetails,
+    lnbitsWalletId: string,
+  ) => {
+    const [secret, baseUri] = lndhubAdminUrl.split('@');
+
+    const wallet = TaprootLdsWallet.create(lnAddress, addressOwnershipProof, assetDetails, lnbitsWalletId);
+    wallet.setLabel(assetDetails.displayName);
+    wallet.setBaseURI(baseUri);
+    wallet.setSecret(secret);
+    await wallet.init();
+    await wallet.authorize();
+    await wallet.fetchTransactions();
+    await wallet.fetchUserInvoices();
+    await wallet.fetchPendingTransactions();
+    await wallet.fetchBalance();
+
+    await addAndSaveWallet(wallet);
+  };
   return (
     <SafeBlueArea>
       <ScrollView contentContainerStyle={styles.scrollableContainer}>

@@ -121,7 +121,7 @@ export class LightningCustodianWallet extends LegacyWallet {
 
   async payInvoice(invoice, freeAmount = 0) {
     const isDevAccount = this.getBaseURI().indexOf(Config.REACT_APP_LDS_DEV_URL) !== -1;
-    const isTestnetInvoice = invoice.startsWith('lntb');
+    const isTestnetInvoice = invoice.toLocaleLowerCase().startsWith('lntb');
     const isTestnetToMainnet = isTestnetInvoice && !isDevAccount;
     const isMainnetToTestnet = !isTestnetInvoice && isDevAccount;
     if (isTestnetToMainnet || isMainnetToTestnet) {

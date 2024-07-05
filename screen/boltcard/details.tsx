@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { Icon, Text } from 'react-native-elements';
 import navigationStyle from '../../components/navigationStyle';
@@ -7,24 +7,29 @@ import { BlueStorageContext } from '../../blue_modules/storage-context';
 import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
 import useLdsBoltcards from '../../api/boltcards/hooks/bolcards.hook';
 import { AbstractWallet } from '../../class';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import loc from '../../loc';
-import BoltCardUI from '../../components/BoltCardUI';
 import BoltcardTransactionList from '../../components/BoltcardTransactionList';
 import BoltCard from '../../class/boltcard';
 import { Hit } from '../../api/boltcards/definitions/apiDtos';
 import useInputAmount from '../../hooks/useInputAmount';
 import alert from '../../components/Alert';
+import BoltCardsCarousel from './BoltCardsCarousel';
 
 const BoltcardDetails: React.FC = () => {
   const { colors } = useTheme();
   const { wallets, saveToDisk } = useContext(BlueStorageContext);
   const ldsWallet = wallets.find((w: AbstractWallet) => w.type === LightningLdsWallet.type) as LightningLdsWallet;
-  const [card, setCard] = useState(ldsWallet.getBoltcard() as BoltCard);
+  const params = useRoute().params as { boltcardUid?: string };
+  const defaultCard = useMemo(
+    () =>
+      params?.boltcardUid ? ldsWallet.getBoltcards().find((c: BoltCard) => c.uid === params.boltcardUid) : ldsWallet.getBoltcards()[0],
+    [params],
+  ) as BoltCard;
+  const [card, setCard] = useState(defaultCard);
   const { navigate } = useNavigation();
   const [isEditCard, setIsEditCard] = useState(false);
-  const [hits, setHits] = useState<Hit[]>(ldsWallet.getBoltcard()?.cachedHits || []);
+  const [hits, setHits] = useState<Hit[]>(ldsWallet.cachedHits || []);
   const { getHits, enableBoltcard, updateBoltcard } = useLdsBoltcards();
   const [isPolling, setIsPolling] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -33,33 +38,47 @@ const BoltcardDetails: React.FC = () => {
   const { amountSats: dailySats, formattedUnit: dailyUnit, inputProps: dailyInputProps, resetInput: resetDaily } = useInputAmount();
   const { amountSats: txLimitSats, formattedUnit: txLimitUnit, inputProps: txLimitInputProps, resetInput: resetTxLimit } = useInputAmount();
 
+  const initPolling = useCallback(async () => {
+    try {
+      pollInterval.current = setInterval(async () => {
+        if (isPolling) return;
+        setIsPolling(true);
+        const latestHits = await getHits(ldsWallet.getInvoiceId());
+        ldsWallet.cachedHits = latestHits;
+        setHits(latestHits);
+        setIsPolling(false);
+      }, 5000);
+    } catch (_) {
+      console.log(_);
+    }
+  }, [card]);
+
+  const stopPolling = () => {
+    if (pollInterval.current) {
+      clearInterval(pollInterval.current);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        pollInterval.current = setInterval(async () => {
-          if (isPolling) return;
-          setIsPolling(true);
-          const latestHits = await getHits(ldsWallet.getInvoiceId());
-          card.cachedHits = latestHits;
-          setCard(card);
-          setHits(latestHits);
-          setIsPolling(false);
-        }, 5000);
-      } catch (_) {
-        console.log(_);
-      }
-    })();
-    return () => {
-      if (pollInterval.current) {
-        clearInterval(pollInterval.current);
-      }
-    };
+    (async () => initPolling())();
+    return () => stopPolling();
   }, []);
+
+  // For handling going back to this screen from creation or deletion
+  useEffect(() => {
+    if (params?.boltcardUid) {
+      const newCard = ldsWallet.getBoltcards().find((c: BoltCard) => c.uid === params.boltcardUid);
+      if (newCard) {
+        setCard(newCard);
+      }
+    }
+  }, [params]);
 
   const stylesHooks = StyleSheet.create({
     root: {
       backgroundColor: colors.elevated,
       flex: 1,
+      paddingTop: 15,
     },
     optionText: {
       color: colors.foregroundColor,
@@ -87,7 +106,7 @@ const BoltcardDetails: React.FC = () => {
     resetDaily();
     resetTxLimit();
     setCardName('');
-  }
+  };
 
   const handleOnPressUpdate = async () => {
     try {
@@ -118,9 +137,8 @@ const BoltcardDetails: React.FC = () => {
   const toggleTx = () => {
     setIsEditCard(false);
     resetInputs();
-  }
-  const navigateToBackup = () => navigate('BackupBoltcard');
-  const navigateToDelete = () => navigate('DeleteBoltcard');
+  };
+  const navigateToDelete = () => navigate('DeleteBoltcard', { boltcardUid: card.uid });
   const toggleCardActive = async () => {
     const newState = !card.enable;
     const { enable } = await enableBoltcard(ldsWallet.getAdminKey(), card, newState);
@@ -128,6 +146,8 @@ const BoltcardDetails: React.FC = () => {
     setCard(card);
     await saveToDisk();
   };
+
+  const addNewCard = () => navigate('AddBoltcard');
 
   const OptionButton = (title: string, icon: string, onPress: () => void) => {
     return (
@@ -137,6 +157,8 @@ const BoltcardDetails: React.FC = () => {
       </TouchableOpacity>
     );
   };
+
+  const cardTxs = useMemo(() => hits.filter(hit => hit.card_id === card.id), [hits, card]);
 
   const renderEditCard = () => {
     return (
@@ -191,27 +213,29 @@ const BoltcardDetails: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={stylesHooks.root}>
+    <View style={stylesHooks.root}>
       <KeyboardAvoidingView
         behavior="position"
         style={styles.flex}
         contentContainerStyle={styles.flex}
         keyboardVerticalOffset={Platform.select({ ios: 20, android: -70 })}
       >
+        <View style={styles.carouselContainer}>
+          <BoltCardsCarousel cards={ldsWallet.getBoltcards()} selectedCard={card} onCardChange={newSelected => setCard(newSelected)} />
+        </View>
         <View>
-          <BoltCardUI cardholder={card.card_name} txLimit={card.tx_limit} dailyLimit={card.daily_limit} isActive={card.enable} />
           <View style={styles.optionsContainer}>
+            {OptionButton('Add', 'add', addNewCard)}
             {isEditCard ? OptionButton('Txs', 'format-list-bulleted', toggleTx) : OptionButton('Edit', 'edit', toggleEditCard)}
             {card.enable ? OptionButton('Pause', 'pause', toggleCardActive) : OptionButton('Activate', 'play-arrow', toggleCardActive)}
-            {OptionButton('Backup', 'save', navigateToBackup)}
             {OptionButton('Delete', 'delete', navigateToDelete)}
           </View>
         </View>
         <View style={[styles.detailsContainer, stylesHooks.detailsContainer]}>
-          {isEditCard ? renderEditCard() : <BoltcardTransactionList transactions={hits} />}
+          {isEditCard ? renderEditCard() : <BoltcardTransactionList transactions={cardTxs} />}
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -262,7 +286,6 @@ const styles = StyleSheet.create({
     minHeight: 33,
   },
   inputUnit: {
-    color: '#81868e',
     fontSize: 16,
     marginRight: 10,
     marginLeft: 10,
@@ -270,11 +293,30 @@ const styles = StyleSheet.create({
   inputLabel: {
     color: '#81868e',
   },
+  walletDetails: {
+    paddingLeft: 12,
+    paddingVertical: 12,
+  },
+  carouselContainer: {
+    flexDirection: 'row',
+  },
 });
 
-BoltcardDetails.navigationOptions = navigationStyle({}, options => ({
+BoltcardDetails.navigationOptions = navigationStyle({}, (options, { navigation, route }) => ({
   ...options,
   title: loc.boltcard.title_details,
+  headerRight: () => (
+    <TouchableOpacity
+      accessibilityRole="button"
+      style={styles.walletDetails}
+      onPress={() =>
+        navigation.navigate('Settings', {
+          walletID: route?.params?.walletID,
+        })
+      }
+    >
+      <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
+    </TouchableOpacity>
+  ),
 }));
-
 export default BoltcardDetails;

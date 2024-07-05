@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
 });
 
 const FeatureFlags: React.FC = () => {
-  const { ldsDEV, setLdsDEVAsyncStorage, isPayCardEnabled, setIsPayCardEnabledAsyncStorage } = useContext(BlueStorageContext);
+  const { ldsDEV, setLdsDEVAsyncStorage } = useContext(BlueStorageContext);
   const [isLoading, setIsLoading] = useState(false);
   const { colors } = useTheme();
 
@@ -26,15 +26,6 @@ const FeatureFlags: React.FC = () => {
     <BlueLoading />
   ) : (
     <ScrollView style={[styles.root, stylesWithThemeHook.root]}>
-      <BlueListItem
-        // @ts-ignore: Fix later
-        Component={Pressable}
-        title="Pay Card area"
-        switch={{ onValueChange: setIsPayCardEnabledAsyncStorage, value: isPayCardEnabled }}
-      />
-      <BlueCard>
-        <BlueText>Access to Pay Card area: Use an NTAG424 as a debit card to make payments over the lightning network</BlueText>
-      </BlueCard>
       <BlueListItem
         // @ts-ignore: Fix later
         Component={Pressable}

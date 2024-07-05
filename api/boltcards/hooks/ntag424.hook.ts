@@ -37,13 +37,14 @@ interface UseNtag424OptionsInterface {
   manualSessionControl?: boolean; // If true, session will not be stopped after each operation
 }
 interface UseNtag424Interface {
-  startNfcSession: () => Promise<NfcTech | null>;
+  startNfcSession: (message?: string) => Promise<NfcTech | null>;
   stopNfcSession: () => void;
   authCard: (cardDetails: CardReadDetails, secrets: BolcardSecrets) => Promise<BolcardSecrets | undefined>;
   getCardUid: () => Promise<string | undefined>;
   readCard: () => Promise<CardReadDetails | undefined>;
   writeCard: (cardDetails: CardKeys) => Promise<CardKeysWithUid>;
   wipeCard: (cardDetails: BolcardSecrets) => Promise<void>;
+  updateModalMessageIos: (message: string) => Promise<void>;
 }
 
 const defaultOptions: UseNtag424OptionsInterface = {
@@ -69,7 +70,8 @@ export function useNtag424({ manualSessionControl } = defaultOptions): UseNtag42
     };
   }, []);
 
-  const startNfcSession = () => NfcManager.requestTechnology(NfcTech.IsoDep, { alertMessage: loc.boltcard.alert_message_write_card });
+  const startNfcSession = (message?: string) =>
+    NfcManager.requestTechnology(NfcTech.IsoDep, { alertMessage: message ?? loc.boltcard.alert_message_write_card });
 
   const stopNfcSession = () => NfcManager.cancelTechnologyRequest();
 
@@ -235,5 +237,7 @@ export function useNtag424({ manualSessionControl } = defaultOptions): UseNtag42
     }
   };
 
-  return { startNfcSession, stopNfcSession, authCard, getCardUid, readCard, writeCard, wipeCard };
+  const updateModalMessageIos = async (message: string) => NfcManager.setAlertMessageIOS(message);
+
+  return { startNfcSession, updateModalMessageIos, stopNfcSession, authCard, getCardUid, readCard, writeCard, wipeCard };
 }

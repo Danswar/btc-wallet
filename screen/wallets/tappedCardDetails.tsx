@@ -252,7 +252,7 @@ const TappedCardDetails = () => {
       deleteBoltcard(lnWallet.getAdminKey(), serverDetails);
     } catch (_) {}
 
-    lnWallet.deleteBoltcard();
+    lnWallet.deleteBoltcard(serverDetails);
     handleOnCancelHoldCard();
     saveToDisk();
     goBack();

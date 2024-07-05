@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -23,6 +23,7 @@ import {
   BlueCopyTextToClipboard,
   BlueSpacing40,
   SecondButton,
+  BlueSpacing10,
 } from '../../BlueComponents';
 import QRCodeComponent from '../../components/QRCodeComponent';
 import navigationStyle from '../../components/navigationStyle';
@@ -42,12 +43,10 @@ interface RouteParams {
 const LNDReceive = () => {
   const { wallets, saveToDisk, setSelectedWallet, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
   const { walletID } = useRoute().params as RouteParams;
-  const wallet = useRef(
-    wallets.find((item: any) => item.getID() === walletID) || wallets.find((item: any) => item.chain === Chain.OFFCHAIN),
-  );
+  const wallet = useMemo(() => wallets.find((item: any) => item.getID() === walletID), [walletID, wallets]);
   const { colors } = useTheme();
   // @ts-ignore - useNavigation non-sense
-  const { replace, dangerouslyGetParent } = useNavigation();
+  const { setParams, replace, dangerouslyGetParent } = useNavigation();
   const [isInvoiceLoading, setIsInvoiceLoading] = useState(false);
   const [description, setDescription] = useState('');
   const { inputProps, amountSats, formattedUnit, changeToNextUnit } = useInputAmount();
@@ -80,10 +79,9 @@ const LNDReceive = () => {
   }, []);
 
   useEffect(() => {
-    if (wallet.current && wallet.current.getID() !== walletID) {
+    if (wallet && wallet.getID() !== walletID) {
       const newWallet = wallets.find(w => w.getID() === walletID);
       if (newWallet) {
-        wallet.current = newWallet;
         setSelectedWallet(newWallet.getID());
       }
     }
@@ -100,7 +98,7 @@ const LNDReceive = () => {
   const initInvoicePolling = (invoice: any) => {
     cancelInvoicePolling(); // clear any previous polling
     invoicePolling.current = setInterval(async () => {
-      const userInvoices = await wallet.current.getUserInvoices(20);
+      const userInvoices = await wallet.getUserInvoices(20);
       const updatedUserInvoice = userInvoices.find(i => i.payment_request === invoice);
       if (!updatedUserInvoice) {
         return;
@@ -159,14 +157,14 @@ const LNDReceive = () => {
       setIsInvoiceLoading(false);
       return;
     }
-    const invoiceRequest = await wallet.current.addInvoice(amountSats, description);
+    const invoiceRequest = await wallet.addInvoice(amountSats, description);
     ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
-    const decoded = await wallet.current.decodeInvoice(invoiceRequest);
+    const decoded = await wallet.decodeInvoice(invoiceRequest);
     await Notifications.tryToObtainPermissions();
     Notifications.majorTomToGroundControl([], [decoded.payment_hash], []);
 
     setTimeout(async () => {
-      await wallet.current.getUserInvoices(1);
+      await wallet.getUserInvoices(1);
       initInvoicePolling(invoiceRequest);
       await saveToDisk();
     }, 1000);
@@ -183,6 +181,8 @@ const LNDReceive = () => {
     if (newWallet.chain !== Chain.OFFCHAIN) {
       return replace('ReceiveDetails', { walletID: id });
     }
+    
+    setParams({ walletID: id });
   };
 
   const handleOnBlur = () => {
@@ -193,7 +193,7 @@ const LNDReceive = () => {
   };
 
   const handleShareButtonPressed = () => {
-    Share.open({ message: invoiceRequest ? invoiceRequest : wallet.current.lnAddress }).catch(error => console.log(error));
+    Share.open({ message: invoiceRequest ? invoiceRequest : wallet.lnAddress }).catch(error => console.log(error));
   };
 
   if (isPaid) {
@@ -214,7 +214,7 @@ const LNDReceive = () => {
         <KeyboardAvoidingView behavior="position" contentContainerStyle={[styleHooks.root, styles.flex]} style={[styles.flex]}>
           <View style={[styles.flex, styles.grow]}>
             <View style={styles.pickerContainer}>
-              <BlueWalletSelect wallets={wallets} value={wallet.current?.getID()} onChange={onWalletChange} />
+              <BlueWalletSelect wallets={wallets} value={wallet?.getID()} onChange={onWalletChange} />
             </View>
             <View style={[styles.contentContainer]}>
               <View style={[styles.scrollBody, styles.flex]}>
@@ -222,12 +222,17 @@ const LNDReceive = () => {
                   <ActivityIndicator />
                 ) : (
                   <>
-                    <QRCodeComponent value={invoiceRequest ? invoiceRequest : wallet.current.lnAddress} />
-                    <BlueCopyTextToClipboard
-                      text={invoiceRequest || wallet.current.lnAddress}
-                      truncated={Boolean(invoiceRequest)}
-                      textStyle={styles.copyText}
-                    />
+                    <QRCodeComponent value={invoiceRequest ? invoiceRequest : wallet.lnAddress} />
+                    <View style={styles.shareContainer}>
+                      <BlueCopyTextToClipboard
+                        text={invoiceRequest || wallet.lnAddress}
+                        truncated={Boolean(invoiceRequest)}
+                        textStyle={styles.copyText}
+                      />
+                      <TouchableOpacity accessibilityRole="button" onPress={handleShareButtonPressed}>
+                        <Image resizeMode="stretch" source={require('../../img/share-icon.png')}  style={{width:18, height: 20}} />
+                      </TouchableOpacity>
+                    </View>
                   </>
                 )}
               </View>
@@ -264,28 +269,33 @@ const LNDReceive = () => {
                     onBlur={handleOnBlur}
                   />
                 </View>
-                <View>
-                  {Platform.select({
-                    ios: (
-                      <View style={styles.iosNfcButtonContainer}>
-                        <SecondButton
-                          onPress={startNfcOnIos}
-                          disabled={!Boolean(invoiceRequest)}
-                          title={'Use Boltcard'}
-                          image={{ source: require('../../img/bolt-card.png') }}
-                        />
-                      </View>
-                    ),
-                    android: (
-                      <View style={styles.buttonsContainer}>
-                        <Image source={require('../../img/bolt-card.png')} style={{ width: 40, height: 40 }} />
-                      </View>
-                    ),
-                  })}
+                {invoiceRequest ? (
                   <View>
-                    <BlueButton onPress={handleShareButtonPressed} title={loc.receive.details_share} />
+                    {Platform.select({
+                      ios: (
+                        <View style={styles.iosNfcButtonContainer}>
+                          <SecondButton
+                            onPress={startNfcOnIos}
+                            disabled={!Boolean(invoiceRequest)}
+                            title={'Use Boltcard'}
+                            image={{ source: require('../../img/bolt-card.png') }}
+                          />
+                        </View>
+                      ),
+                      android: (
+                        <View style={styles.buttonsContainer}>
+                          <Image source={require('../../img/bolt-card.png')} style={{ width: 40, height: 40 }} />
+                        </View>
+                      ),
+                    })}
+                    <BlueSpacing10 />
                   </View>
-                </View>
+                ) : (
+                  <>
+                    <BlueSpacing40 />
+                    <BlueSpacing40 />
+                  </>
+                )}
               </View>
               <BlueDismissKeyboardInputAccessory onPress={generateInvoice} />
             </View>
@@ -346,10 +356,10 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     paddingHorizontal: 10,
   },
-  flex:{
+  flex: {
     flex: 1,
   },
-  grow:{
+  grow: {
     flexGrow: 1,
   },
   doneButton: {
@@ -364,6 +374,11 @@ const styles = StyleSheet.create({
   },
   iosNfcButtonContainer: {
     marginVertical: 10,
+  },
+  shareContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
 });
 
