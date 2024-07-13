@@ -44,7 +44,7 @@ const currency = require('../../blue_modules/currency');
 
 const ReceiveDetails = () => {
   const { walletID, address } = useRoute().params;
-  const { wallets, saveToDisk, sleep, isElectrumDisabled, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
+  const { wallets, saveToDisk, sleep, isElectrumDisabled, fetchAndSaveWalletTransactions, isPosMode } = useContext(BlueStorageContext);
   const wallet = wallets.find(w => w.getID() === walletID);
   const [customLabel, setCustomLabel] = useState('');
   const [bip21encoded, setBip21encoded] = useState();
@@ -383,7 +383,7 @@ const ReceiveDetails = () => {
     if (!newWallet) return;
 
     if (newWallet.chain !== Chain.ONCHAIN) {
-      return replace({ name: 'LNDReceive', params: { walletID: id } });
+      return replace({ name: isPosMode && newWallet.isPosMode ? 'PosReceive' : 'LNDReceive', params: { walletID: id } });
     }
 
     setParams({ walletID: id });

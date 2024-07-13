@@ -74,7 +74,8 @@ const Asset = ({ navigation }) => {
     refreshAllWalletTransactions,
     walletTransactionUpdateStatus,
     isElectrumDisabled,
-    ldsDEV
+    ldsDEV,
+    isPosMode
   } = useContext(BlueStorageContext);
   const { name, params } = useRoute();
   const walletID = params.walletID;
@@ -663,7 +664,10 @@ const Asset = ({ navigation }) => {
             text={loc.receive.header}
             onPress={() => {
               if (wallet.chain === Chain.OFFCHAIN) {
-                navigate('ReceiveDetailsRoot', { screen: 'LNDReceive', params: { walletID: wallet.getID() } });
+                navigate('ReceiveDetailsRoot', {
+                  screen: isPosMode && wallet.isPosMode ? 'PosReceive' : 'LNDReceive',
+                  params: { walletID: wallet.getID() },
+                });
               } else {
                 navigate('ReceiveDetailsRoot', { screen: 'ReceiveDetails', params: { walletID: wallet.getID() } });
               }

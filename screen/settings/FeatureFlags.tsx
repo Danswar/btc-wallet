@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
 });
 
 const FeatureFlags: React.FC = () => {
-  const { ldsDEV, setLdsDEVAsyncStorage } = useContext(BlueStorageContext);
+  const { ldsDEV, setLdsDEVAsyncStorage, isPosMode, setIsPosModeAsyncStorage } = useContext(BlueStorageContext);
   const [isLoading, setIsLoading] = useState(false);
   const { colors } = useTheme();
 
@@ -35,6 +35,12 @@ const FeatureFlags: React.FC = () => {
       <BlueCard>
         <BlueText>Requests to LDS go to https://dev.lightning.space/v1 instead of production</BlueText>
       </BlueCard>
+      <BlueListItem
+        // @ts-ignore: Fix later
+        Component={Pressable}
+        title="POS mode"
+        switch={{ onValueChange: setIsPosModeAsyncStorage, value: isPosMode }}
+      />
     </ScrollView>
   );
 };

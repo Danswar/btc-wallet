@@ -13,6 +13,7 @@ import {
   InteractionManager,
   ActivityIndicator,
   I18nManager,
+  Pressable,
 } from 'react-native';
 import { BlueCard, BlueLoading, BlueSpacing10, BlueSpacing20, BlueText, SecondButton, BlueListItem } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
@@ -85,13 +86,13 @@ const styles = StyleSheet.create({
   marginRight16: {
     marginRight: 16,
   },
-  addressProofContainer:{
+  addressProofContainer: {
     height: 52,
   },
 });
 
 const WalletDetails = () => {
-  const { saveToDisk, wallets, deleteWallet, setSelectedWallet, txMetadata } = useContext(BlueStorageContext);
+  const { saveToDisk, wallets, deleteWallet, setSelectedWallet, txMetadata, isPosMode } = useContext(BlueStorageContext);
   const { reset } = useDfxSessionContext();
   const { walletID } = useRoute().params;
   const [isLoading, setIsLoading] = useState(false);
@@ -119,7 +120,7 @@ const WalletDetails = () => {
   const { walletID: mainWalletId, getOwnershipProof } = useWalletContext();
   const [ownershipProof, setOwnershipProof] = useState(wallet.addressOwnershipProof);
   const [isCopied, setIsCopied] = useState(false);
-  const isMainWallet = useMemo(() => mainWalletId === walletID , [wallets]);
+  const isMainWallet = useMemo(() => mainWalletId === walletID, [wallets]);
 
   useEffect(() => {
     if (isAdvancedModeEnabledRender && wallet.allowMasterFingerprint()) {
@@ -171,7 +172,7 @@ const WalletDetails = () => {
     }
     saveToDisk(true);
     reset();
-  }
+  };
 
   const deleteCurrentWallet = () => {
     navigate('WalletTransactions');
@@ -186,9 +187,9 @@ const WalletDetails = () => {
       externalAddresses = wallet.getAllExternalAddresses();
     } catch (_) {}
     Notifications.unsubscribe(externalAddresses, [], []);
-    if(isMainWallet){
+    if (isMainWallet) {
       deleteAllWallets();
-    }else{
+    } else {
       deleteCurrentWallet();
     }
     ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
@@ -361,10 +362,18 @@ const WalletDetails = () => {
   };
 
   const onCopyToClipboard = () => {
-    setIsCopied(true)
+    setIsCopied(true);
     Clipboard.setString(ownershipProof);
-    setTimeout(() => setIsCopied(false), 2000)
-  }
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const togglePosMode = async () => {
+    wallet.isPosMode = !wallet.isPosMode;
+    if (!wallet.isPosMode) {
+      wallet.adjustLnurlPayAmount(1, 1 * 100 * 1000 * 1000); 
+    }
+    await saveToDisk();
+  };
 
   return (
     <ScrollView
@@ -506,6 +515,21 @@ const WalletDetails = () => {
             {(wallet instanceof AbstractHDElectrumWallet || (wallet.type === WatchOnlyWallet.type && wallet.isHd())) && (
               <BlueListItem onPress={navigateToAddresses} title={loc.wallets.details_show_addresses} chevron />
             )}
+            {isPosMode && wallet.type === LightningLdsWallet.type && (
+              <BlueListItem
+                Component={Pressable}
+                title={'Activate POS mode'}
+                switch={{ onValueChange: togglePosMode, value: wallet.isPosMode }}
+              />
+            )}
+            {isPosMode && wallet.type === LightningLdsWallet.type && wallet.isPosMode && (
+              <BlueListItem
+                Component={Pressable}
+                title={'Go to cashier station'}
+                chevron
+                onPress={() => navigate('ReceiveDetailsRoot', { screen: 'CashierPos', params: { walletID: wallet.getID() } })}
+              />
+            )}
             {wallet.allowBIP47() && isBIP47Enabled && <BlueListItem onPress={navigateToPaymentCodes} title="Show payment codes" chevron />}
             <BlueCard style={styles.address}>
               <View>
@@ -545,7 +569,6 @@ const WalletDetails = () => {
                     />
                   </>
                 )}
-
                 {wallet.allowXpub() && (
                   <>
                     <BlueSpacing20 />

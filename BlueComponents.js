@@ -986,7 +986,7 @@ export const BlueWalletSelect = ({ wallets, value, onChange }) => {
     <PickerSelect
       value={value}
       onValueChange={onChange}
-      items={wallets.map(w => ({ label: w.getLabel(), value: w.getID() }))}
+      items={wallets.map(w => ({ label: `${w.getLabel()}${w.isPosMode ? ' (POS mode)' : ''}`, value: w.getID() }))}
       placeholder={{}}
       style={pickerStyles}
       useNativeAndroidPickerStyle={false}

@@ -96,6 +96,8 @@ import DeleteBolcard from './screen/boltcard/delete';
 import WrittenCardError from './screen/boltcard/writtenCardError';
 import TappedCardDetails from './screen/wallets/tappedCardDetails';
 import Swap from './screen/dfx/swap';
+import LndPosReceive from './screen/lnd/lndPosReceive';
+import CashierPos from './screen/lnd/cashierPos';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -340,11 +342,9 @@ const ReceiveDetailsStackRoot = () => {
         component={LNDCreateInvoice}
         options={LNDCreateInvoice.navigationOptions(theme)}
       />
-      <ReceiveDetailsStack.Screen
-        name="LNDReceive"
-        component={LNDReceive}
-        options={LNDReceive.navigationOptions(theme)}
-      />
+      <ReceiveDetailsStack.Screen name="LNDReceive" component={LNDReceive} options={LNDReceive.navigationOptions(theme)} />
+      <ReceiveDetailsStack.Screen name="PosReceive" component={LndPosReceive} options={LndPosReceive.navigationOptions(theme)} />
+      <ReceiveDetailsStack.Screen name="CashierPos" component={CashierPos} options={CashierPos.navigationOptions(theme)} />
       <ReceiveDetailsStack.Screen name="SelectWallet" component={SelectWallet} options={SelectWallet.navigationOptions(theme)} />
       <ReceiveDetailsStack.Screen name="LNDViewInvoice" component={LNDViewInvoice} options={LNDViewInvoice.navigationOptions(theme)} />
       <ReceiveDetailsStack.Screen
