@@ -1114,7 +1114,7 @@ const styles = StyleSheet.create({
 SendDetails.navigationOptions = navigationStyle(
   {
     closeButton: true,
-    headerHideBackButton: true,
+    headerBackVisible: false,
   },
   options => ({
     ...options,

@@ -565,7 +565,7 @@ WalletHome.navigationOptions = navigationStyle({}, (options, { theme, navigation
     },
     headerTintColor: '#FFFFFF',
     headerBackTitleVisible: false,
-    headerHideBackButton: true,
+    headerBackVisible: false,
     gestureEnabled: false,
   };
 });

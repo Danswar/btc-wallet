@@ -46,7 +46,7 @@ const LNDReceive = () => {
   const wallet = useMemo(() => wallets.find((item: any) => item.getID() === walletID), [walletID, wallets]);
   const { colors } = useTheme();
   // @ts-ignore - useNavigation non-sense
-  const { setParams, replace, dangerouslyGetParent } = useNavigation();
+  const { setParams, replace, getParent } = useNavigation();
   const [isInvoiceLoading, setIsInvoiceLoading] = useState(false);
   const [description, setDescription] = useState('');
   const { inputProps, amountSats, formattedUnit, changeToNextUnit } = useInputAmount();
@@ -201,7 +201,7 @@ const LNDReceive = () => {
       <View style={styles.root}>
         <SuccessView amount={amountSats} amountUnit={BitcoinUnit.SATS} invoiceDescription={description} shouldAnimate={true} />
         <View style={styles.doneButton}>
-          <BlueButton onPress={() => dangerouslyGetParent().popToTop()} title={loc.send.success_done} />
+          <BlueButton onPress={() => getParent().popToTop()} title={loc.send.success_done} />
           <BlueSpacing40 />
         </View>
       </View>
@@ -387,7 +387,7 @@ LNDReceive.routeName = 'LNDReceive';
 LNDReceive.navigationOptions = navigationStyle(
   {
     closeButton: true,
-    headerHideBackButton: true,
+    headerBackVisible: false,
   },
   opts => ({ ...opts, title: loc.receive.header }),
 );
