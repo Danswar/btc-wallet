@@ -134,7 +134,11 @@ class DeeplinkSchemaMatch {
           },
         },
       ]);
-    } else if (DeeplinkSchemaMatch.isLightningInvoice(event.url) || DeeplinkSchemaMatch.isTestnetLightningInvoice(event.url)) {
+    } else if (
+      DeeplinkSchemaMatch.isLightningInvoice(event.url) ||
+      DeeplinkSchemaMatch.isTestnetLightningInvoice(event.url) ||
+      DeeplinkSchemaMatch.isLnUrl(event.url)
+    ) {
       completionHandler([
         'SendDetailsRoot',
         {
@@ -335,7 +339,7 @@ class DeeplinkSchemaMatch {
 
   static isPossiblyPSBTString(text) {
     try {
-      return Boolean(bitcoin.Psbt.fromBase64(text))
+      return Boolean(bitcoin.Psbt.fromBase64(text));
     } catch (e) {
       return false;
     }
