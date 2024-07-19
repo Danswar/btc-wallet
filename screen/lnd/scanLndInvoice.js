@@ -134,6 +134,9 @@ const ScanLndInvoice = () => {
 
   const processDestination = destinationString => {
     Keyboard.dismiss();
+    if (destinationString.startsWith('mailto:')) {
+      destinationString = destinationString.replace('mailto:', '');
+    }
     if (Lnurl.isLnurl(destinationString)) return setLnurlDestination(destinationString);
     if (Lnurl.isLightningAddress(destinationString)) return setLightningAddressDestination(destinationString);
     if (
