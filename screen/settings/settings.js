@@ -81,6 +81,5 @@ const Settings = () => {
 
 export default Settings;
 Settings.navigationOptions = navigationStyle({
-  headerTitle: Platform.select({ ios: loc.settings.header, default: '' }),
-  headerLargeTitle: true,
+  headerTitle: Platform.select({ ios: loc.settings.header, default: '' })
 });
