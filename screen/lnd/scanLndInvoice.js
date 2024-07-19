@@ -23,6 +23,7 @@ import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import alert from '../../components/Alert';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
+import { useReplaceModalScreen } from '../../hooks/replaceModalScreen.hook';
 const currency = require('../../blue_modules/currency');
 
 const ScanLndInvoice = () => {
@@ -35,7 +36,8 @@ const ScanLndInvoice = () => {
     () => wallets.find(item => item.getID() === walletID) || wallets.find(item => item.chain === Chain.OFFCHAIN),
     [walletID, wallets],
   );
-  const { navigate, setParams, goBack, replace } = useNavigation();
+  const { navigate, setParams, goBack } = useNavigation();
+  const replace = useReplaceModalScreen();
   const [isLoading, setIsLoading] = useState(false);
   const [destination, setDestination] = useState('');
   const [unit, setUnit] = useState(BitcoinUnit.SATS);
@@ -67,7 +69,7 @@ const ScanLndInvoice = () => {
     if (!newWallet) return;
 
     if (newWallet.chain !== Chain.OFFCHAIN) {
-      return replace('SendDetails', { walletID: id });
+      return replace({ name: 'SendDetails', params: { walletID: id } });
     }
 
     setParams({ walletID: id });

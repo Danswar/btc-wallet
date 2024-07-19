@@ -39,6 +39,7 @@ import * as BlueElectrum from '../../blue_modules/BlueElectrum';
 import { SuccessView } from '../send/success';
 import useInputAmount from '../../hooks/useInputAmount';
 import NetworkTransactionFees from '../../models/networkTransactionFees';
+import { useReplaceModalScreen } from '../../hooks/replaceModalScreen.hook';
 const currency = require('../../blue_modules/currency');
 
 const ReceiveDetails = () => {
@@ -51,7 +52,8 @@ const ReceiveDetails = () => {
   const [showPendingBalance, setShowPendingBalance] = useState(false);
   const [showConfirmedBalance, setShowConfirmedBalance] = useState(false);
   const [showAddress, setShowAddress] = useState(false);
-  const { goBack, setParams, replace } = useNavigation();
+  const { goBack, setParams } = useNavigation();
+  const replace = useReplaceModalScreen()
   const { colors } = useTheme();
   const [intervalMs, setIntervalMs] = useState(5000);
   const [eta, setEta] = useState('');
@@ -381,7 +383,7 @@ const ReceiveDetails = () => {
     if (!newWallet) return;
 
     if (newWallet.chain !== Chain.ONCHAIN) {
-      return replace('LNDReceive', { walletID: id });
+      return replace({ name: 'LNDReceive', params: { walletID: id } });
     }
   };
 
