@@ -54,8 +54,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
 import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
 import BoltCard from '../../class/boltcard';
+import scanqrHelper from '../../helpers/scan-qr';
 
-const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
 const BlueElectrum = require('../../blue_modules/BlueElectrum');
 const currency = require('../../blue_modules/currency');
@@ -534,7 +534,8 @@ const Asset = ({ navigation }) => {
   };
 
   const onScanButtonPressed = () => {
-    scanqrHelper(navigate, name, false).then(d => onBarCodeRead(d));
+    const navigateBackHere = () => navigate(name, params);
+    scanqrHelper(navigate, navigateBackHere, false).then(d => onBarCodeRead(d));
   };
 
   const getItemLayout = (_, index) => ({
@@ -547,7 +548,7 @@ const Asset = ({ navigation }) => {
     return wallet.getBoltcards().length > 0 ? navigate('BoltCardDetails') : navigate('AddBoltcard');
   };
 
-  renderRightHeaderComponent = () => {
+  const renderRightHeaderComponent = () => {
     switch (wallet.type) {
       case LightningLdsWallet.type:
         return (

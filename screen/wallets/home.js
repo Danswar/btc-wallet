@@ -35,8 +35,8 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { LightningLdsWallet } from '../../class/wallets/lightning-lds-wallet';
 import BoltCard from '../../class/boltcard';
 import { TaprootLdsWallet, TaprootLdsWalletType } from '../../class/wallets/taproot-lds-wallet';
+import scanqrHelper from '../../helpers/scan-qr';
 
-const scanqrHelper = require('../../helpers/scan-qr');
 const fs = require('../../blue_modules/fs');
 const BlueElectrum = require('../../blue_modules/BlueElectrum');
 
