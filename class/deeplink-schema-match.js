@@ -134,7 +134,11 @@ class DeeplinkSchemaMatch {
           },
         },
       ]);
-    } else if (DeeplinkSchemaMatch.isLightningInvoice(event.url) || DeeplinkSchemaMatch.isTestnetLightningInvoice(event.url)) {
+    } else if (
+      DeeplinkSchemaMatch.isLightningInvoice(event.url) ||
+      DeeplinkSchemaMatch.isTestnetLightningInvoice(event.url) ||
+      DeeplinkSchemaMatch.isLnUrl(event.url)
+    ) {
       completionHandler([
         'SendDetailsRoot',
         {
@@ -149,7 +153,7 @@ class DeeplinkSchemaMatch {
       // to the server, which is undesirable here, so LNDCreateInvoice screen will handle it for us and will
       // redirect user to LnurlPay screen if necessary
       completionHandler([
-        'ReceiveDetailsRoot',
+        'SendDetailsRoot',
         {
           screen: 'LNDCreateInvoice',
           params: {

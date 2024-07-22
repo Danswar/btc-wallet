@@ -249,8 +249,18 @@ const ScanQRCode = () => {
     }
   };
 
+  const findlnurl = bodyOfText => {
+    const regex = /(lnurl1[02-9ac-hj-np-z]+)/i;
+    const res = regex.exec(bodyOfText);
+    if (res) {
+      return res[1];
+    }
+    return null;
+  };
+
   const onBarCodeRead = ret => {
     const h = HashIt(ret.data);
+    const lnurl = findlnurl(ret.data);
     if (scannedCache[h]) {
       // this QR was already scanned by this ScanQRCode, lets prevent firing duplicate callbacks
       return;
@@ -280,7 +290,15 @@ const ScanQRCode = () => {
       return _onReadUniformResource(ret.data);
     }
 
-    // is it base43? stupid electrum desktop
+    if (lnurl) {
+      onBarScanned(lnurl);
+      if (launchedBy) {
+        navigation.navigate(launchedBy);
+      }
+      return;
+    }
+
+    // Is it base43? Stupid electrum desktop
     try {
       const hex = Base43.decode(ret.data);
       bitcoin.Psbt.fromHex(hex); // if it doesnt throw - all good
@@ -363,7 +381,7 @@ const ScanQRCode = () => {
     if (Platform.OS === 'android') setHoldCardModalVisible(true);
     try {
       await startNfcSession();
-      
+
       const card = await readCard();
       const secretsGuess = await genFreshCardDetails();
       const authKeys = await authCard(card, secretsGuess);
