@@ -44,10 +44,11 @@ interface RouteParams {
 const LNDReceive = () => {
   const { wallets, saveToDisk, setSelectedWallet, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
   const { walletID } = useRoute().params as RouteParams;
+  console.log("#### ",walletID, " ####");
   const wallet = useMemo(() => wallets.find((item: any) => item.getID() === walletID), [walletID, wallets]);
   const { colors } = useTheme();
   // @ts-ignore - useNavigation non-sense
-  const { setParams, getParent } = useNavigation();
+  const { setParams, getParent, navigate } = useNavigation();
   const replace = useReplaceModalScreen();
   const [isInvoiceLoading, setIsInvoiceLoading] = useState(false);
   const [description, setDescription] = useState('');
@@ -185,6 +186,7 @@ const LNDReceive = () => {
     }
     
     setParams({ walletID: id });
+    navigate('LNDReceive', { walletID: id });
   };
 
   const handleOnBlur = () => {

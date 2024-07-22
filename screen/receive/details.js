@@ -52,7 +52,7 @@ const ReceiveDetails = () => {
   const [showPendingBalance, setShowPendingBalance] = useState(false);
   const [showConfirmedBalance, setShowConfirmedBalance] = useState(false);
   const [showAddress, setShowAddress] = useState(false);
-  const { goBack, setParams } = useNavigation();
+  const { goBack, setParams, navigate } = useNavigation();
   const replace = useReplaceModalScreen()
   const { colors } = useTheme();
   const [intervalMs, setIntervalMs] = useState(5000);
@@ -385,6 +385,9 @@ const ReceiveDetails = () => {
     if (newWallet.chain !== Chain.ONCHAIN) {
       return replace({ name: 'LNDReceive', params: { walletID: id } });
     }
+
+    setParams({ walletID: id });
+    navigate('ReceiveDetails', { walletID: id });
   };
 
   return (
