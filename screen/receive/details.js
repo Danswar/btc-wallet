@@ -340,7 +340,7 @@ const ReceiveDetails = () => {
       Notifications.majorTomToGroundControl([newAddress], [], []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [wallet]);
 
   const setAddressBIP21Encoded = addr => {
     const newBip21encoded = DeeplinkSchemaMatch.bip21encode(addr);
