@@ -34,6 +34,7 @@ import AmountInput from '../../components/AmountInput';
 import InputAccessoryAllFunds from '../../components/InputAccessoryAllFunds';
 import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
+import { useReplaceModalScreen } from '../../hooks/replaceModalScreen.hook';
 const currency = require('../../blue_modules/currency');
 const prompt = require('../../helpers/prompt');
 
@@ -42,6 +43,7 @@ const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
 const SendDetails = () => {
   const { wallets, setSelectedWallet, sleep, txMetadata, saveToDisk } = useContext(BlueStorageContext);
   const navigation = useNavigation();
+  const replace = useReplaceModalScreen();
   const { name, params: routeParams } = useRoute();
   const scrollView = useRef();
   const scrollIndex = useRef(0);
@@ -324,7 +326,7 @@ const SendDetails = () => {
     if (!newWallet) return;
 
     if (newWallet.chain !== Chain.ONCHAIN) {
-      return navigation.replace('ScanLndInvoice', { walletID: id });
+      return replace({ name: 'ScanLndInvoice', params: { walletID: id } });
     }
 
     setWallet(newWallet);
@@ -1114,7 +1116,7 @@ const styles = StyleSheet.create({
 SendDetails.navigationOptions = navigationStyle(
   {
     closeButton: true,
-    headerHideBackButton: true,
+    headerBackVisible: false,
   },
   options => ({
     ...options,

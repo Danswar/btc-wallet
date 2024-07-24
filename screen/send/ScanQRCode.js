@@ -174,7 +174,7 @@ const ScanQRCode = () => {
         const data = decoder.toString();
         decoder = false; // nullify for future use (?)
         if (launchedBy) {
-          navigation.navigate(launchedBy);
+          navigation.navigate(launchedBy, {});
         }
         onBarScanned({ data });
       } else {
@@ -223,7 +223,7 @@ const ScanQRCode = () => {
           data = Buffer.from(payload, 'hex').toString();
         }
         if (launchedBy) {
-          navigation.navigate(launchedBy);
+          navigation.navigate(launchedBy, {});
         }
         onBarScanned({ data });
       } else {
@@ -286,7 +286,7 @@ const ScanQRCode = () => {
       bitcoin.Psbt.fromHex(hex); // if it doesnt throw - all good
 
       if (launchedBy) {
-        navigation.navigate(launchedBy);
+        navigation.navigate(launchedBy, {});
       }
       onBarScanned({ data: Buffer.from(hex, 'hex').toString('base64') });
       return;
@@ -296,7 +296,7 @@ const ScanQRCode = () => {
       setIsLoading(true);
       try {
         if (launchedBy) {
-          navigation.navigate(launchedBy);
+          navigation.navigate(launchedBy, {});
         }
         onBarScanned(ret.data);
       } catch (e) {
@@ -352,7 +352,7 @@ const ScanQRCode = () => {
   const dismiss = () => {
     onBarScannerDismissWithoutData();
     if (launchedBy) {
-      navigation.navigate(launchedBy);
+      navigation.navigate(launchedBy, {});
     } else {
       navigation.goBack();
     }
@@ -369,7 +369,7 @@ const ScanQRCode = () => {
       const authKeys = await authCard(card, secretsGuess);
 
       if (launchedBy) {
-        navigation.navigate(launchedBy);
+        navigation.navigate(launchedBy, {});
       }
       onBarScanned({ data: {...card, secrets: authKeys } });
     } catch (error) {

@@ -35,6 +35,7 @@ import useInputAmount from '../../hooks/useInputAmount';
 import { SuccessView } from '../send/success';
 import { useNFC } from '../../hooks/nfc.hook';
 import BoltCard from '../../class/boltcard';
+import { useReplaceModalScreen } from '../../hooks/replaceModalScreen.hook';
 
 interface RouteParams {
   walletID: string;
@@ -46,7 +47,8 @@ const LNDReceive = () => {
   const wallet = useMemo(() => wallets.find((item: any) => item.getID() === walletID), [walletID, wallets]);
   const { colors } = useTheme();
   // @ts-ignore - useNavigation non-sense
-  const { setParams, replace, dangerouslyGetParent } = useNavigation();
+  const { setParams, getParent, navigate } = useNavigation();
+  const replace = useReplaceModalScreen();
   const [isInvoiceLoading, setIsInvoiceLoading] = useState(false);
   const [description, setDescription] = useState('');
   const { inputProps, amountSats, formattedUnit, changeToNextUnit } = useInputAmount();
@@ -179,10 +181,11 @@ const LNDReceive = () => {
     if (!newWallet) return;
 
     if (newWallet.chain !== Chain.OFFCHAIN) {
-      return replace('ReceiveDetails', { walletID: id });
+      return replace({ name: 'ReceiveDetails', params: { walletID: id } });
     }
     
     setParams({ walletID: id });
+    navigate('LNDReceive', { walletID: id });
   };
 
   const handleOnBlur = () => {
@@ -201,7 +204,7 @@ const LNDReceive = () => {
       <View style={styles.root}>
         <SuccessView amount={amountSats} amountUnit={BitcoinUnit.SATS} invoiceDescription={description} shouldAnimate={true} />
         <View style={styles.doneButton}>
-          <BlueButton onPress={() => dangerouslyGetParent().popToTop()} title={loc.send.success_done} />
+          <BlueButton onPress={() => getParent().popToTop()} title={loc.send.success_done} />
           <BlueSpacing40 />
         </View>
       </View>
@@ -387,7 +390,7 @@ LNDReceive.routeName = 'LNDReceive';
 LNDReceive.navigationOptions = navigationStyle(
   {
     closeButton: true,
-    headerHideBackButton: true,
+    headerBackVisible: false,
   },
   opts => ({ ...opts, title: loc.receive.header }),
 );
