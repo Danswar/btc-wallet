@@ -95,6 +95,7 @@ import BackupBolcard from './screen/boltcard/backup';
 import DeleteBolcard from './screen/boltcard/delete';
 import WrittenCardError from './screen/boltcard/writtenCardError';
 import TappedCardDetails from './screen/wallets/tappedCardDetails';
+import Swap from './screen/dfx/swap';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -462,6 +463,7 @@ const DeeplinkStackRoot = () => {
   return (
     <DeeplinkStack.Navigator name="Deeplink" screenOptions={{ headerShadowVisible: false }} initialRouteName="Sell">
       <DeeplinkStack.Screen name="Sell" component={Sell} options={Sell.navigationOptions(theme)} />
+      <DeeplinkStack.Screen name="Swap" component={Swap} options={Swap.navigationOptions(theme)} />
       <DeeplinkStack.Screen name="Confirm" component={Confirm} options={Confirm.navigationOptions(theme)} />
       <DeeplinkStack.Screen name="CreateTransaction" component={SendCreate} options={SendCreate.navigationOptions(theme)} />
       <DeeplinkStack.Screen
