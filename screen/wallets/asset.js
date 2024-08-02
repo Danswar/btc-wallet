@@ -49,6 +49,7 @@ import BuyFr from '../../img/dfx/buttons/buy_fr.png';
 import SellFr from '../../img/dfx/buttons/sell_fr.png';
 import BuyIt from '../../img/dfx/buttons/buy_it.png';
 import SellIt from '../../img/dfx/buttons/sell_it.png';
+import SwapEn from '../../img/dfx/buttons/swap.png';
 import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/networkTransactionFees';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
@@ -73,6 +74,7 @@ const Asset = ({ navigation }) => {
     refreshAllWalletTransactions,
     walletTransactionUpdateStatus,
     isElectrumDisabled,
+    ldsDEV
   } = useContext(BlueStorageContext);
   const { name, params } = useRoute();
   const walletID = params.walletID;
@@ -95,15 +97,15 @@ const Asset = ({ navigation }) => {
   const getButtonImages = lang => {
     switch (lang) {
       case 'en':
-        return [BuyEn, SellEn];
+        return [BuyEn, SellEn, SwapEn];
       case 'de_de':
-        return [BuyDe, SellDe];
+        return [BuyDe, SellDe, SwapEn];
       case 'fr_fr':
-        return [BuyFr, SellFr];
+        return [BuyFr, SellFr, SwapEn];
       case 'it':
-        return [BuyIt, SellIt];
+        return [BuyIt, SellIt, SwapEn];
       default:
-        return [BuyEn, SellEn];
+        return [BuyEn, SellEn, SwapEn];
     }
   };
 
@@ -249,7 +251,7 @@ const Asset = ({ navigation }) => {
 
   const getBalanceByDfxService = async service => {
     const balance = wallet.getBalance();
-    if (service === DfxService.SELL) {
+    if (service === DfxService.SELL || service === DfxService.SWAP) {
       try {
         const fee = wallet.chain === Chain.ONCHAIN ? await getEstimatedOnChainFee() : balance * 0.03; // max 3% fee for LNBits
         return balance - fee;
@@ -595,6 +597,13 @@ const Asset = ({ navigation }) => {
                         disabled={isHandlingOpenServices}
                       />
                     </View>
+                    {ldsDEV && <View>
+                      <ImageButton
+                        source={buttonImages[2]}
+                        onPress={() => handleOpenServices(DfxService.SWAP)}
+                        disabled={isHandlingOpenServices}
+                      />
+                    </View>}
                     <View>
                       <ImageButton
                         source={buttonImages[1]}

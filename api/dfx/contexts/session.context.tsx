@@ -21,6 +21,7 @@ import { TaprootLdsWallet } from '../../../class/wallets/taproot-lds-wallet';
 export enum DfxService {
   BUY = 'buy',
   SELL = 'sell',
+  SWAP = 'swap',
 }
 
 export interface SessionInterface {

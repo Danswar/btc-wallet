@@ -666,6 +666,15 @@
     "info": "You will be notified by email when the bank transfer to your account is done.",
     "confirm": "Cash out to bank account"
   },
+  "swap": {
+    "header": "Confirm Swap",
+    "spend": "You spend",
+    "network_spending": "Through the {blockchain} network",
+    "to": "To the address",
+    "receiving": "And you receive",
+    "network_receiving": "{asset} through the {blockchain} network", 
+    "confirm": "Checkout"
+  },
   "boltcard": {
     "pay_card": "Pay Card",
     "title_create": "Create Pay Card",

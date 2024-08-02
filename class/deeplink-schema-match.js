@@ -278,6 +278,9 @@ class DeeplinkSchemaMatch {
             case 'sell':
               completionHandler(['DeeplinkRoot', { screen: 'Sell', params: urlObject.query }]);
               break;
+            case 'swap':
+              completionHandler(['DeeplinkRoot', { screen: 'Swap', params: urlObject.query }]);
+              break;
           }
         }
       })();
