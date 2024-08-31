@@ -375,6 +375,8 @@ const WalletDetails = () => {
     await saveToDisk();
   };
 
+  const showPosModeOptions = wallet.isPosMode || isPosMode;
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -515,14 +517,14 @@ const WalletDetails = () => {
             {(wallet instanceof AbstractHDElectrumWallet || (wallet.type === WatchOnlyWallet.type && wallet.isHd())) && (
               <BlueListItem onPress={navigateToAddresses} title={loc.wallets.details_show_addresses} chevron />
             )}
-            {isPosMode && wallet.type === LightningLdsWallet.type && (
+            {showPosModeOptions && wallet.type === LightningLdsWallet.type && (
               <BlueListItem
                 Component={Pressable}
                 title={'Activate POS mode'}
                 switch={{ onValueChange: togglePosMode, value: wallet.isPosMode }}
               />
             )}
-            {isPosMode && wallet.type === LightningLdsWallet.type && wallet.isPosMode && (
+            {showPosModeOptions && wallet.type === LightningLdsWallet.type && (
               <BlueListItem
                 Component={Pressable}
                 title={'Go to cashier station'}

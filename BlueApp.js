@@ -47,6 +47,7 @@ class AppStorage {
   static PAY_CARD = 'PAY_CARD';
   static FF_LDS_DEV_API = 'ff_lds_dev_api';
   static POS_MODE = 'pos_mode';
+  static DFX_POS = 'dfx_pos';
 
   static keys2migrate = [AppStorage.HANDOFF_STORAGE_KEY, AppStorage.DO_NOT_TRACK, AppStorage.ADVANCED_MODE_ENABLED];
 
@@ -868,6 +869,17 @@ class AppStorage {
 
   setIsPOSmodeEnabled = async value => {
     await AsyncStorage.setItem(AppStorage.POS_MODE, value ? '1' : '');
+  };
+
+  isDfxPOSEnabled = async () => {
+    try {
+      return !!(await AsyncStorage.getItem(AppStorage.DFX_POS));
+    } catch (_) {}
+    return false;
+  };
+
+  setIsDfxPOSEnabled = async value => {
+    await AsyncStorage.setItem(AppStorage.DFX_POS, value ? '1' : '');
   };
 
   isHandoffEnabled = async () => {

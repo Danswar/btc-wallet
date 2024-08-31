@@ -383,7 +383,7 @@ const ReceiveDetails = () => {
     if (!newWallet) return;
 
     if (newWallet.chain !== Chain.ONCHAIN) {
-      return replace({ name: isPosMode && newWallet.isPosMode ? 'PosReceive' : 'LNDReceive', params: { walletID: id } });
+      return replace({ name: newWallet.isPosMode ? 'PosReceive' : 'LNDReceive', params: { walletID: id } });
     }
 
     setParams({ walletID: id });

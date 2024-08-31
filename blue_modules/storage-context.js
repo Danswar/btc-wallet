@@ -29,6 +29,7 @@ export const BlueStorageProvider = ({ children }) => {
   const [isHandOffUseEnabled, setIsHandOffUseEnabled] = useState(false);
   const [ldsDEV, setLdsDEV] = useState(false);
   const [isPosMode, setIsPosMode] = useState(false);
+  const [isDfxPos, setIsDfxPos] = useState(false);
   const [isElectrumDisabled, setIsElectrumDisabled] = useState(true);
   const [isTorDisabled, setIsTorDisabled] = useState(false);
   const [isPrivacyBlurEnabled, setIsPrivacyBlurEnabled] = useState(true);
@@ -64,6 +65,11 @@ export const BlueStorageProvider = ({ children }) => {
     return BlueApp.setIsPOSmodeEnabled(value);
   }
 
+  const setIsDfxPosAsyncStorage = value => {
+    setIsDfxPos(value);
+    return BlueApp.setIsDfxPOSEnabled(value);
+  }
+
   const saveToDisk = async (force = false) => {
     if (BlueApp.getWallets().length === 0 && !force) {
       console.log('not saving empty wallets array');
@@ -88,6 +94,8 @@ export const BlueStorageProvider = ({ children }) => {
         setLdsDEV(!!enabledLdsDev);
         const enabledPosMode = await BlueApp.isPOSmodeEnabled();
         setIsPosMode(!!enabledPosMode);
+        const enabledDfxPos = await BlueApp.isDfxPOSEnabled();
+        setIsDfxPos(!!enabledDfxPos);
       } catch (_e) {
         setIsHandOffUseEnabledAsyncStorage(false);
         setIsHandOffUseEnabled(false);
@@ -95,6 +103,8 @@ export const BlueStorageProvider = ({ children }) => {
         setLdsDEV(false);
         setIsPosModeAsyncStorage(false);
         setIsPosMode(false);
+        setIsDfxPosAsyncStorage(false);
+        setIsDfxPos(false);
       }
     })();
   }, []);
@@ -303,7 +313,9 @@ export const BlueStorageProvider = ({ children }) => {
         ldsDEV,
         setLdsDEVAsyncStorage,
         isPosMode,
-        setIsPosModeAsyncStorage
+        setIsPosModeAsyncStorage,
+        isDfxPos,
+        setIsDfxPosAsyncStorage,
       }}
     >
       {children}

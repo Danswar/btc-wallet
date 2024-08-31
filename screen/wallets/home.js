@@ -315,7 +315,7 @@ const WalletHome = ({ navigation }) => {
     if (multisigWallet) return navigate('ReceiveDetailsRoot', { screen: 'ReceiveDetails', params: { walletID: multisigWallet.getID() } });
     if (lnWallet)
       return navigate('ReceiveDetailsRoot', {
-        screen: isPosMode && lnWallet.isPosMode ? 'PosReceive' : 'LNDReceive',
+        screen: lnWallet.isPosMode ? 'PosReceive' : 'LNDReceive',
         params: { walletID: lnWallet.getID() },
       });
     return navigate('ReceiveDetailsRoot', { screen: 'ReceiveDetails', params: { walletID: wallet.getID() } });
