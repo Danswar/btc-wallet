@@ -20,7 +20,7 @@ const Settings = () => {
   const { navigate } = useNavigation();
   // By simply having it here, it'll re-render the UI if language is changed
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { wallets, language } = useContext(BlueStorageContext);
+  const { wallets, language, ldsDEV } = useContext(BlueStorageContext);
   const { walletID } = useWalletContext();
   const lndWallet = wallets.find(wallet => wallet.type === LightningLdsWallet.type);
   const multiDeviceWallet = wallets.find(wallet => wallet.type === MultisigHDWallet.type);
@@ -60,13 +60,15 @@ const Settings = () => {
           testID="WalletDetailsMultisig"
           chevron
         />
-        <BlueListItem
-          title={loc.wallets.chf_taproot_wallet_label}
-          disabled={!chfTaprootWallet}
-          onPress={() => navigateToWalletDetails(chfTaprootWallet?.getID())}
-          testID="WalletDetailsLnd"
-          chevron
-        />
+        {ldsDEV && (
+          <BlueListItem
+            title={loc.wallets.chf_taproot_wallet_label}
+            disabled={!chfTaprootWallet}
+            onPress={() => navigateToWalletDetails(chfTaprootWallet?.getID())}
+            testID="WalletDetailsLnd"
+            chevron
+          />
+        )}
         <BlueListItem title={loc.settings.currency} onPress={() => navigate('Currency')} testID="Currency" chevron />
         <BlueListItem title={loc.settings.language} onPress={() => navigate('Language')} testID="Language" chevron />
         <BlueListItem title={loc.settings.encrypt_title} onPress={() => navigate('EncryptStorage')} testID="SecurityButton" chevron />

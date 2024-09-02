@@ -74,7 +74,8 @@ const Asset = ({ navigation }) => {
     refreshAllWalletTransactions,
     walletTransactionUpdateStatus,
     isElectrumDisabled,
-    ldsDEV
+    ldsDEV,
+    isDfxPos
   } = useContext(BlueStorageContext);
   const { name, params } = useRoute();
   const walletID = params.walletID;
@@ -279,6 +280,13 @@ const Asset = ({ navigation }) => {
     setIsHandlingOpenServices(false);
   };
 
+  const handleOpenDfxPosMode = async () => {
+    navigate('ReceiveDetailsRoot', {
+      screen: 'CashierDfxPos',
+      params: { walletID: wallet.getID() },
+    });
+  };
+
   // if description of transaction has been changed we want to show new one
   useFocusEffect(
     useCallback(() => {
@@ -442,6 +450,17 @@ const Asset = ({ navigation }) => {
     onBarCodeRead(await BlueClipboard().getClipboardContent());
   };
 
+  const receiveButtonPress = () => {
+    if (wallet.chain === Chain.OFFCHAIN) {
+      navigate('ReceiveDetailsRoot', {
+        screen: wallet.isPosMode ? 'PosReceive' : 'LNDReceive',
+        params: { walletID: wallet.getID() },
+      });
+    } else {
+      navigate('ReceiveDetailsRoot', { screen: 'ReceiveDetails', params: { walletID: wallet.getID() } });
+    }
+  }
+
   const sendButtonPress = () => {
     if (wallet.chain === Chain.OFFCHAIN) {
       return navigate('SendDetailsRoot', { screen: 'ScanLndInvoice', params: { walletID: wallet.getID() } });
@@ -597,13 +616,15 @@ const Asset = ({ navigation }) => {
                         disabled={isHandlingOpenServices}
                       />
                     </View>
-                    {ldsDEV && <View>
-                      <ImageButton
-                        source={buttonImages[2]}
-                        onPress={() => handleOpenServices(DfxService.SWAP)}
-                        disabled={isHandlingOpenServices}
-                      />
-                    </View>}
+                    {ldsDEV && (
+                      <View>
+                        <ImageButton
+                          source={buttonImages[2]}
+                          onPress={() => handleOpenServices(DfxService.SWAP)}
+                          disabled={isHandlingOpenServices}
+                        />
+                      </View>
+                    )}
                     <View>
                       <ImageButton
                         source={buttonImages[1]}
@@ -611,6 +632,19 @@ const Asset = ({ navigation }) => {
                         disabled={isHandlingOpenServices}
                       />
                     </View>
+                    {isDfxPos && (
+                      <View style={{ backgroundColor: colors.background, height: '100%' }}>
+                        <TouchableOpacity
+                          onPress={handleOpenDfxPosMode}
+                          disabled={isHandlingOpenServices}
+                          style={{ justifyContent: 'center', alignItems: 'center', width: 60, padding: 10 }}
+                        >
+                          <BlueText>Point</BlueText>
+                          <BlueText>of</BlueText>
+                          <BlueText>Sale</BlueText>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </>
                 )}
               </View>
@@ -661,13 +695,7 @@ const Asset = ({ navigation }) => {
           <FButton
             testID="ReceiveButton"
             text={loc.receive.header}
-            onPress={() => {
-              if (wallet.chain === Chain.OFFCHAIN) {
-                navigate('ReceiveDetailsRoot', { screen: 'LNDReceive', params: { walletID: wallet.getID() } });
-              } else {
-                navigate('ReceiveDetailsRoot', { screen: 'ReceiveDetails', params: { walletID: wallet.getID() } });
-              }
-            }}
+            onPress={receiveButtonPress}
             icon={
               <View style={styles.receiveIcon}>
                 <Icon name="arrow-down" size={buttonFontSize} type="font-awesome" color={colors.buttonAlternativeTextColor} />

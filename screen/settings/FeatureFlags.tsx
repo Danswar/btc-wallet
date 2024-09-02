@@ -12,7 +12,8 @@ const styles = StyleSheet.create({
 });
 
 const FeatureFlags: React.FC = () => {
-  const { ldsDEV, setLdsDEVAsyncStorage } = useContext(BlueStorageContext);
+  const { ldsDEV, setLdsDEVAsyncStorage, isPosMode, setIsPosModeAsyncStorage, isDfxPos, setIsDfxPosAsyncStorage } =
+    useContext(BlueStorageContext);
   const [isLoading, setIsLoading] = useState(false);
   const { colors } = useTheme();
 
@@ -20,6 +21,20 @@ const FeatureFlags: React.FC = () => {
     root: {
       backgroundColor: colors.background,
     },
+  };
+
+  const handlePosModeChange = (value: boolean) => {
+    setIsPosModeAsyncStorage(value);
+    if (value) {
+      setIsDfxPosAsyncStorage(false);
+    }
+  };
+
+  const handleDfxPosChange = (value: boolean) => {
+    setIsDfxPosAsyncStorage(value);
+    if (value) {
+      setIsPosModeAsyncStorage(false);
+    }
   };
 
   return isLoading ? (
@@ -35,6 +50,18 @@ const FeatureFlags: React.FC = () => {
       <BlueCard>
         <BlueText>Requests to LDS go to https://dev.lightning.space/v1 instead of production</BlueText>
       </BlueCard>
+      <BlueListItem
+        // @ts-ignore: Fix later
+        Component={Pressable}
+        title="POS mode"
+        switch={{ onValueChange: handlePosModeChange, value: isPosMode }}
+      />
+      <BlueListItem
+        // @ts-ignore: Fix later
+        Component={Pressable}
+        title="DFX Point of Sale"
+        switch={{ onValueChange: handleDfxPosChange, value: isDfxPos }}
+      />
     </ScrollView>
   );
 };

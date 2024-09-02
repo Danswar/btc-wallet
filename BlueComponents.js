@@ -947,9 +947,9 @@ export const BlueTabs = ({ active, onSwitch, tabs }) => (
   </View>
 );
 
-export const BlueWalletSelect = ({ wallets, value, onChange }) => {
+const useSelectorStyles = () => {
   const { colors } = useTheme();
-
+  
   const pickerStyles = StyleSheet.create({
     // eslint-disable-next-line react-native/no-unused-styles
     inputIOS: {
@@ -981,12 +981,19 @@ export const BlueWalletSelect = ({ wallets, value, onChange }) => {
       justifyContent: 'center',
     },
   });
+  
+  return pickerStyles
+} 
+
+export const BlueWalletSelect = ({ wallets, value, onChange }) => {
+  const { colors } = useTheme();
+  const pickerStyles = useSelectorStyles();
 
   return (
     <PickerSelect
       value={value}
       onValueChange={onChange}
-      items={wallets.map(w => ({ label: w.getLabel(), value: w.getID() }))}
+      items={wallets.map(w => ({ label: `${w.getLabel()}${w.isPosMode ? ' (POS mode)' : ''}`, value: w.getID() }))}
       placeholder={{}}
       style={pickerStyles}
       useNativeAndroidPickerStyle={false}
@@ -995,3 +1002,21 @@ export const BlueWalletSelect = ({ wallets, value, onChange }) => {
     />
   );
 };
+
+export const Selector = ({ items, selectedValue, onValueChange }) => {
+  const { colors } = useTheme();
+  const pickerStyles = useSelectorStyles();
+
+  return (
+    <PickerSelect
+      value={selectedValue}
+      onValueChange={onValueChange}
+      items={items}
+      placeholder={{}}
+      style={pickerStyles}
+      useNativeAndroidPickerStyle={false}
+      fixAndroidTouchableBug
+      Icon={() => <Icon size={18} name="sync-alt" type="material-icons" color={colors.foregroundColor} />}
+    />
+  );
+}

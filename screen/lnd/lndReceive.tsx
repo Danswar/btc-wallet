@@ -225,7 +225,7 @@ const LNDReceive = () => {
                   <ActivityIndicator />
                 ) : (
                   <>
-                    <QRCodeComponent value={invoiceRequest ? invoiceRequest : wallet.lnAddress} />
+                    <QRCodeComponent value={invoiceRequest ? invoiceRequest : wallet.getLnurl?.() || wallet.lnAddress} />
                     <View style={styles.shareContainer}>
                       <BlueCopyTextToClipboard
                         text={invoiceRequest || wallet.lnAddress}
@@ -233,7 +233,7 @@ const LNDReceive = () => {
                         textStyle={styles.copyText}
                       />
                       <TouchableOpacity accessibilityRole="button" onPress={handleShareButtonPressed}>
-                        <Image resizeMode="stretch" source={require('../../img/share-icon.png')}  style={{width:18, height: 20}} />
+                        <Image resizeMode="stretch" source={require('../../img/share-icon.png')} style={{ width: 18, height: 20 }} />
                       </TouchableOpacity>
                     </View>
                   </>
