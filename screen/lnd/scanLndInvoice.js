@@ -24,6 +24,11 @@ import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import { useReplaceModalScreen } from '../../hooks/replaceModalScreen.hook';
 const currency = require('../../blue_modules/currency');
 
+const isFreeDomain = (domain) => {
+  const freeDomains = ['lightning.space', 'dev.lightning.space'];
+  return freeDomains.includes(domain);
+}
+
 const ScanLndInvoice = () => {
   const { wallets } = useContext(BlueStorageContext);
   const { colors } = useTheme();
@@ -47,6 +52,8 @@ const ScanLndInvoice = () => {
   const [desc, setDesc] = useState();
   const [isDescDisabled, setIsDescDisabled] = useState(false);
   const [expiresIn, setExpiresIn] = useState();
+  const [isTxFree, setIsTxFree] = useState(false);
+
   const stylesHook = StyleSheet.create({
     root: {
       backgroundColor: colors.elevated,
@@ -97,6 +104,9 @@ const ScanLndInvoice = () => {
     setIsAmountInputDisabled(false);
     setDesc(ln.getDescription());
     setIsDescDisabled(Boolean(ln.getDescription()));
+    if(isFreeDomain(ln.getDomain())){
+      setIsTxFree(true);
+    }
     setIsLoading(false);
   };
 
@@ -104,6 +114,10 @@ const ScanLndInvoice = () => {
     setDestination(destinationString);
     setIsAmountInputDisabled(false);
     setIsDescDisabled(false);
+    const domain = Lnurl.getDomainFromLightningAddress(destinationString);
+    if(isFreeDomain(domain)){
+      setIsTxFree(true);
+    }
   };
 
   const setLightningInvoiceDestination = destinationString => {
@@ -181,15 +195,16 @@ const ScanLndInvoice = () => {
     if (amountSat <= 0) return showError(loc.send.details_amount_field_is_not_valid);
 
     const isMax = amountSat === wallet.getBalance();
-    const maxFee = Math.round(amountSat * 0.03);
+    const maxFee = isTxFree ? 0 : Math.round(amountSat * 0.03);
     const remainingBalance = wallet.getBalance() - amountSat;
-    if (!isMax && maxFee > remainingBalance) return showError(loc.lnd.error_balance_for_insuficient_fee);
+    if (!isMax && !isTxFree && maxFee > remainingBalance) return showError(loc.lnd.error_balance_for_insuficient_fee);
+    const maxMultiplier = isTxFree ? 1 : 0.97; // max 3% fee set by LNBits
 
     navigate('SendDetailsRoot', {
       screen: 'LnurlPay',
       params: {
         lnurl: destination,
-        amountSat: isMax ? Math.floor(amountSat * 0.97) : amountSat, // max 3% fee set by LNBits
+        amountSat: isMax ? Math.floor(amountSat * maxMultiplier) : amountSat,
         description: desc,
         walletID: walletID || wallet.getID(),
       },
@@ -232,6 +247,8 @@ const ScanLndInvoice = () => {
   };
 
   const getFees = () => {
+    if(isTxFree) return 'Free'
+    
     const min = 0;
     const max = Math.floor(amountSat * 0.03);
     return `${min} ${BitcoinUnit.SATS} - ${max} ${BitcoinUnit.SATS}`;

@@ -33,6 +33,11 @@ const currency = require('../../blue_modules/currency');
  */
 const _cacheFiatToSat = {};
 
+const isFreeDomain = (domain) => {
+  const freeDomains = ['lightning.space', 'dev.lightning.space'];
+  return freeDomains.includes(domain);
+}
+
 const LnurlPay = () => {
   const { wallets, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
   const { walletID, lnurl, amountSat, destination, invoice, amountUnit, description } = useRoute().params;
@@ -46,6 +51,7 @@ const LnurlPay = () => {
   const { pop, navigate, goBack } = useNavigation();
   const [amount, setAmount] = useState();
   const [desc, setDesc] = useState();
+  const [isTxFree, setIsTxFree] = useState(false);
   const { colors } = useTheme();
   const stylesHook = StyleSheet.create({
     root: {
@@ -62,7 +68,11 @@ const LnurlPay = () => {
       const recepient = isLightningAddress ? destination : lnurl;
       const ln = new Lnurl(recepient, AsyncStorage);
       ln.callLnurlPayService()
-        .then(setPayload)
+        .then(p => {
+          const domain = ln.getDomain();
+          setIsTxFree(isFreeDomain(domain))
+          setPayload(p);
+        })
         .catch(error => {
           alert(error.message);
           pop();
@@ -253,7 +263,7 @@ const LnurlPay = () => {
           ) : (
             <>
               <Text style={styles.fees}>
-                {loc.send.create_fee}: {getFees()}
+                {loc.send.create_fee}: {isTxFree ? 'free' : getFees()}
               </Text>
               <BlueButton title={loc.lnd.payButton} onPress={pay} />
             </>

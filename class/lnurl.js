@@ -361,6 +361,13 @@ export default class Lnurl {
     const splitted = address.split('@');
     return !!splitted[0].trim() && !!splitted[1].trim();
   }
+
+  static getDomainFromLightningAddress(address){
+    if(!Lnurl.isLightningAddress(address)) return '';
+    const cleanedAddress = address.trim().replace('mailto:', '')
+    const splitted = cleanedAddress.split('@');
+    return splitted[1];
+  }
 }
 
 async function _fetchGetTor(parsedOnionUrl) {
