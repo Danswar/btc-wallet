@@ -338,7 +338,7 @@ class DeeplinkSchemaMatch {
 
   static isPossiblyPSBTString(text) {
     try {
-      return Boolean(bitcoin.Psbt.fromBase64(text))
+      return Boolean(bitcoin.Psbt.fromBase64(text));
     } catch (e) {
       return false;
     }
@@ -496,6 +496,33 @@ class DeeplinkSchemaMatch {
       }
     } catch (_) {}
     return { address, amount, memo, payjoinUrl };
+  }
+
+  static isPossiblyLightningDestination(text, options = { includeDualFormats: true }) {
+    if (DeeplinkSchemaMatch.isLnUrl(text)) return true;
+    if (Lnurl.isLightningAddress(text)) return true;
+    if (DeeplinkSchemaMatch.isLightningInvoice(text)) return true;
+    if (DeeplinkSchemaMatch.isTestnetLightningInvoice(text)) return true;
+
+    if (options.includeDualFormats) {
+      if (DeeplinkSchemaMatch.isBothBitcoinAndLightning(text)) return true;
+    }
+
+    return false;
+  }
+
+  static isPossiblyOnChainDestination(text, options = { includeDualFormats: true }) {
+    if (DeeplinkSchemaMatch.isBitcoinAddress(text)) return true;
+
+    try {
+      if (DeeplinkSchemaMatch.bip21decode(text).address) return true;
+    } catch (_) { }
+
+    if (options.includeDualFormats) {
+      if (DeeplinkSchemaMatch.isBothBitcoinAndLightning(text)) return true;
+    }
+
+    return false;
   }
 }
 

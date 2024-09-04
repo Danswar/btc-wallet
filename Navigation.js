@@ -100,6 +100,8 @@ import LndPosReceive from './screen/lnd/lndPosReceive';
 import CashierPos from './screen/lnd/cashierPos';
 import CashierDfxPos from './screen/wallets/dfx/cashierPos';
 import ReceiveDfxPos from './screen/wallets/dfx/receivePos';
+import ScanCodeSend from './screen/send/ScanCodeSend';
+import ManualAddressSend from './screen/send/ManualAddressSend';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -313,6 +315,16 @@ const ScanQRCodeRoot = () => (
     <ScanQRCodeStack.Screen name="ScanQRCode" component={ScanQRCode} />
   </ScanQRCodeStack.Navigator>
 );
+
+const ScanCodeSendStack = createNativeStackNavigator();
+const ScanCodeSendRoot = () => {
+  const theme = useTheme();
+  return (
+  <ScanCodeSendStack.Navigator>
+    <ScanCodeSendStack.Screen name="ScanCodeSend" component={ScanCodeSend} options={ScanCodeSend.navigationOptions(theme)}/>
+    <ScanCodeSendStack.Screen name="ManualEnterAddress" component={ManualAddressSend} options={ManualAddressSend.navigationOptions(theme)}/>
+  </ScanCodeSendStack.Navigator>
+);}
 
 const UnlockWithScreenStack = createNativeStackNavigator();
 const UnlockWithScreenRoot = () => (
@@ -534,6 +546,14 @@ const Navigation = () => {
         options={{
           headerShown: false,
           presentation: isDesktop ? 'containedModal' : 'fullScreenModal',
+        }}
+      />
+
+      <RootStack.Screen
+        name="ScanCodeSendRoot"
+        component={ScanCodeSendRoot}
+        options={{
+          headerShown: false,
         }}
       />
 

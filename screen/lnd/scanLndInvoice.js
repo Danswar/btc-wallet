@@ -14,11 +14,9 @@ import {
   BlueText,
 } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
-import AddressInput from '../../components/AddressInput';
 import AmountInput from '../../components/AmountInput';
 import Lnurl from '../../class/lnurl';
 import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
-import Biometric from '../../class/biometrics';
 import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import alert from '../../components/Alert';
@@ -36,6 +34,7 @@ const ScanLndInvoice = () => {
     () => wallets.find(item => item.getID() === walletID) || wallets.find(item => item.chain === Chain.OFFCHAIN),
     [walletID, wallets],
   );
+  const suitableWallets = useMemo(() => wallets.filter(item => item.chain === Chain.OFFCHAIN), [wallets]);
   const { navigate, setParams, goBack } = useNavigation();
   const replace = useReplaceModalScreen();
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +55,7 @@ const ScanLndInvoice = () => {
       color: colors.feeText,
       fontSize: 12,
       marginBottom: 5,
-      marginHorizontal: 30,
+      marginHorizontal: 20,
     },
     fee: {
       fontSize: 14,
@@ -173,10 +172,6 @@ const ScanLndInvoice = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uri]);
 
-  const onBlur = () => {
-    processDestination(destination);
-  };
-
   const showError = errMessage => {
     alert(errMessage);
     ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
@@ -264,7 +259,7 @@ const ScanLndInvoice = () => {
         break;
     }
     setAmountSat(sats);
-  }
+  };
 
   if (isLoading) {
     return (
@@ -274,16 +269,14 @@ const ScanLndInvoice = () => {
     );
   }
 
+  const formatDestination = destination.length > 25 ? `${destination.substring(0, 18)}.....${destination.substring(destination.length - 18)}` : destination;
+
   return (
     <SafeBlueArea style={stylesHook.root}>
       <StatusBar barStyle="light-content" />
       <View style={[styles.root, stylesHook.root]}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <KeyboardAvoidingView enabled behavior="position" keyboardVerticalOffset={20}>
-            <View style={styles.pickerContainer}>
-              <BlueWalletSelect wallets={wallets} value={walletID} onChange={onWalletChange} />
-            </View>
-
             <View>
               <AmountInput
                 isLoading={isLoading}
@@ -297,32 +290,24 @@ const ScanLndInvoice = () => {
                 onPressMax={onUseAllPressed}
               />
             </View>
-
-            <AddressInput
-              onChangeText={text => {
-                text = text.trim();
-                setDestination(text);
-              }}
-              onBarScanned={processDestination}
-              address={destination}
-              isLoading={isLoading}
-              placeholder={loc.lnd.placeholder}
-              inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-              launchedBy={name}
-              onBlur={onBlur}
-              keyboardType="email-address"
-            />
-
+            <BlueText style={styles.label}>To:</BlueText>
+            <BlueText style={styles.staticField}>{formatDestination}</BlueText>
             {expiresIn !== undefined && (
               <View>
                 <BlueText style={stylesHook.expiresIn}>{expiresIn}</BlueText>
               </View>
             )}
-
+            <BlueText style={styles.label}>From your wallet:</BlueText>
+            {suitableWallets.length === 1 ? (
+              <BlueText style={styles.staticField}>{wallet.getLabel()}</BlueText>
+            ) : (
+              <View style={styles.pickerContainer}>
+                <BlueWalletSelect wallets={suitableWallets} value={walletID} onChange={onWalletChange} />
+              </View>
+            )}
+            <BlueText style={styles.label}>Note</BlueText>
             <View style={styles.noteContainer}>
               <BlueFormInput
-                placeholder={loc.send.details_note_placeholder}
-                placeholderTextColor={colors.feeText}
                 value={desc}
                 onChangeText={setDesc}
                 editable={!isDescDisabled}
@@ -373,8 +358,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  pickerContainer: { marginHorizontal: 16 },
-  noteContainer: { marginHorizontal: 20, marginTop: 10 },
+  label: {
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+  pickerContainer: { 
+    marginHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  noteContainer: { marginHorizontal: 20 },
+  staticField: {
+    marginHorizontal: 20,
+    borderBottomColor: '#d2d2d2',
+    borderBottomWidth: 1,
+    paddingTop: 8,
+    paddingBottom: 12,
+    color: '#818181',
+    fontSize: 16
+  },
   fee: {
     flexDirection: 'row',
     marginHorizontal: 20,

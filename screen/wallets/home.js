@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext, useRef, useMemo } from 'react';
 import {
-  Alert,
   Dimensions,
   InteractionManager,
   PixelRatio,
@@ -219,32 +218,7 @@ const WalletHome = ({ navigation }) => {
   };
 
   const sendButtonPress = () => {
-    if (wallet.chain === Chain.OFFCHAIN) {
-      return navigate('SendDetailsRoot', { screen: 'ScanLndInvoice', params: { walletID: wallet.getID() } });
-    }
-
-    if (wallet.type === WatchOnlyWallet.type && wallet.isHd() && !wallet.useWithHardwareWalletEnabled()) {
-      return Alert.alert(
-        loc.wallets.details_title,
-        loc.transactions.enable_offline_signing,
-        [
-          {
-            text: loc._.ok,
-            onPress: async () => {
-              wallet.setUseWithHardwareWalletEnabled(true);
-              await saveToDisk();
-              navigateToSendScreen();
-            },
-            style: 'default',
-          },
-
-          { text: loc._.cancel, onPress: () => { }, style: 'cancel' },
-        ],
-        { cancelable: false },
-      );
-    }
-
-    navigateToSendScreen();
+    return navigate('ScanCodeSendRoot', {screen: 'ScanCodeSend', params: { walletID: wallet.getID() }});
   };
 
   const sendButtonLongPress = async () => {

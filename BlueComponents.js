@@ -74,7 +74,7 @@ export const BlueButton = props => {
           <ActivityIndicator />
         ) : (
           <>
-            {props.icon && <Icon name={props.icon.name} type={props.icon.type} color={props.icon.color} />}
+            {props.icon && <Icon name={props.icon.name} type={props.icon.type} color={props.icon.color} size={props.icon.size} />}
             {props.title && <Text style={{ marginHorizontal: 8, fontSize: 16, color: fontColor, fontWeight: '500' }}>{props.title}</Text>}
           </>
         )}
