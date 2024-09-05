@@ -254,7 +254,7 @@ const Asset = ({ navigation }) => {
     const balance = wallet.getBalance();
     if (service === DfxService.SELL || service === DfxService.SWAP) {
       try {
-        const fee = wallet.chain === Chain.ONCHAIN ? await getEstimatedOnChainFee() : balance * 0.03; // max 3% fee for LNBits
+        const fee = wallet.chain === Chain.ONCHAIN ? await getEstimatedOnChainFee() : 0;
         return balance - fee;
       } catch (_) {
         return 0;
