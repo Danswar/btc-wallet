@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { launchImageLibrary } from 'react-native-image-picker';
+import loc from '../loc';
 const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
 
 const useQrCodeImagePicker = () => {

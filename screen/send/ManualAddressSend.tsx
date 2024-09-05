@@ -26,7 +26,7 @@ const ManualAddressSend: React.FC = () => {
 
   const handleOnChange = (text: string) => {
     setAddress(text);
-    const isValid = DeeplinkSchemaMatch.isPossiblyOnChainDestination(text) || DeeplinkSchemaMatch.isPossiblyOnChainDestination(address);
+    const isValid = DeeplinkSchemaMatch.isPossiblyLightningDestination(text) || DeeplinkSchemaMatch.isPossiblyOnChainDestination(text);
     setDisableContinue(!isValid);
   };
 
