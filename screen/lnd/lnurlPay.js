@@ -24,6 +24,7 @@ import Biometric from '../../class/biometrics';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import alert from '../../components/Alert';
 import { Text } from 'react-native-elements';
+import { isFreeDomain } from '../../helpers/freeLightningDomains';
 const currency = require('../../blue_modules/currency');
 
 /**
@@ -32,11 +33,6 @@ const currency = require('../../blue_modules/currency');
  * provided by LnUrl. thats why we cache initial precise conversion rate so the reverse conversion wont be off.
  */
 const _cacheFiatToSat = {};
-
-const isFreeDomain = (domain) => {
-  const freeDomains = ['lightning.space', 'dev.lightning.space'];
-  return freeDomains.includes(domain);
-}
 
 const LnurlPay = () => {
   const { wallets, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);

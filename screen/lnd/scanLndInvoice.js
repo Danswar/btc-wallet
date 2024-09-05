@@ -22,12 +22,8 @@ import { BlueStorageContext } from '../../blue_modules/storage-context';
 import alert from '../../components/Alert';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import { useReplaceModalScreen } from '../../hooks/replaceModalScreen.hook';
+import { isFreeDomain } from '../../helpers/freeLightningDomains';
 const currency = require('../../blue_modules/currency');
-
-const isFreeDomain = (domain) => {
-  const freeDomains = ['lightning.space', 'dev.lightning.space'];
-  return freeDomains.includes(domain);
-}
 
 const ScanLndInvoice = () => {
   const { wallets } = useContext(BlueStorageContext);
@@ -387,8 +383,6 @@ const styles = StyleSheet.create({
   noteContainer: { marginHorizontal: 20 },
   staticField: {
     marginHorizontal: 20,
-    borderBottomColor: '#d2d2d2',
-    borderBottomWidth: 1,
     paddingTop: 8,
     paddingBottom: 12,
     color: '#818181',
