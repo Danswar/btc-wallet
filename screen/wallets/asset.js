@@ -389,15 +389,6 @@ const Asset = ({ navigation }) => {
     );
   };
 
-  const navigateToSendScreen = () => {
-    navigate('SendDetailsRoot', {
-      screen: 'SendDetails',
-      params: {
-        walletID: wallet.getID(),
-      },
-    });
-  };
-
   const renderItem = item => (
     <TransactionListItem item={item.item} itemPriceUnit={itemPriceUnit} timeElapsed={timeElapsed} walletID={walletID} />
   );

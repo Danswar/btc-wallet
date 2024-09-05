@@ -218,7 +218,7 @@ const WalletHome = ({ navigation }) => {
   };
 
   const sendButtonPress = () => {
-    return navigate('ScanCodeSendRoot', {screen: 'ScanCodeSend', params: { walletID: wallet.getID() }});
+    return navigate('ScanCodeSendRoot', { screen: 'ScanCodeSend' });
   };
 
   const sendButtonLongPress = async () => {

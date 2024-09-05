@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { View, StyleSheet, StatusBar, ActivityIndicator } from 'react-native';
 import navigationStyle from '../../components/navigationStyle';
 import { Camera } from 'react-native-camera-kit';
@@ -8,10 +8,16 @@ import { useQrCodeScanner } from '../../hooks/qrCodeScaner.hook';
 import useQrCodeImagePicker from '../../hooks/qrCodeImagePicker.hook';
 import BlueClipboard from '../../blue_modules/clipboard';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
-import { useNavigation } from '@react-navigation/native';
-import RNReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { BlueStorageContext } from '../../blue_modules/storage-context';
+import { Chain } from '../../models/bitcoinUnits';
+import { useWalletContext } from '../../contexts/wallet.context';
 
 const ScanCodeSend: React.FC = () => {
+  const { wallets } = useContext(BlueStorageContext);
+  const { wallet: mainWallet } = useWalletContext();
+  const { params } = useRoute();
   const { isReadingQrCode, cameraCallback, setOnBarScanned } = useQrCodeScanner();
   const { isProcessingImage, openImagePicker, setOnBarCodeInImage } = useQrCodeImagePicker();
   const { cameraStatus } = useCameraPermissions();
@@ -19,14 +25,25 @@ const ScanCodeSend: React.FC = () => {
 
   const onContentRead = (data: any) => {
     const destinationString = data.data ? data.data : data;
-    if (
+
+    if(DeeplinkSchemaMatch.isBothBitcoinAndLightning(destinationString)){
+      const selectedWallet = wallets.find(w => w.getID() === params?.walletID);
+      const lightningWallet = wallets.find(w => w.chain === Chain.OFFCHAIN);
+      const uri = DeeplinkSchemaMatch.isBothBitcoinAndLightning(destinationString);
+      const destinationWallet = selectedWallet || lightningWallet || mainWallet;
+      const route = DeeplinkSchemaMatch.isBothBitcoinAndLightningOnWalletSelect(destinationWallet, uri);
+      ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
+      replace(...route);
+
+    }else if (
       DeeplinkSchemaMatch.isPossiblyLightningDestination(destinationString) ||
       DeeplinkSchemaMatch.isPossiblyOnChainDestination(destinationString)
     ) {
       DeeplinkSchemaMatch.navigationRouteFor({ url: destinationString }, completionValue => {
-        RNReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
+        ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
         replace(...completionValue);
       });
+
     } else {
       goBack();
     }
@@ -76,7 +93,7 @@ const ScanCodeSend: React.FC = () => {
         />
         <BlueButton
           style={styles.actionButton}
-          onPress={() => navigate('ManualEnterAddress')}
+          onPress={() => navigate('ScanCodeSendRoot', {screen: 'ManualEnterAddress', params: { walletID: params?.walletID }})}
           icon={{ name: 'keyboard', type: 'material', color: '#ffffff', size: 38 }}
         />
         <BlueButton

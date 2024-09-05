@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import navigationStyle from '../../components/navigationStyle';
 import { BlueButton, BlueSpacing40, BlueText } from '../../BlueComponents';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
-import RNReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { BlueStorageContext } from '../../blue_modules/storage-context';
+import { useWalletContext } from '../../contexts/wallet.context';
+import { Chain } from '../../models/bitcoinUnits';
 
 const ManualAddressSend: React.FC = () => {
+  const { wallets } = useContext(BlueStorageContext);
+  const { wallet: mainWallet } = useWalletContext();
+  const { params } = useRoute();
   const { replace } = useNavigation();
   const [address, setAddress] = useState('');
   const [disableContinue, setDisableContinue] = useState(true);
@@ -31,10 +37,19 @@ const ManualAddressSend: React.FC = () => {
   };
 
   const onContinue = () => {
-    if (DeeplinkSchemaMatch.isPossiblyLightningDestination(address) || DeeplinkSchemaMatch.isPossiblyOnChainDestination(address)) {
+    if(DeeplinkSchemaMatch.isBothBitcoinAndLightning(address)){
+      const selectedWallet = wallets.find(w => w.getID() === params?.walletID);
+      const lightningWallet = wallets.find(w => w.chain === Chain.OFFCHAIN);
+      const uri = DeeplinkSchemaMatch.isBothBitcoinAndLightning(address);
+      const destinationWallet = selectedWallet || lightningWallet || mainWallet;
+      const route = DeeplinkSchemaMatch.isBothBitcoinAndLightningOnWalletSelect(destinationWallet, uri);
+      ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
+      replace(...route);
+
+    }else if (DeeplinkSchemaMatch.isPossiblyLightningDestination(address) || DeeplinkSchemaMatch.isPossiblyOnChainDestination(address)) {
       DeeplinkSchemaMatch.navigationRouteFor({ url: address }, completionValue => {
         console.log('completionValue', completionValue);
-        RNReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
+        ReactNativeHapticFeedback.trigger('impactLight', { ignoreAndroidSystemSettings: false });
         replace(...completionValue);
       });
     }
