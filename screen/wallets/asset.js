@@ -254,7 +254,7 @@ const Asset = ({ navigation }) => {
     const balance = wallet.getBalance();
     if (service === DfxService.SELL || service === DfxService.SWAP) {
       try {
-        const fee = wallet.chain === Chain.ONCHAIN ? await getEstimatedOnChainFee() : balance * 0.03; // max 3% fee for LNBits
+        const fee = wallet.chain === Chain.ONCHAIN ? await getEstimatedOnChainFee() : 0;
         return balance - fee;
       } catch (_) {
         return 0;
@@ -389,15 +389,6 @@ const Asset = ({ navigation }) => {
     );
   };
 
-  const navigateToSendScreen = () => {
-    navigate('SendDetailsRoot', {
-      screen: 'SendDetails',
-      params: {
-        walletID: wallet.getID(),
-      },
-    });
-  };
-
   const renderItem = item => (
     <TransactionListItem item={item.item} itemPriceUnit={itemPriceUnit} timeElapsed={timeElapsed} walletID={walletID} />
   );
@@ -462,32 +453,7 @@ const Asset = ({ navigation }) => {
   }
 
   const sendButtonPress = () => {
-    if (wallet.chain === Chain.OFFCHAIN) {
-      return navigate('SendDetailsRoot', { screen: 'ScanLndInvoice', params: { walletID: wallet.getID() } });
-    }
-
-    if (wallet.type === WatchOnlyWallet.type && wallet.isHd() && !wallet.useWithHardwareWalletEnabled()) {
-      return Alert.alert(
-        loc.wallets.details_title,
-        loc.transactions.enable_offline_signing,
-        [
-          {
-            text: loc._.ok,
-            onPress: async () => {
-              wallet.setUseWithHardwareWalletEnabled(true);
-              await saveToDisk();
-              navigateToSendScreen();
-            },
-            style: 'default',
-          },
-
-          { text: loc._.cancel, onPress: () => { }, style: 'cancel' },
-        ],
-        { cancelable: false },
-      );
-    }
-
-    navigateToSendScreen();
+    return navigate('ScanCodeSendRoot', {screen: 'ScanCodeSend', params: { walletID: wallet.getID() }});
   };
 
   const sendButtonLongPress = async () => {

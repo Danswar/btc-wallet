@@ -14,16 +14,15 @@ import {
   BlueText,
 } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
-import AddressInput from '../../components/AddressInput';
 import AmountInput from '../../components/AmountInput';
 import Lnurl from '../../class/lnurl';
 import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
-import Biometric from '../../class/biometrics';
 import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import alert from '../../components/Alert';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import { useReplaceModalScreen } from '../../hooks/replaceModalScreen.hook';
+import { isFreeDomain } from '../../helpers/freeLightningDomains';
 const currency = require('../../blue_modules/currency');
 
 const ScanLndInvoice = () => {
@@ -36,6 +35,7 @@ const ScanLndInvoice = () => {
     () => wallets.find(item => item.getID() === walletID) || wallets.find(item => item.chain === Chain.OFFCHAIN),
     [walletID, wallets],
   );
+  const suitableWallets = useMemo(() => wallets.filter(item => item.chain === Chain.OFFCHAIN), [wallets]);
   const { navigate, setParams, goBack } = useNavigation();
   const replace = useReplaceModalScreen();
   const [isLoading, setIsLoading] = useState(false);
@@ -48,6 +48,8 @@ const ScanLndInvoice = () => {
   const [desc, setDesc] = useState();
   const [isDescDisabled, setIsDescDisabled] = useState(false);
   const [expiresIn, setExpiresIn] = useState();
+  const [isTxFree, setIsTxFree] = useState(false);
+
   const stylesHook = StyleSheet.create({
     root: {
       backgroundColor: colors.elevated,
@@ -56,7 +58,7 @@ const ScanLndInvoice = () => {
       color: colors.feeText,
       fontSize: 12,
       marginBottom: 5,
-      marginHorizontal: 30,
+      marginHorizontal: 20,
     },
     fee: {
       fontSize: 14,
@@ -98,6 +100,9 @@ const ScanLndInvoice = () => {
     setIsAmountInputDisabled(false);
     setDesc(ln.getDescription());
     setIsDescDisabled(Boolean(ln.getDescription()));
+    if(isFreeDomain(ln.getDomain())){
+      setIsTxFree(true);
+    }
     setIsLoading(false);
   };
 
@@ -105,6 +110,10 @@ const ScanLndInvoice = () => {
     setDestination(destinationString);
     setIsAmountInputDisabled(false);
     setIsDescDisabled(false);
+    const domain = Lnurl.getDomainFromLightningAddress(destinationString);
+    if(isFreeDomain(domain)){
+      setIsTxFree(true);
+    }
   };
 
   const setLightningInvoiceDestination = destinationString => {
@@ -173,10 +182,6 @@ const ScanLndInvoice = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uri]);
 
-  const onBlur = () => {
-    processDestination(destination);
-  };
-
   const showError = errMessage => {
     alert(errMessage);
     ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
@@ -186,15 +191,16 @@ const ScanLndInvoice = () => {
     if (amountSat <= 0) return showError(loc.send.details_amount_field_is_not_valid);
 
     const isMax = amountSat === wallet.getBalance();
-    const maxFee = Math.round(amountSat * 0.03);
+    const maxFee = isTxFree ? 0 : Math.round(amountSat * 0.03);
     const remainingBalance = wallet.getBalance() - amountSat;
-    if (!isMax && maxFee > remainingBalance) return showError(loc.lnd.error_balance_for_insuficient_fee);
+    if (!isMax && !isTxFree && maxFee > remainingBalance) return showError(loc.lnd.error_balance_for_insuficient_fee);
+    const maxMultiplier = isTxFree ? 1 : 0.97; // max 3% fee set by LNBits
 
     navigate('SendDetailsRoot', {
       screen: 'LnurlPay',
       params: {
         lnurl: destination,
-        amountSat: isMax ? Math.floor(amountSat * 0.97) : amountSat, // max 3% fee set by LNBits
+        amountSat: isMax ? Math.floor(amountSat * maxMultiplier) : amountSat,
         description: desc,
         walletID: walletID || wallet.getID(),
       },
@@ -237,6 +243,8 @@ const ScanLndInvoice = () => {
   };
 
   const getFees = () => {
+    if(isTxFree) return 'Free'
+    
     const min = 0;
     const max = Math.floor(amountSat * 0.03);
     return `${min} ${BitcoinUnit.SATS} - ${max} ${BitcoinUnit.SATS}`;
@@ -264,7 +272,7 @@ const ScanLndInvoice = () => {
         break;
     }
     setAmountSat(sats);
-  }
+  };
 
   if (isLoading) {
     return (
@@ -274,16 +282,14 @@ const ScanLndInvoice = () => {
     );
   }
 
+  const formatDestination = destination.length > 25 ? `${destination.substring(0, 18)}.....${destination.substring(destination.length - 18)}` : destination;
+
   return (
     <SafeBlueArea style={stylesHook.root}>
       <StatusBar barStyle="light-content" />
       <View style={[styles.root, stylesHook.root]}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <KeyboardAvoidingView enabled behavior="position" keyboardVerticalOffset={20}>
-            <View style={styles.pickerContainer}>
-              <BlueWalletSelect wallets={wallets} value={walletID} onChange={onWalletChange} />
-            </View>
-
             <View>
               <AmountInput
                 isLoading={isLoading}
@@ -297,32 +303,24 @@ const ScanLndInvoice = () => {
                 onPressMax={onUseAllPressed}
               />
             </View>
-
-            <AddressInput
-              onChangeText={text => {
-                text = text.trim();
-                setDestination(text);
-              }}
-              onBarScanned={processDestination}
-              address={destination}
-              isLoading={isLoading}
-              placeholder={loc.lnd.placeholder}
-              inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-              launchedBy={name}
-              onBlur={onBlur}
-              keyboardType="email-address"
-            />
-
+            <BlueText style={styles.label}>To:</BlueText>
+            <BlueText style={styles.staticField}>{formatDestination}</BlueText>
             {expiresIn !== undefined && (
               <View>
                 <BlueText style={stylesHook.expiresIn}>{expiresIn}</BlueText>
               </View>
             )}
-
+            <BlueText style={styles.label}>From your wallet:</BlueText>
+            {suitableWallets.length === 1 ? (
+              <BlueText style={styles.staticField}>{wallet.getLabel()}</BlueText>
+            ) : (
+              <View style={styles.pickerContainer}>
+                <BlueWalletSelect wallets={suitableWallets} value={walletID} onChange={onWalletChange} />
+              </View>
+            )}
+            <BlueText style={styles.label}>Note</BlueText>
             <View style={styles.noteContainer}>
               <BlueFormInput
-                placeholder={loc.send.details_note_placeholder}
-                placeholderTextColor={colors.feeText}
                 value={desc}
                 onChangeText={setDesc}
                 editable={!isDescDisabled}
@@ -373,8 +371,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  pickerContainer: { marginHorizontal: 16 },
-  noteContainer: { marginHorizontal: 20, marginTop: 10 },
+  label: {
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+  pickerContainer: { 
+    marginHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  noteContainer: { marginHorizontal: 20 },
+  staticField: {
+    marginHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+    color: '#818181',
+    fontSize: 16
+  },
   fee: {
     flexDirection: 'row',
     marginHorizontal: 20,

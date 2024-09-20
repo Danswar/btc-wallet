@@ -24,6 +24,7 @@ import Biometric from '../../class/biometrics';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import alert from '../../components/Alert';
 import { Text } from 'react-native-elements';
+import { isFreeDomain } from '../../helpers/freeLightningDomains';
 const currency = require('../../blue_modules/currency');
 
 /**
@@ -46,6 +47,7 @@ const LnurlPay = () => {
   const { pop, navigate, goBack } = useNavigation();
   const [amount, setAmount] = useState();
   const [desc, setDesc] = useState();
+  const [isTxFree, setIsTxFree] = useState(false);
   const { colors } = useTheme();
   const stylesHook = StyleSheet.create({
     root: {
@@ -62,7 +64,11 @@ const LnurlPay = () => {
       const recepient = isLightningAddress ? destination : lnurl;
       const ln = new Lnurl(recepient, AsyncStorage);
       ln.callLnurlPayService()
-        .then(setPayload)
+        .then(p => {
+          const domain = ln.getDomain();
+          setIsTxFree(isFreeDomain(domain))
+          setPayload(p);
+        })
         .catch(error => {
           alert(error.message);
           pop();
@@ -253,7 +259,7 @@ const LnurlPay = () => {
           ) : (
             <>
               <Text style={styles.fees}>
-                {loc.send.create_fee}: {getFees()}
+                {loc.send.create_fee}: {isTxFree ? 'free' : getFees()}
               </Text>
               <BlueButton title={loc.lnd.payButton} onPress={pay} />
             </>
