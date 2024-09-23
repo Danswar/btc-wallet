@@ -27,8 +27,7 @@ import {
   SegwitBech32Wallet,
   WatchOnlyWallet,
   MultisigHDWallet,
-  HDAezeedWallet,
-  LightningLdkWallet,
+  HDAezeedWallet
 } from '../../class';
 import loc, { formatBalanceWithoutSuffix } from '../../loc';
 import { useTheme, useRoute, useNavigation, StackActions } from '@react-navigation/native';
@@ -140,11 +139,6 @@ const WalletDetails = () => {
       color: colors.outputValue,
     },
   });
-  useEffect(() => {
-    if (wallet.type === LightningLdkWallet.type) {
-      wallet.getInfo().then(setLightningWalletInfo);
-    }
-  }, [wallet]);
   useLayoutEffect(() => {
     isAdvancedModeEnabled().then(setIsAdvancedModeEnabledRender);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -257,12 +251,6 @@ const WalletDetails = () => {
         address: wallet.getAllExternalAddresses()[0], // works for both single address and HD wallets
       },
     });
-  const navigateToLdkViewLogs = () => {
-    navigate('LdkViewLogs', {
-      walletID,
-    });
-  };
-
   const navigateToAddresses = () =>
     navigate('WalletAddresses', {
       walletID: wallet.getID(),
@@ -407,19 +395,6 @@ const WalletDetails = () => {
               })()}
               <Text style={[styles.textLabel1, stylesHook.textLabel1]}>{loc.wallets.details_type}</Text>
               <Text style={[styles.textValue, stylesHook.textValue]}>{wallet.typeReadable}</Text>
-
-              {wallet.type === LightningLdkWallet.type && (
-                <>
-                  <Text style={[styles.textLabel2, stylesHook.textLabel2]}>{loc.wallets.identity_pubkey}</Text>
-                  {lightningWalletInfo?.identityPubkey ? (
-                    <>
-                      <BlueText>{lightningWalletInfo.identityPubkey}</BlueText>
-                    </>
-                  ) : (
-                    <ActivityIndicator />
-                  )}
-                </>
-              )}
               {wallet.type === MultisigHDWallet.type && (
                 <>
                   <Text style={[styles.textLabel2, stylesHook.textLabel2]}>{loc.wallets.details_multisig_type}</Text>
@@ -581,12 +556,6 @@ const WalletDetails = () => {
                   <>
                     <BlueSpacing20 />
                     <SecondButton onPress={navigateToSignVerify} testID="SignVerify" title={loc.addresses.sign_title} />
-                  </>
-                )}
-                {wallet.type === LightningLdkWallet.type && (
-                  <>
-                    <BlueSpacing20 />
-                    <SecondButton onPress={navigateToLdkViewLogs} testID="LdkLogs" title={loc.lnd.view_logs} />
                   </>
                 )}
                 <BlueSpacing20 />
