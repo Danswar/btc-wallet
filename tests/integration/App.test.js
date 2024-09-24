@@ -5,7 +5,7 @@ import Settings from '../../screen/settings/settings';
 import Selftest from '../../screen/selftest';
 import { BlueHeaderDefaultSub } from '../../BlueComponents';
 
-// Note: import explicitly to use the types shiped with jest.
+// Note: import explicitly to use the types shipped with jest.
 import {it} from '@jest/globals';
 
 jest.mock('../../blue_modules/BlueElectrum', () => {

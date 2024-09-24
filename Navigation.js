@@ -64,7 +64,6 @@ import IsItMyAddress from './screen/send/isItMyAddress';
 import CoinControl from './screen/send/coinControl';
 
 import ScanLndInvoice from './screen/lnd/scanLndInvoice';
-import LappBrowser from './screen/lnd/browser';
 import LNDCreateInvoice from './screen/lnd/lndCreateInvoice';
 import LNDViewInvoice from './screen/lnd/lndViewInvoice';
 import LNDViewAdditionalInvoiceInformation from './screen/lnd/lndViewAdditionalInvoiceInformation';
@@ -385,17 +384,6 @@ const WalletExportStackRoot = () => {
   );
 };
 
-const LappBrowserStack = createNativeStackNavigator();
-const LappBrowserStackRoot = () => {
-  const theme = useTheme();
-
-  return (
-    <LappBrowserStack.Navigator name="LappBrowserRoot" screenOptions={{ headerShadowVisible: false }} initialRouteName="LappBrowser">
-      <LappBrowserStack.Screen name="LappBrowser" component={LappBrowser} options={LappBrowser.navigationOptions(theme)} />
-    </LappBrowserStack.Navigator>
-  );
-};
-
 const InitStack = createNativeStackNavigator();
 const InitRoot = () => (
   <InitStack.Navigator initialRouteName="UnlockWithScreenRoot">
@@ -512,7 +500,6 @@ const Navigation = () => {
       <RootStack.Screen name="SignVerifyRoot" component={SignVerifyStackRoot} options={NavigationDefaultOptions} />
       <RootStack.Screen name="SelectWallet" component={SelectWallet} />
       <RootStack.Screen name="ReceiveDetailsRoot" component={ReceiveDetailsStackRoot} options={NavigationDefaultOptions} />
-      <RootStack.Screen name="LappBrowserRoot" component={LappBrowserStackRoot} options={NavigationDefaultOptions} />
 
       <RootStack.Screen
         name="ScanQRCodeRoot"

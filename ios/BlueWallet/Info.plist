@@ -132,25 +132,14 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NFCReaderUsageDescription</key>
+	<string>DFX wallet needs to uses NFC to scan BoltCards.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
 		<true/>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>localhost</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-			</dict>
-			<key>onion</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-			</dict>
-		</dict>
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>This alert should not show up as we do not require this data</string>
@@ -209,7 +198,7 @@
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
@@ -364,12 +353,17 @@
 			</dict>
 		</dict>
 	</array>
-	<key>NFCReaderUsageDescription</key>
-	<string>DFX wallet needs to uses NFC to scan BoltCards.</string>
 	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
 	<array>
 		<string>D2760000850100</string>
 		<string>D2760000850101</string>
 	</array>
+	<key>onion</key>
+	<dict>
+		<key>NSExceptionAllowsInsecureHTTPLoads</key>
+		<true/>
+		<key>NSIncludesSubdomains</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
