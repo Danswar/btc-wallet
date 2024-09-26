@@ -78,6 +78,7 @@ def jscFlavor = 'org.webkit:android-jsc-intl:+'
 
 
 android {
+    namespace "swiss.dfx.bitcoin"
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
