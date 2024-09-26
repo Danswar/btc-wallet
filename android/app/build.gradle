@@ -78,6 +78,7 @@ def jscFlavor = 'org.webkit:android-jsc-intl:+'
 
 
 android {
+    namespace "swiss.dfx.bitcoin"
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -119,7 +120,6 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
-    implementation files("../../node_modules/rn-ldk/android/libs/LDK-release.aar")
     implementation files("../../node_modules/react-native-tor/android/libs/sifir_android.aar")
 
     if (hermesEnabled.toBoolean()) {

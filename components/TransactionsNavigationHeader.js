@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Image, Text, TouchableOpacity, View, InteractionManager, I18nManager, StyleSheet, Linking } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { LightningCustodianWallet, LightningLdkWallet, MultisigHDWallet } from '../class';
+import { LightningCustodianWallet } from '../class';
 import { BitcoinUnit } from '../models/bitcoinUnits';
 import Biometric from '../class/biometrics';
 import loc, { formatBalance } from '../loc';
@@ -243,13 +243,6 @@ export default class TransactionsNavigationHeader extends Component {
             >
               <Text style={styles.manageFundsButtonText}>{loc.lnd.title}</Text>
             </ToolTipMenu>
-          )}
-          {this.state.wallet.type === LightningLdkWallet.type && (
-            <TouchableOpacity accessibilityRole="button" onPress={this.manageFundsPressed}>
-              <View style={styles.manageFundsButton}>
-                <Text style={styles.manageFundsButtonText}>{loc.lnd.title}</Text>
-              </View>
-            </TouchableOpacity>
           )}
         </View>
         {this.props.showRBFWarning && (
