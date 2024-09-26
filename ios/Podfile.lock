@@ -788,11 +788,11 @@ SPEC CHECKSUMS:
   boost: 7dcd2de282d72e344012f7d6564d024930a6a440
   BVLinearGradient: 916632041121a658c704df89d99f04acb038de0f
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
-  DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
+  DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   FBLazyVector: d98eefb42c5a64cb28ef966bd9096c76770d8f24
   FBReactNativeSpec: 53d4eb00e8e1b6e987a3dd5906d2afe131cc54c8
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
-  glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
+  glog: 69ef571f3de08433d766d614c73a9838a06bf7eb
   hermes-engine: b213bace5f31766ad1434d2d9b2cbf04cf92a2b6
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   lottie-ios: 8f97d3271e155c2d688875c29cd3c74908aef5f8
