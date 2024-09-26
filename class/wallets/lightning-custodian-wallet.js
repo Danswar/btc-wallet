@@ -1,5 +1,4 @@
 import { LegacyWallet } from './legacy-wallet';
-import Frisbee from 'frisbee';
 import bolt11 from 'bolt11';
 import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
 import { isTorDaemonDisabled } from '../../blue_modules/environment';
@@ -74,16 +73,41 @@ export class LightningCustodianWallet extends LegacyWallet {
     // is turned off permanently, so users cant pull refill address from cache and send money to a black hole
     this.refill_addressess = [];
 
-    this._api = new Frisbee({
-      baseURI: this.baseURI,
-    });
     const isTorDisabled = await isTorDaemonDisabled();
 
     if (!isTorDisabled && this.baseURI && this.baseURI?.indexOf('.onion') !== -1) {
       this._api = new torrific.Torsbee({
         baseURI: this.baseURI,
       });
+    } else {
+      this._api = {
+        post: this.fetchWrapper.bind(this, 'POST'),
+        get: this.fetchWrapper.bind(this, 'GET'),
+      };
     }
+  }
+
+  async fetchWrapper(method, endpoint, options = {}) {
+    const url = this.baseURI + endpoint;
+    const fetchOptions = {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    };
+
+    if (options.body) {
+      fetchOptions.body = JSON.stringify(options.body);
+    }
+
+    const response = await fetch(url, fetchOptions);
+    const responseBody = await response.json();
+
+    return {
+      originalResponse: response,
+      body: responseBody,
+    };
   }
 
   accessTokenExpired() {
@@ -600,23 +624,31 @@ export class LightningCustodianWallet extends LegacyWallet {
   static async isValidNodeAddress(address) {
     const isTorDisabled = await isTorDaemonDisabled();
     const isTor = address.indexOf('.onion') !== -1;
-    const apiCall =
-      isTor && !isTorDisabled
-        ? new torrific.Torsbee({
-            baseURI: address,
-          })
-        : new Frisbee({
-            baseURI: address,
+    let apiCall;
+    
+    if (isTor && !isTorDisabled) {
+      apiCall = new torrific.Torsbee({
+        baseURI: address,
+      });
+    } else {
+      apiCall = {
+        get: async (endpoint) => {
+          const response = await fetch(address + endpoint, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           });
-    const response = await apiCall.get('/getinfo', {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-    });
+          const body = await response.json();
+          return { body };
+        },
+      };
+    }
+
+    const response = await apiCall.get('/getinfo');
     const json = response.body;
     if (typeof json === 'undefined') {
-      throw new Error('API failure: ' + response.err + ' ' + JSON.stringify(response.body));
+      throw new Error('API failure: ' + JSON.stringify(response));
     }
 
     if (json && json.code && json.code !== 1) {
