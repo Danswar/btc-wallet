@@ -74,8 +74,8 @@ const Asset = ({ navigation }) => {
     refreshAllWalletTransactions,
     walletTransactionUpdateStatus,
     isElectrumDisabled,
-    ldsDEV,
-    isDfxPos
+    isDfxPos,
+    isDfxSwap
   } = useContext(BlueStorageContext);
   const { name, params } = useRoute();
   const walletID = params.walletID;
@@ -582,7 +582,7 @@ const Asset = ({ navigation }) => {
                         disabled={isHandlingOpenServices}
                       />
                     </View>
-                    {ldsDEV && (
+                    {isDfxSwap && (
                       <View>
                         <ImageButton
                           source={buttonImages[2]}

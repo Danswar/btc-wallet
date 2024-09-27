@@ -12,8 +12,16 @@ const styles = StyleSheet.create({
 });
 
 const FeatureFlags: React.FC = () => {
-  const { ldsDEV, setLdsDEVAsyncStorage, isPosMode, setIsPosModeAsyncStorage, isDfxPos, setIsDfxPosAsyncStorage } =
-    useContext(BlueStorageContext);
+  const { 
+    ldsDEV, 
+    setLdsDEVAsyncStorage, 
+    isPosMode, 
+    setIsPosModeAsyncStorage, 
+    isDfxPos, 
+    setIsDfxPosAsyncStorage,
+    isDfxSwap,
+    setIsDfxSwapAsyncStorage
+  } = useContext(BlueStorageContext);
   const [isLoading, setIsLoading] = useState(false);
   const { colors } = useTheme();
 
@@ -61,6 +69,12 @@ const FeatureFlags: React.FC = () => {
         Component={Pressable}
         title="DFX Point of Sale"
         switch={{ onValueChange: handleDfxPosChange, value: isDfxPos }}
+      />
+      <BlueListItem
+        // @ts-ignore: Fix later
+        Component={Pressable}
+        title="DFX Swap"
+        switch={{ onValueChange: setIsDfxSwapAsyncStorage, value: isDfxSwap }}
       />
     </ScrollView>
   );
