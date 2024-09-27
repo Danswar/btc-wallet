@@ -47,6 +47,7 @@ class AppStorage {
   static FF_LDS_DEV_API = 'ff_lds_dev_api';
   static POS_MODE = 'pos_mode';
   static DFX_POS = 'dfx_pos';
+  static DFX_SWAP = 'dfx_swap';
 
   static keys2migrate = [AppStorage.HANDOFF_STORAGE_KEY, AppStorage.DO_NOT_TRACK, AppStorage.ADVANCED_MODE_ENABLED];
 
@@ -870,6 +871,17 @@ class AppStorage {
 
   setIsDfxPOSEnabled = async value => {
     await AsyncStorage.setItem(AppStorage.DFX_POS, value ? '1' : '');
+  };
+
+  isDfxSwapEnabled = async () => {
+    try {
+      return !!(await AsyncStorage.getItem(AppStorage.DFX_SWAP));
+    } catch (_) {}
+    return false;
+  };
+
+  setIsDfxSwapEnabled = async value => {
+    await AsyncStorage.setItem(AppStorage.DFX_SWAP, value ? '1' : '');
   };
 
   isHandoffEnabled = async () => {
