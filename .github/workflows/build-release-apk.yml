@@ -62,12 +62,14 @@ jobs:
           BUILD_NUMBER: ${{ env.NEW_BUILD_NUMBER }}
         run: ./scripts/build-release-apk.sh
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
         if: success()
         with:
           name: DFX-Btc-Wallet-${{ env.VERSION_NAME }}(${{ env.NEW_BUILD_NUMBER }}).apk
           path: ./android/app/build/outputs/apk/release/app-release.apk
-      
+          if-no-files-found: error
+
       - uses: cardinalby/git-get-release-action@v1
         id: get_release
         env:
