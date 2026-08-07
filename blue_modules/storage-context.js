@@ -31,7 +31,10 @@ export const BlueStorageProvider = ({ children }) => {
   const [isDfxPos, setIsDfxPos] = useState(false);
   const [isDfxSwap, setIsDfxSwap] = useState(false);
   const [isElectrumDisabled, setIsElectrumDisabled] = useState(true);
-  const [isPrivacyBlurEnabled, setIsPrivacyBlurEnabled] = useState(false);
+  // Fail-safe until the boot effect below loads the real persisted value: Privacy.tsx mirrors
+  // this into a module-level ref read by every sensitive screen, so starting `false` would
+  // leave those screens briefly unprotected on cold start even for a user who opted in.
+  const [isPrivacyBlurEnabled, setIsPrivacyBlurEnabled] = useState(true);
   const [lastSuccessfulBalanceRefresh, setLastSuccessfulBalanceRefresh] = useState(Date.now());
   const balanceRefreshInterval = useRef(null);
   const [cameraPermissionLastAskedTime, setCameraPermissionLastAskedTime] = useState(0);
