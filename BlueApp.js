@@ -872,7 +872,9 @@ class AppStorage {
     try {
       return !!(await AsyncStorage.getItem(AppStorage.PRIVACY_BLUR_ENABLED));
     } catch (_) {}
-    return false;
+    // Unlike the sibling flags below, false is the unsafe direction for screen-capture
+    // protection - fail toward protected rather than assume the read reflects "never enabled".
+    return true;
   };
 
   setIsPrivacyBlurEnabled = async value => {
