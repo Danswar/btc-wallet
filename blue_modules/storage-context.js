@@ -126,8 +126,10 @@ export const BlueStorageProvider = ({ children }) => {
         setIsDfxPos(false);
         setIsDfxSwapAsyncStorage(false);
         setIsDfxSwap(false);
-        setIsPrivacyBlurEnabledAsyncStorage(false);
-        setIsPrivacyBlurEnabled(false);
+        // Fail-safe in-memory only, not persisted: unlike the flags above, "off" isn't the
+        // safe direction for screen-capture protection, and an unrelated read failure
+        // shouldn't overwrite a user's real (unread) persisted preference.
+        setIsPrivacyBlurEnabled(true);
       }
     })();
   }, []);
