@@ -9,9 +9,9 @@ interface PrivacyComponent extends React.FC {
 
 // Module-level mirror of the user setting so Privacy.enableBlur() (called from
 // screens outside the React tree) can honor the toggle without changing the
-// long-standing call-site API. Defaults to enabled (safe) until <Privacy />
+// long-standing call-site API. Matches the opt-in default (off) until <Privacy />
 // mounts and syncs the real value from BlueStorageContext.
-let isPrivacyBlurEnabledRef = true;
+let isPrivacyBlurEnabledRef = false;
 
 const Privacy: PrivacyComponent = () => {
   const { isPrivacyBlurEnabled } = useContext(BlueStorageContext);

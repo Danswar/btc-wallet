@@ -31,7 +31,7 @@ export const BlueStorageProvider = ({ children }) => {
   const [isDfxPos, setIsDfxPos] = useState(false);
   const [isDfxSwap, setIsDfxSwap] = useState(false);
   const [isElectrumDisabled, setIsElectrumDisabled] = useState(true);
-  const [isPrivacyBlurEnabled, setIsPrivacyBlurEnabled] = useState(true);
+  const [isPrivacyBlurEnabled, setIsPrivacyBlurEnabled] = useState(false);
   const [lastSuccessfulBalanceRefresh, setLastSuccessfulBalanceRefresh] = useState(Date.now());
   const balanceRefreshInterval = useRef(null);
   const [cameraPermissionLastAskedTime, setCameraPermissionLastAskedTime] = useState(0);
@@ -59,6 +59,11 @@ export const BlueStorageProvider = ({ children }) => {
   const setIsDfxPosAsyncStorage = value => {
     setIsDfxPos(value);
     return BlueApp.setIsDfxPOSEnabled(value);
+  };
+
+  const setIsPrivacyBlurEnabledAsyncStorage = value => {
+    setIsPrivacyBlurEnabled(value);
+    return BlueApp.setIsPrivacyBlurEnabled(value);
   };
 
   const setIsDfxSwapAsyncStorage = value => {
@@ -105,6 +110,8 @@ export const BlueStorageProvider = ({ children }) => {
         setCameraPermissionLastAskedTime(cameraPermissionLastAskedTime);
         const isHideBalance = await BlueApp.isHideBalanceEnabled();
         setHideBalance(!!isHideBalance);
+        const enabledPrivacyBlur = await BlueApp.isPrivacyBlurEnabled();
+        setIsPrivacyBlurEnabled(!!enabledPrivacyBlur);
       } catch (_e) {
         setIsHandOffUseEnabledAsyncStorage(false);
         setIsHandOffUseEnabled(false);
@@ -116,6 +123,8 @@ export const BlueStorageProvider = ({ children }) => {
         setIsDfxPos(false);
         setIsDfxSwapAsyncStorage(false);
         setIsDfxSwap(false);
+        setIsPrivacyBlurEnabledAsyncStorage(false);
+        setIsPrivacyBlurEnabled(false);
       }
     })();
   }, []);
@@ -368,7 +377,7 @@ export const BlueStorageProvider = ({ children }) => {
         isElectrumDisabled,
         setIsElectrumDisabled,
         isPrivacyBlurEnabled,
-        setIsPrivacyBlurEnabled,
+        setIsPrivacyBlurEnabledAsyncStorage,
         lastSuccessfulBalanceRefresh,
         setBalanceRefreshInterval,
         clearBalanceRefreshInterval,
